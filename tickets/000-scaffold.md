@@ -49,6 +49,6 @@ This ticket is also the dry run of the whole loop: plan → draft PR → review 
 
 ## Notes
 - If Postgres cannot run inside the cloud session, do NOT silently switch to SQLite: open a
-  `needs-kamran` issue describing what failed and mark this ticket `blocked`. The whole
+  `needs-operator` issue describing what failed and mark this ticket `blocked`. The whole
   build order depends on tests running against real Postgres.
 - Keep `settings.py` ready for a `TEST` database override via env.
