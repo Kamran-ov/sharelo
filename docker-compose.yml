@@ -1,0 +1,33 @@
+# Laptop only. The cloud session has no Docker daemon; see scripts/cloud-setup.sh.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: sharelo
+      POSTGRES_PASSWORD: sharelo
+      POSTGRES_DB: sharelo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sharelo -d sharelo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgres://sharelo:sharelo@db:5432/sharelo
+      SECRET_KEY: compose-dev-only-not-secret
+      DEBUG: "1"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"

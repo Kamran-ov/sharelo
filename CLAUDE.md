@@ -99,14 +99,14 @@ body; `docs/REVIEW-LOG.md` updated with the reviewer's entries; ticket `status: 
 | Tests (cloud / plain Postgres) | `make test` | Needs `DATABASE_URL`; run `scripts/cloud-setup.sh` first in a fresh cloud session |
 | Tests (laptop, Docker) | `USE_DOCKER=1 make test` | `docker compose up` without `-d` never returns; use `make`, which uses `run --rm` |
 | Backend only / frontend only | `make test-backend` / `make test-frontend` | Both must exit non-zero on failure; CI relies on it |
-| Lint | `make lint` | ruff for Python, eslint+tsc for TS |
+| Lint | `make lint` | `ruff check` + `ruff format --check` for Python, `tsc --noEmit` for TS |
 | Wait for CI | `timeout 1800 gh run watch <run-id> --exit-status` | Take the run id from `gh run list --branch <b>`; no output = no run exists, not "finished" |
 | Merge preflight | `gh pr checks <n>`; `gh pr view <n> --json mergeStateStatus` | `UNKNOWN`/`UNSTABLE` = not answered yet; settle on `gh run view <run> --json jobs` |
 | Rates | `python manage.py fetch_rates --since YYYY-MM-DD` | Network; stub in tests |
 
 ## 6. CURRENT STATE
 
-Nothing built yet (Oct 2026). Roadmap in `docs/PLAN.md` "Build order". Tickets 000–006 cover
+Scaffold exists (ticket 000): Django 5 + DRF project `sharelo` in `backend/` (Postgres only, `DATABASE_URL`), Vite/React/TS skeleton in `frontend/`, `Makefile`, compose, CI. No apps or models yet. Roadmap in `docs/PLAN.md` "Build order". Tickets 000–006 cover
 step 0 (scaffold) and step 1 (core engine). This section is updated by the Author at each
 merge: one line, what now exists.
 
