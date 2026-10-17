@@ -1,6 +1,7 @@
 # Targets run directly against DATABASE_URL, or through compose with USE_DOCKER=1.
 # DATABASE_URL and SECRET_KEY below are test values for local/CI runs; never used in production.
 PYTHON ?= python3
+# invoked as `python -m` so the interpreter that holds the installed packages is the one used
 export DATABASE_URL ?= postgres://sharelo:sharelo@localhost:5432/sharelo
 export SECRET_KEY ?= test-only-not-a-secret
 
@@ -21,12 +22,12 @@ install:
 test: test-backend test-frontend
 
 test-backend:
-	$(BACKEND) pytest
+	$(BACKEND) $(PYTHON) -m pytest
 
 test-frontend:
 	$(FRONTEND) npm test
 
 lint:
-	$(BACKEND) ruff check .
-	$(BACKEND) ruff format --check .
+	$(BACKEND) $(PYTHON) -m ruff check .
+	$(BACKEND) $(PYTHON) -m ruff format --check .
 	$(FRONTEND) npm run lint
