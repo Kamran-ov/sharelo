@@ -4,7 +4,7 @@ title: Core models — groups, members, expenses, payers, splits, settlements
 status: in-review
 risk: risky
 depends_on: [000]
-pr:
+pr: 5
 ---
 
 ## Goal
