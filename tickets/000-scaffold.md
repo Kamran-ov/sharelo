@@ -1,7 +1,7 @@
 ---
 id: 000
 title: Repository scaffold — Django + Postgres + test stack
-status: ready
+status: in-review
 risk: normal
 depends_on: []
 pr:
