@@ -4,7 +4,7 @@ title: Repository scaffold — Django + Postgres + test stack
 status: in-review
 risk: normal
 depends_on: []
-pr:
+pr: 2
 ---
 
 ## Goal
