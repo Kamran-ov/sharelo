@@ -11,7 +11,7 @@ lowest-numbered ticket with `status: ready` whose `depends_on` tickets are all
 | `draft`     | Being written; the builder ignores it                                | Kamran             |
 | `ready`     | Can be built                                                         | Kamran             |
 | `in-review` | A PR is open for it (draft = plan under review, ready = build under review) | Builder     |
-| `blocked`   | Builder needs an answer; a GitHub issue `needs-kamran` names the question | Builder       |
+| `blocked`   | Builder needs an answer; a GitHub issue `needs-operator` names the question | Builder       |
 | `done`      | PR merged into `develop`                                             | Builder, at merge  |
 
 ## Format

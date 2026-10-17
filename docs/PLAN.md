@@ -131,7 +131,7 @@ We can drop Splitwise after step 3; each step ends with passing tests before the
 - Tickets live in a `tickets/` folder with a status: ready, in-review, blocked, done.
 - A builder routine runs hourly: it fixes PRs with requested changes first, otherwise builds the next ready ticket with tests and opens a PR.
 - A reviewer routine (Fable 5.1, fresh session, no build context) starts on every PR opened or updated, reviews against the ticket spec, and either merges into `develop` or requests changes.
-- A blocked ticket becomes a GitHub issue labeled `needs-kamran`; the builder moves on to independent tickets.
+- A blocked ticket becomes a GitHub issue labeled `needs-operator`; the builder moves on to independent tickets.
 - Kamran tests `develop` visually and merges `develop` into `main` when happy.
 
 ## Out of scope and open points
