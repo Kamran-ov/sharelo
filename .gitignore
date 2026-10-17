@@ -3,5 +3,3 @@ node_modules/
 __pycache__/
 *.pyc
 .env
-.claude/settings.json
-CLAUDE.md
