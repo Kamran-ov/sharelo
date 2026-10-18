@@ -85,10 +85,10 @@ def test_expense_currency_matches_group_currency(group, expense_kwargs):
         **expense_kwargs,
         original_amount_cents=1100,
         original_currency="USD",
-        rate_used=Decimal("1.10000000"),
+        rate_used=Decimal("0.90909091"),
     )
     assert (expense.currency, expense.original_currency) == ("EUR", "USD")
-    assert expense.rate_used == Decimal("1.1")
+    assert expense.rate_used == Decimal("0.90909091")
 
 
 def test_same_currency_expense_stores_identity_original(group, expense_kwargs):
