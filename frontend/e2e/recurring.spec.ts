@@ -112,7 +112,9 @@ test("test_settings_shows_last_run", async ({ page }, testInfo) => {
   resetFixture("--with-recurring-run");
   await loginAsFixtureUser(page);
   await page.goto(`/g/${HOME}/settings`);
-  await expect(page.getByTestId("recurring-status")).toHaveText("Recurring expenses are created by the daily job; last run: 2026-01-15");
+  const status = page.getByTestId("recurring-status");
+  await expect(status).toHaveText("Recurring expenses are created by the daily job; last run: 2026-01-15");
+  await status.scrollIntoViewIfNeeded();
   await snap(page, testInfo);
 });
 
