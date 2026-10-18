@@ -1,7 +1,7 @@
 ---
 id: 007
 title: Recurring rules and the daily job
-status: ready
+status: in-review
 risk: risky
 depends_on: [002, 004]
 pr:
