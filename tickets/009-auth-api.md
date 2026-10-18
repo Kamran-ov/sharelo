@@ -1,10 +1,10 @@
 ---
 id: 009
 title: Sign-in API — email and password, Google, guest sessions
-status: ready
+status: done
 risk: risky
 depends_on: [006]
-pr:
+pr: 14
 ---
 
 ## Goal
