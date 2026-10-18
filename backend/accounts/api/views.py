@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -44,6 +45,7 @@ def sign_in(request, user) -> Response:
 
 @method_decorator(ensure_csrf_cookie, name="get")
 class MeView(APIView):
+    @extend_schema(responses=serializers.MeSerializer)
     def get(self, request):
         return Response(me_body(request))
 
@@ -51,6 +53,7 @@ class MeView(APIView):
 class RegisterView(CsrfProtectedAPIView):
     throttle_classes = [AuthThrottle]
 
+    @extend_schema(request=serializers.RegisterSerializer, responses=serializers.MeSerializer)
     def post(self, request):
         data = serializers.RegisterSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -61,6 +64,7 @@ class RegisterView(CsrfProtectedAPIView):
 class LoginView(CsrfProtectedAPIView):
     throttle_classes = [AuthThrottle]
 
+    @extend_schema(request=serializers.LoginSerializer, responses=serializers.MeSerializer)
     def post(self, request):
         data = serializers.LoginSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -70,6 +74,7 @@ class LoginView(CsrfProtectedAPIView):
 class GoogleView(CsrfProtectedAPIView):
     throttle_classes = [AuthThrottle]
 
+    @extend_schema(request=serializers.GoogleSerializer, responses=serializers.MeSerializer)
     def post(self, request):
         data = serializers.GoogleSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -78,6 +83,7 @@ class GoogleView(CsrfProtectedAPIView):
 
 
 class LogoutView(CsrfProtectedAPIView):
+    @extend_schema(request=None, responses=serializers.MeSerializer)
     def post(self, request):
         logout(request)
         return Response(me_body(request))
