@@ -1,10 +1,10 @@
 ---
 id: 003
 title: Balances, settlements and debt simplification
-status: ready
+status: done
 risk: risky
 depends_on: [002]
-pr:
+pr: 7
 ---
 
 ## Goal
