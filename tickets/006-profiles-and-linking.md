@@ -1,7 +1,7 @@
 ---
 id: 006
 title: Profiles, main group, linked sub-groups, Move to Home
-status: in-review
+status: done
 risk: risky
 depends_on: [003]
 pr: 10
