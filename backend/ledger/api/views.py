@@ -50,7 +50,7 @@ def _group_detail(request, group: Group, me: Member | None) -> dict:
     )
     members = group.members.order_by("id")
     return {
-        **_group_summary(profile, group),
+        **_group_summary(profile, group, link.active if link is not None else None),
         "share_token": group.share_token,
         "members": [
             {
@@ -62,16 +62,16 @@ def _group_detail(request, group: Group, me: Member | None) -> dict:
             for m in members
         ],
         "my_member_id": me.id if me else None,
-        "link_active": link.active if link is not None else None,
     }
 
 
-def _group_summary(profile, group: Group) -> dict:
+def _group_summary(profile, group: Group, link_active: bool | None) -> dict:
     return {
         "id": group.id,
         "name": group.name,
         "currency": group.currency,
         "is_main": profile is not None and profile.main_group_id == group.id,
+        "link_active": link_active,
     }
 
 
@@ -89,7 +89,17 @@ class GroupListView(CsrfProtectedAPIView):
         if ids:
             mine |= Q(members__id__in=ids)
         found = Group.objects.filter(mine).distinct().order_by("-id")
-        return Response([_group_summary(profile, g) for g in found])
+        # One query for every row; a guest session has no profile and so no links.
+        active = (
+            dict(
+                GroupLink.objects.filter(profile=profile, sub_group__in=found).values_list(
+                    "sub_group_id", "active"
+                )
+            )
+            if profile is not None
+            else {}
+        )
+        return Response([_group_summary(profile, g, active.get(g.id)) for g in found])
 
     def post(self, request):
         profile = require_profile(request)

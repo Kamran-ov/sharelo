@@ -1,4 +1,6 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from accounts.services.auth import register
@@ -134,3 +136,33 @@ def test_category_defaults_bad_preset_refused_and_nothing_saved(world, api_a):
     assert api_a.get(url).json() == {}
     good = api_a.put(url, {cat: {"preset": "personal"}}, format="json")
     assert good.status_code == 200
+
+
+def test_group_list_carries_link_active_per_group(world, api_a):
+    rome_link = GroupLink.objects.get(profile=world.a, sub_group=world.rome)
+    rows = {g["id"]: g for g in api_a.get("/api/groups/").json()}
+    assert rows[world.home.id]["link_active"] is None
+    assert rows[world.rome.id]["link_active"] is True
+    rome_link.active = False
+    rome_link.save()
+    rows = {g["id"]: g for g in api_a.get("/api/groups/").json()}
+    assert rows[world.rome.id]["link_active"] is False
+    guest_rows = world.guest_client().get("/api/groups/").json()
+    assert [g["link_active"] for g in guest_rows] == [None]
+
+
+def test_group_list_query_count_is_constant_with_link_field(db):
+    profile, client = new_user("q")
+    client.post("/api/groups/", {"name": "Home", "currency": "EUR"}, format="json")
+
+    def count_queries() -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            assert client.get("/api/groups/").status_code == 200
+        return len(ctx)
+
+    for i in range(2):
+        client.post("/api/groups/", {"name": f"T{i}", "currency": "EUR"}, format="json")
+    few = count_queries()
+    for i in range(7):
+        client.post("/api/groups/", {"name": f"U{i}", "currency": "EUR"}, format="json")
+    assert count_queries() == few
