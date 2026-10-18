@@ -1,7 +1,7 @@
 ---
 id: 005
 title: Analytics core — spending per person and per category
-status: ready
+status: in-review
 risk: normal
 depends_on: [003]
 pr:
