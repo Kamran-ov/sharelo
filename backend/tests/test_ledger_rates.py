@@ -227,3 +227,42 @@ def test_unique_rate_per_date_and_currency(db):
 
 def test_rates_module_has_no_float():
     assert "float(" not in inspect.getsource(rates)
+
+
+@pytest.fixture
+def jpy_usd_rates():
+    for day, jpy, usd in ((FRI, "160", "1.10"), (datetime.date(2026, 2, 10), "150", "1.08")):
+        ExchangeRate.objects.create(date=day, currency="JPY", rate_to_eur=Decimal(jpy))
+        ExchangeRate.objects.create(date=day, currency="USD", rate_to_eur=Decimal(usd))
+
+
+def test_rate_resolver_agrees_with_rate_function(jpy_usd_rates):
+    for day in (FRI, SAT, SUN, MON, datetime.date(2026, 2, 10)):
+        for pair in (("JPY", "EUR"), ("EUR", "JPY"), ("JPY", "USD")):
+            resolve = rates.rate_resolver(*pair, FRI - datetime.timedelta(days=20), MON)
+            assert resolve(day) == rates.rate(day, *pair)
+    to_usd = rates.range_converter("JPY", "USD", FRI, MON)
+    assert to_usd(MON, 123457) == rates.convert(123457, MON, "JPY", "USD")
+
+
+def test_rate_resolver_refuses_after_8_day_gap(jpy_usd_rates):
+    ok = rates.rate_resolver("JPY", "EUR", FRI, FRI + datetime.timedelta(days=8))
+    assert ok(FRI + datetime.timedelta(days=7)) == rates.rate(
+        FRI + datetime.timedelta(days=7), "JPY", "EUR"
+    )
+    with pytest.raises(LedgerError) as exc:
+        ok(FRI + datetime.timedelta(days=8))
+    assert exc.value.code == "no_rate"
+
+
+def test_rate_resolver_same_currency_and_eur_need_no_queries(django_assert_num_queries):
+    with django_assert_num_queries(0):
+        assert rates.rate_resolver("EUR", "EUR", FRI, MON)(MON) == 1
+        assert rates.rate_resolver("JPY", "JPY", FRI, MON)(MON) == 1
+
+
+def test_rate_resolver_uses_one_query_for_a_foreign_pair(jpy_usd_rates, django_assert_num_queries):
+    with django_assert_num_queries(1):
+        resolve = rates.rate_resolver("JPY", "USD", FRI, MON)
+        for day in (FRI, SAT, SUN, MON):
+            resolve(day)

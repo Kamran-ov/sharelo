@@ -9,9 +9,11 @@ Rates are the only Decimals here; amounts go in and out as `int` cents. Weekend 
 dates use the latest earlier rate, but never one older than MAX_RATE_AGE_DAYS.
 """
 
+import bisect
 import datetime
 import urllib.request
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from decimal import ROUND_HALF_EVEN, Decimal
 
 from django.db import transaction
@@ -59,6 +61,51 @@ def rate(date: datetime.date, from_currency: str, to_currency: str) -> Decimal:
 
 def convert(amount_cents: int, date: datetime.date, from_currency: str, to_currency: str) -> int:
     return convert_with_rate(amount_cents, rate(date, from_currency, to_currency))
+
+
+def rate_resolver(
+    from_currency: str, to_currency: str, date_from: datetime.date, date_to: datetime.date
+) -> Callable[[datetime.date], Decimal]:
+    """`rate()` for many dates in at most one query; same rule, same quantisation.
+
+    A date outside [date_from, date_to] is a caller bug, not a missing rate, so the window
+    is the contract: rows are loaded for [date_from - MAX_RATE_AGE_DAYS, date_to].
+    """
+    needed = {c for c in (from_currency, to_currency) if c != "EUR"}
+    if from_currency == to_currency or not needed:
+        return lambda date: Decimal(1)
+    window_start = date_from - datetime.timedelta(days=MAX_RATE_AGE_DAYS)
+    rows = (
+        ExchangeRate.objects.filter(currency__in=needed, date__gte=window_start, date__lte=date_to)
+        .order_by("date")
+        .values_list("currency", "date", "rate_to_eur")
+    )
+    dates: dict[str, list[datetime.date]] = {c: [] for c in needed}
+    values: dict[str, list[Decimal]] = {c: [] for c in needed}
+    for currency, date, rate_to_eur in rows:
+        dates[currency].append(date)
+        values[currency].append(rate_to_eur)
+
+    def eur_per_unit(currency: str, date: datetime.date) -> Decimal:
+        if currency == "EUR":
+            return Decimal(1)
+        i = bisect.bisect_right(dates[currency], date) - 1
+        if i < 0 or dates[currency][i] < date - datetime.timedelta(days=MAX_RATE_AGE_DAYS):
+            raise LedgerError("no_rate", f"{currency} on {date}")
+        return 1 / values[currency][i]
+
+    def resolve(date: datetime.date) -> Decimal:
+        return quantize_rate(eur_per_unit(from_currency, date) / eur_per_unit(to_currency, date))
+
+    return resolve
+
+
+def range_converter(
+    from_currency: str, to_currency: str, date_from: datetime.date, date_to: datetime.date
+) -> Callable[[datetime.date, int], int]:
+    """`convert()` for many (date, cents) pairs; rounds through `convert_with_rate` like it."""
+    resolve = rate_resolver(from_currency, to_currency, date_from, date_to)
+    return lambda date, cents: convert_with_rate(cents, resolve(date))
 
 
 def resolve_foreign_amount(
