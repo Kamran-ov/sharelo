@@ -59,7 +59,7 @@ need the CSRF token (see above), guests included.
 
 | Path | Methods | Notes |
 |---|---|---|
-| `groups/` | GET, POST | POST `{name, currency, as_main?}`; first group is the main group; `as_main: true` when a main group exists → 400 `main_group_exists` |
+| `groups/` | GET, POST | GET rows: `id, name, currency, is_main, link_active` (`null` for the main group and guest sessions); POST `{name, currency, as_main?}`; first group is the main group; `as_main: true` when a main group exists → 400 `main_group_exists` |
 | `groups/{id}/` | GET | members (with `profile_id`, `is_guest`), `my_member_id`, `is_main`, `link_active`, `share_token` |
 | `groups/{id}/link` | POST | `{active}`; profiles only (guest → 401) |
 | `join/{token}/` | GET, POST | GET is public and sets the CSRF cookie; POST `{display_name}`; a guest who joins again gets the same member |
@@ -105,3 +105,10 @@ An expense keeps its `split_type` but not the preset params, so splits are never
   400 `invalid_request` unless the body carries the splits.
 
 New codes: `not_a_sub_group`, `unknown_profile`, `invalid_params` (bad preset params).
+
+# Frontend
+
+`vite dev` (port 5173) and `vite preview` (port 4173) both proxy `/api` to Django with `changeOrigin: false`.
+The e2e backend listens on 8001 and must be reached as `localhost`, never `127.0.0.1`, or Origin and Host differ
+and CSRF fails. `E2E=1` is the browser-test mode (see `docs/e2e.md`); it is refused unless the database name ends
+in `_e2e`.

@@ -31,3 +31,38 @@ jobs:
       - run: make install
       - run: make lint
       - run: make test
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: sharelo
+          POSTGRES_PASSWORD: sharelo
+          POSTGRES_DB: sharelo
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sharelo -d sharelo"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      E2E: "1"
+      SECRET_KEY: ci-only-not-a-secret
+      DATABASE_URL: postgres://sharelo:sharelo@localhost:5432/sharelo_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: make install
+      # A GitHub runner has no browser; the cloud image ships one, so this is not part of `make e2e`.
+      - run: cd frontend && npx playwright install --with-deps chromium
+      - run: make e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-screenshots
+          path: docs/screenshots/

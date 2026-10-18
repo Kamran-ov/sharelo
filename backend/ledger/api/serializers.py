@@ -152,13 +152,13 @@ class GroupSummarySerializer(serializers.Serializer):
     name = serializers.CharField()
     currency = serializers.CharField()
     is_main = serializers.BooleanField()
+    link_active = serializers.BooleanField(allow_null=True)
 
 
 class GroupDetailSerializer(GroupSummarySerializer):
     share_token = serializers.CharField()
     members = MemberSerializer(many=True)
     my_member_id = serializers.IntegerField()
-    link_active = serializers.BooleanField(allow_null=True)
 
 
 class JoinPreviewSerializer(serializers.Serializer):

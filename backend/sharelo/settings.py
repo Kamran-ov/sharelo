@@ -20,6 +20,9 @@ SECRET_KEY = required_env("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", "") == "1"
 ALLOWED_HOSTS = [h for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h]
 
+# Browser tests run the real server on plain http against a throwaway `*_e2e` database.
+E2E = os.environ.get("E2E") == "1"
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -103,6 +106,20 @@ CSRF_FAILURE_VIEW = "accounts.api.errors.csrf_failure"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = "Lax"
+
+if E2E:
+    from .e2e import check_e2e_settings
+
+    check_e2e_settings(DATABASES["default"]["NAME"], os.environ.get("ALLOWED_HOSTS"))
+    DEBUG = False
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+    # Every `not DEBUG`-derived security setting is neutralised here: plain http, no redirects.
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_PROXY_SSL_HEADER = None
+    REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {"auth": "100000/min"}
 
 # Optional by design: empty disables Google sign-in rather than refusing to boot.
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")

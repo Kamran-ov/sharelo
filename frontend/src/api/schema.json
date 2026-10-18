@@ -1629,6 +1629,10 @@
                     "is_main": {
                         "type": "boolean"
                     },
+                    "link_active": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
                     "share_token": {
                         "type": "string"
                     },
@@ -1640,10 +1644,6 @@
                     },
                     "my_member_id": {
                         "type": "integer"
-                    },
-                    "link_active": {
-                        "type": "boolean",
-                        "nullable": true
                     }
                 },
                 "required": [
@@ -1671,12 +1671,17 @@
                     },
                     "is_main": {
                         "type": "boolean"
+                    },
+                    "link_active": {
+                        "type": "boolean",
+                        "nullable": true
                     }
                 },
                 "required": [
                     "currency",
                     "id",
                     "is_main",
+                    "link_active",
                     "name"
                 ]
             },
