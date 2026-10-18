@@ -1,10 +1,10 @@
 ---
 id: 015
 title: Installable PWA, single-origin serving, laptop "production" compose
-status: ready
+status: done
 risk: normal
 depends_on: [013, 014]
-pr:
+pr: 21
 ---
 
 ## Goal

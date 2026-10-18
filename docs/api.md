@@ -115,3 +115,9 @@ New codes: `not_a_sub_group`, `unknown_profile`, `invalid_params` (bad preset pa
 The e2e backend listens on 8001 and must be reached as `localhost`, never `127.0.0.1`, or Origin and Host differ
 and CSRF fails. `E2E=1` is the browser-test mode (see `docs/e2e.md`); it is refused unless the database name ends
 in `_e2e`.
+
+## Unknown paths
+
+Django serves the built SPA for every path that no route claims, except `api`, `admin` and `static`
+(with or without a trailing slash). An unknown `/api/...` path is therefore a plain 404, never the
+app shell.

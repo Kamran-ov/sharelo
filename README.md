@@ -41,3 +41,29 @@ rule failed. Example cron line (scheduling it on a server is the release step):
 ```
 15 6 * * * cd /srv/sharelo/backend && python manage.py run_daily >> /var/log/sharelo-daily.log 2>&1
 ```
+
+## Run it for real on your laptop
+
+One origin, gunicorn, and the daily job on a clock; needs Docker (`compose.prod.yml`).
+
+```
+cp .env.example .env
+# edit .env: set SECRET_KEY (generator line inside)
+docker compose -f compose.prod.yml up -d --build
+docker compose -f compose.prod.yml logs backend    # migrations ran, gunicorn listening
+# open http://localhost:8000
+```
+
+Phone test through a Cloudflare tunnel: `cloudflared tunnel --url http://localhost:8000`, then switch modes.
+
+| Mode | `.env` | Open |
+|---|---|---|
+| local | `HTTPS=0`, `ALLOWED_HOSTS=localhost,127.0.0.1` | `http://localhost:8000` |
+| tunnel | `HTTPS=1`, `ALLOWED_HOSTS=<host>.trycloudflare.com`, `CSRF_TRUSTED_ORIGINS=https://<host>.trycloudflare.com` | the https URL the tunnel prints |
+
+Switch by editing `.env`, then `docker compose -f compose.prod.yml up -d` (recreates `backend` with the new
+environment). With `HTTPS=1` the app redirects plain http to https, so `localhost:8000` stops working until you
+switch back. The `cron` service runs `python manage.py run_daily` at 06:00 UTC (08:00 Rome).
+
+Without Docker: `make build-frontend` builds the SPA into `backend/frontend_dist` and collects static files;
+Django then serves it at the site root.

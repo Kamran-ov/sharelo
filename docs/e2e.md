@@ -2,7 +2,8 @@
 
 `make e2e` builds the frontend and runs `playwright test` in `frontend/`. Playwright's `webServer` entries start
 Django (`E2E=1 manage.py runserver 8001 --noreload`, after `e2e_prepare`) and `vite preview` (4173) and stop them
-afterwards; never start either by hand.
+afterwards; never start either by hand. Since 015 a third entry, Django on 8002 serving `frontend/dist` itself
+(no `e2e_prepare`: the 8001 entry prepared the shared `sharelo_e2e` database), backs the `served` project.
 
 - **Database:** `sharelo_e2e`, separate from the dev database. `e2e_prepare` creates it if missing (needs CREATEDB,
   else it prints `createdb sharelo_e2e`) and migrates it. `e2e_reset` refuses unless `E2E=1` and the database name
@@ -19,3 +20,4 @@ afterwards; never start either by hand.
   pinned to the matching 1.56.1); CI runs `npx playwright install --with-deps chromium` first.
 - **Screenshots:** each test writes `docs/screenshots/<ticket>/<test name>.png`, committed.
 - **Google sign-in** is not covered (needs real Google).
+- **015 specs (`pwa.spec.ts`, project `served`, baseURL 8002):** the `preview` project (all earlier specs, vite preview 4173) and `served` run in the same `make e2e`, one worker, so every `e2e_reset` is serial. `dist` is built once by `make e2e` and shared. The offline test cannot use `context.setOffline` (Chromium does not apply it to the service worker's own fetches, so the worker would still fetch the shell from the server); it runs through a forwarding proxy on 8003 that the test closes. Do not "simplify" this back to `setOffline`: the test would go green or red for the wrong reason. Not covered: a real phone install, `beforeinstallprompt` on real Chrome (vitest drives that branch), HTTPS/HSTS behind a tunnel.

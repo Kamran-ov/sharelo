@@ -250,3 +250,44 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 014: result review round 2, head 36ce3ed
 - Verdict: ACCEPT — merge. All four a36d457 items are closed: CI run 39168775386 is green (test, e2e), the Settings PNG shows "last run: 2026-01-15" after its assertion, the pytest/vitest date table is side by side with the mode stated, and both watch items are answered with an API re-read in the e2e.
 - Worth remembering: what looked like a broken copy (day-31 list missing its first date) was a write-up that left out the inclusive first element. Asking for the two assertion lines side by side settled it in one round, where a written explanation would not have.
+
+
+- Ticket 015 — plan review, head ca2284b
+- Verdict: REVISE. Nine items; the main ones:
+  - Both KEY tests miss. The catch-all is appended last, so `/api/me` stays JSON when the `api/` exclusion is removed. Django's default 404 is `text/html`, so a "not text/html" check on an unknown `/api/` path fails even when the code is right. Assert that the body is not the SPA shell instead, with an e2e red proof.
+  - `navigateFallback: index.html` and `offline.html` contradict each other; pick one.
+  - `NetworkFirst` caches authenticated `/api` GETs past logout.
+  - HSTS raises W005/W021, and `SSL_REDIRECT` breaks localhost; state both run modes.
+  - Install-hint trigger in headless, per-process `index.html` cache, literal supercronic sha256, who builds `dist` for the `served` project.
+  - All four open questions accepted as assumed.
+- Worth remembering: a KEY test on a catch-all route must aim at a path that only the exclusion protects. Known routes resolve before an appended catch-all, so asserting "/api/me is JSON" is protected by URL ordering, not by the regex. A content-type check is also defeated by Django's HTML 404. The test must look for the SPA's own sentinel in the body of an unknown `/api/` path.
+
+
+- Ticket 015 — plan review round 2, head 510c8ef
+- Verdict: REVISE. Two items:
+  - Leaving `navigateFallback` unset keeps vite-plugin-pwa's default `index.html` fallback. A precached `index.html` also answers `/` through Workbox `directoryIndex`. Set `navigateFallback: null`, ignore `index.html` in the precache, and run the offline reload on both `/` and a deep link.
+  - Playwright `webServer` is global, so the 8001 and 8002 backends both run `e2e_prepare` on `sharelo_e2e`. State how they share the database and the workers.
+  - Round-1 items 1, 2 and 4–9 are closed.
+- Worth remembering: "option X unset" in a plan is a claim about the library's default, not about the config. vite-plugin-pwa ships a shell `navigateFallback` and precaches `index.html` unless told otherwise, so an offline-page design must name the null or ignore setting it depends on.
+
+
+- Ticket 015: plan review round 3, head 8527463
+- Verdict: ACCEPT PLAN. Both round-2 items are closed: an explicit `navigateFallback: null` with `index.html` kept out of the precache, the offline test on `/` and on a deep link, and one ordered `webServer` array with a single `e2e_prepare` and `workers: 1`. Watch: a stale "8002 runs `e2e_prepare`" sentence, `offline.html` precached through both a glob and `additionalManifestEntries`, and the KEY red on both the pytest and the e2e.
+- Worth remembering: a precache fallback page in `public/` already matches the plugin's default html glob, so listing it again in `additionalManifestEntries` can give two revisions of the same URL. Workbox then refuses to install the SW, and every offline test goes red for a config reason. The plan should name a single source for each precached file.
+
+
+- Ticket 015: result review, head 0016797
+- Verdict: REVISE, six items:
+  - CI was not cited and was still running.
+  - The manifest PNG shows the Sign in page, not the manifest.
+  - The install-hint PNG shows the banner on `/login` instead of above the groups list, as planned.
+  - The single `offline.html` precache entry and the offline test covering both `/` and the deep link are claimed, not shown.
+  - The restore half of the KEY proof is prose: `git status --short` is not pasted and the e2e was not re-run.
+  - The spec still says `additionalManifestEntries`, `make-icons.py` and `setOffline`.
+  - Accepted: both KEY reds (pytest sentinel, e2e 200≠404) and the four justified plan changes.
+- Worth remembering: a screenshot named after an Acceptance line can show a different page altogether. Here, `test_manifest_served_with_name_and_icons.png` is the Sign in screen. For a non-visual property like a manifest, ask for a PNG of the fetched resource, or a page rendering it, plus the assertion's `file:line`. A file name is not evidence.
+
+
+- Ticket 015: result review round 2, head b2a6c26
+- Verdict: ACCEPT — merge. All six 0016797 items are closed: CI run 39171709101 is green (test, e2e) on the head, verified by the reviewer. The manifest PNG renders the name and 3 served icons, with assertions at `pwa.spec.ts:23-37`. The install-hint PNG shows the banner above Groups. The `sw.js` grep counts (offline 1, index 0) and the two-URL offline loop are quoted. `git status --short` after the restore is pasted, with the e2e twin green. The spec matches the build.
+- Worth remembering: for a property with no visual (a web manifest), a page that renders the fetched fields and the `<img>`s from the served URLs, next to the assertion `file:line`, is acceptable evidence when the browser refuses to display the raw resource. The unverified Docker/supercronic checksum path carries over to the first real deploy.

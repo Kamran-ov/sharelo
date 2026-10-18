@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RequireAccess } from "./auth";
+import InstallHint from "./components/InstallHint";
 import Balances from "./pages/Balances";
 import Expenses from "./pages/Expenses";
 import GroupShell from "./pages/GroupShell";
@@ -13,6 +14,7 @@ import Settings from "./pages/Settings";
 export default function App() {
   return (
     <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-white text-slate-900">
+      <InstallHint />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/join/:token" element={<Join />} />

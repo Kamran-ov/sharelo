@@ -2,6 +2,8 @@
 DJANGO_SETTINGS_MODULE = "sharelo.settings"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
+# whitenoise warns when STATIC_ROOT is not collected yet; only the container build collects it.
+filterwarnings = ["ignore:No directory at:UserWarning"]
 
 [tool.ruff]
 line-length = 100

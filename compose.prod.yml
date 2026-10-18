@@ -1,0 +1,44 @@
+# "Production" on a laptop: one origin, gunicorn, daily job. See README "Run it for real on your laptop".
+x-app-env: &app-env
+  DEBUG: "0"
+  SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+  DATABASE_URL: postgres://sharelo:sharelo@db:5432/sharelo
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+  HTTPS: ${HTTPS:-0}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: sharelo
+      POSTGRES_PASSWORD: sharelo
+      POSTGRES_DB: sharelo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sharelo -d sharelo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    build: {context: ., target: app}
+    command: sh -c "python manage.py migrate --noinput && gunicorn sharelo.wsgi --bind 0.0.0.0:8000 --workers 2"
+    environment: *app-env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  cron:
+    build: {context: ., target: cron}
+    environment: *app-env
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pgdata:
