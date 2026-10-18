@@ -1,7 +1,7 @@
 ---
 id: 015
 title: Installable PWA, single-origin serving, laptop "production" compose
-status: in-review
+status: done
 risk: normal
 depends_on: [013, 014]
 pr: 21
