@@ -4,7 +4,7 @@ title: Recurring rules and the daily job
 status: in-review
 risk: risky
 depends_on: [002, 004]
-pr:
+pr: 12
 ---
 
 ## Goal
