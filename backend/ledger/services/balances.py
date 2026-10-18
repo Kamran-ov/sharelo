@@ -14,6 +14,7 @@ number of transfers is below the number of people involved.
 import datetime
 
 from django.db.models import Sum
+from django.utils import timezone
 
 from ledger.errors import LedgerError
 from ledger.models import ExpensePayer, ExpenseSplit, Group, Member, Settlement
@@ -104,6 +105,17 @@ def record_settlement(
         date=date,
         notes=notes,
     )
+
+
+def delete_settlement(group: Group, settlement_id: int) -> None:
+    row = Settlement.objects.filter(group=group, pk=settlement_id).first()
+    if row is None:
+        raise LedgerError("not_found", f"settlement {settlement_id}")
+    # A twin pair is undone together or not at all; half a pair would leave one side's books wrong.
+    if row.twin_id is not None:
+        raise LedgerError("twin_settlement", "a Move to Home settlement cannot be deleted alone")
+    row.deleted_at = timezone.now()
+    row.save(update_fields=["deleted_at"])
 
 
 def member_summary(group: Group, member: Member) -> dict[str, int]:

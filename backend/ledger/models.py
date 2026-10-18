@@ -253,6 +253,11 @@ class ExpenseSplit(models.Model):
         ]
 
 
+class ActiveSettlementManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
 class Settlement(models.Model):
     group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="settlements")
     from_member = models.ForeignKey(
@@ -272,8 +277,13 @@ class Settlement(models.Model):
         ImportBatch, null=True, blank=True, on_delete=models.PROTECT, related_name="settlements"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ActiveSettlementManager()
+    all_objects = models.Manager()
 
     class Meta:
+        base_manager_name = "all_objects"
         constraints = [
             models.CheckConstraint(
                 condition=Q(amount_cents__gt=0), name="settlement_amount_positive"

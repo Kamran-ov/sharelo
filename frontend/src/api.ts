@@ -10,6 +10,9 @@ export type ExpensePage = Schemas["ExpensePage"];
 export type ExpenseRow = ExpensePage["results"][number];
 export type CategoryNode = Schemas["CategoryTree"];
 export type RateOut = Schemas["RateOut"];
+export type Balances = Schemas["Balances"];
+export type Transfer = Balances["transfers"][number];
+export type SettlementRow = Schemas["SettlementOut"];
 export type CategoryDefaults = Record<string, { preset: string; params: Record<string, unknown> }>;
 
 export class ApiError extends Error {

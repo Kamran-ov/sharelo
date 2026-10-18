@@ -475,14 +475,30 @@ class BalancesView(GroupScopedView):
     @extend_schema(responses=sz.BalancesSerializer)
     def get(self, request, group_id):
         nets = balances.net_balances(self.group)
+        members = {m.id: m for m in self.group.members.select_related("profile")}
+        viewer = self.me
+        home = None
+        if viewer.profile is not None and viewer.profile.main_group_id is not None:
+            home = Group.objects.filter(pk=viewer.profile.main_group_id).first()
+        transfers = []
+        for f, t, c in balances.simplify_debts(nets):
+            # Debtor's own session only: move-to-home takes the caller as from_profile.
+            mine = f == viewer.id
+            transfers.append(
+                {
+                    "from_member": f,
+                    "to_member": t,
+                    "amount_cents": c,
+                    "can_move_to_home": mine
+                    and groups.can_move_to_home(self.group, home, viewer, members[t]),
+                    "to_profile": members[t].profile_id,
+                }
+            )
         return Response(
             {
                 "currency": self.group.currency,
                 "nets": {str(m): c for m, c in nets.items()},
-                "transfers": [
-                    {"from_member": f, "to_member": t, "amount_cents": c}
-                    for f, t, c in balances.simplify_debts(nets)
-                ],
+                "transfers": transfers,
                 "members": [
                     {"member_id": m.id, **balances.member_summary(self.group, m)}
                     for m in self.group.members.order_by("id")
@@ -494,7 +510,11 @@ class BalancesView(GroupScopedView):
 class SettlementListView(GroupScopedView):
     @extend_schema(responses=sz.SettlementOutSerializer(many=True))
     def get(self, request, group_id):
-        rows = Settlement.objects.filter(group=self.group).order_by("-date", "-id")
+        rows = (
+            Settlement.objects.filter(group=self.group)
+            .select_related("twin__group", "from_member__profile", "to_member__profile")
+            .order_by("-date", "-id")
+        )
         return Response(sz.SettlementOutSerializer(rows, many=True).data)
 
     @extend_schema(
@@ -513,6 +533,13 @@ class SettlementListView(GroupScopedView):
             self.group, sender, receiver, d["amount_cents"], d["date"], d.get("notes", "")
         )
         return Response(sz.SettlementOutSerializer(row).data, status=201)
+
+
+class SettlementDetailView(GroupScopedView):
+    @extend_schema(responses={204: None})
+    def delete(self, request, group_id, sid):
+        balances.delete_settlement(self.group, sid)
+        return Response(status=204)
 
 
 class MoveToHomeView(GroupScopedView):

@@ -5,14 +5,14 @@ from django.urls import URLPattern, URLResolver, get_resolver
 from rest_framework.test import APIClient
 
 from ledger.models import Expense, RecurringRule
-from ledger.services import expenses, recurring
+from ledger.services import balances, expenses, recurring
 
 pytestmark = pytest.mark.django_db
 
 OK_STATUSES = {200, 201, 204}
 
 # (path template, method) -> body factory, and the status a guest of Rome gets by design.
-# Templates use {g} group, {e} expense, {r} rule.
+# Templates use {g} group, {e} expense, {r} rule, {s} settlement.
 ROUTES = [
     ("groups/{g}/", "GET", None, 200),
     ("groups/{g}/link", "POST", lambda w: {"active": False}, 401),
@@ -26,6 +26,7 @@ ROUTES = [
     ("groups/{g}/balances/", "GET", None, 200),
     ("groups/{g}/settlements/", "GET", None, 200),
     ("groups/{g}/settlements/", "POST", lambda w: {}, 400),
+    ("groups/{g}/settlements/{s}/", "DELETE", None, 204),
     ("groups/{g}/move-to-home", "POST", lambda w: {}, 401),
     ("groups/{g}/recurring/", "GET", None, 200),
     ("groups/{g}/recurring/", "POST", lambda w: {}, 400),
@@ -65,7 +66,8 @@ def rome_ids(world):
         day_of_month=1,
         start_date=datetime.date(2026, 10, 1),
     )
-    return {"g": rome.id, "e": expense.id, "r": rule.id}
+    settlement = balances.record_settlement(rome, b_rome, a_rome, 100, datetime.date(2026, 10, 2))
+    return {"g": rome.id, "e": expense.id, "r": rule.id, "s": settlement.id}
 
 
 def call(client, ids, template, method, body):
@@ -113,6 +115,7 @@ def test_route_table_covers_every_group_url():
             .replace("<int:group_id>", "{g}")
             .replace("<int:eid>", "{e}")
             .replace("<int:rid>", "{r}")
+            .replace("<int:sid>", "{s}")
         )
         for method in ("get", "post", "put", "patch", "delete"):
             if hasattr(callback.cls, method):

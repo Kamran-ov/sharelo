@@ -444,6 +444,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/settlements/{sid}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        delete: operations["groups_settlements_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/join/{token}/": {
         parameters: {
             query?: never;
@@ -736,6 +758,8 @@ export interface components {
             date: string;
             notes?: string;
             twin?: number | null;
+            readonly twin_group_name: string | null;
+            readonly is_home_side: boolean;
             /** Format: date-time */
             readonly created_at: string;
         };
@@ -778,6 +802,8 @@ export interface components {
             from_member: number;
             to_member: number;
             amount_cents: number;
+            can_move_to_home: boolean;
+            to_profile: number | null;
         };
     };
     responses: never;
@@ -1430,6 +1456,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SettlementOut"];
                 };
+            };
+        };
+    };
+    groups_settlements_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+                sid: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

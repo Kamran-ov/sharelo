@@ -92,6 +92,21 @@ def _member_in(group: Group, profile: Profile) -> Member:
     return member
 
 
+def can_move_to_home(group: Group, home: Group | None, viewer: Member, to_member: Member) -> bool:
+    """Display hint for the Move to Home button; `move_debt_to_home` stays the authority.
+
+    `home` is the viewer's main group (None when they have none). Members arrive with `profile`
+    already loaded so a page of transfers costs no extra queries.
+    """
+    if home is None or viewer.profile is None or to_member.profile is None:
+        return False
+    return (
+        group.pk != home.pk
+        and to_member.profile.main_group_id == home.pk
+        and group.currency == home.currency
+    )
+
+
 @transaction.atomic
 def move_debt_to_home(
     trip_group: Group,

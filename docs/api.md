@@ -68,8 +68,9 @@ need the CSRF token (see above), guests included.
 | `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404; the page carries `month_totals` (`"YYYY-MM"` → cents, `amount_cents` summed over the whole filtered set for the months on the page, `personal` rows included, computed by `services.expenses.month_totals`) |
 | `groups/{id}/rate/` | GET | `?currency=USD&date=YYYY-MM-DD` → `{currency, date, rate}` (group units per 1 foreign unit, string); 400 `no_rate` when there is none within 7 days; 400 `invalid_request` for the group's own currency; preview only, the POST stays the authority |
 | `groups/{id}/expenses/{eid}/` | PATCH, DELETE | DELETE is soft and idempotent (204) |
-| `groups/{id}/balances/` | GET | `nets`, `transfers` (`from_member` pays `to_member`), per-member `paid/owed_share/net` |
-| `groups/{id}/settlements/` | GET, POST | POST `{from_member, to_member, amount_cents, date, notes?}` |
+| `groups/{id}/balances/` | GET | `nets`, `transfers` (`from_member` pays `to_member`; each carries `to_profile`, the creditor's profile id or null for a guest, and `can_move_to_home`, a display hint that is true only for the debtor's own session when the group is not their main group, both members have profiles, both profiles share that main group and the currencies match; `move-to-home` stays the authority), per-member `paid/owed_share/net` |
+| `groups/{id}/settlements/` | GET, POST | POST `{from_member, to_member, amount_cents, date, notes?}`; rows carry `twin_group_name` (group of the twin row, null without a twin) and `is_home_side` (true for the Home row of a Move to Home pair); the badge reads "<trip>: moved to Home" with the trip = `twin_group_name` on the Home side, else the group's own name |
+| `groups/{id}/settlements/{sid}/` | DELETE | soft delete (204); a row with a `twin` → 400 `twin_settlement`; another group's id → 404 |
 | `groups/{id}/move-to-home` | POST | `{to_profile, amount_cents, date}`; the main group → 400 `not_a_sub_group` |
 | `groups/{id}/recurring/` | GET, POST | rule fields use the model's `split_type` + `split_params` (service form) |
 | `groups/{id}/recurring/{rid}/` | PATCH, DELETE | |

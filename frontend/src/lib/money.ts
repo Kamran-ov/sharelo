@@ -16,3 +16,10 @@ export function formatCents(cents: number): string {
   const sign = cents < 0 ? "-" : "";
   return `${sign}${Math.floor(abs / 100)}.${String(abs % 100).padStart(2, "0")}`;
 }
+
+/** Like `parseAmount` but zero is an amount: the Settle sheet sends it so the server refuses it. */
+export function parseAmountForSubmit(text: string): number | null {
+  const match = /^(\d*)(?:[.,](\d{1,2}))?$/.exec(text.trim());
+  if (match && (match[1] !== "" || match[2] !== undefined) && Number(match[1] || "0") === 0 && Number(match[2] ?? "0") === 0) return 0;
+  return parseAmount(text);
+}
