@@ -105,6 +105,19 @@ class Source(models.TextChoices):
     RECURRING = "recurring"
 
 
+class CategoryDefault(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="category_defaults")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="+")
+    split_type = models.CharField(max_length=20, choices=SplitType.choices, default=SplitType.EQUAL)
+    # JSON, so object keys are strings; split_for_preset normalises them back to int.
+    split_params = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["group", "category"], name="uniq_category_default")
+        ]
+
+
 class ActiveExpenseManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)

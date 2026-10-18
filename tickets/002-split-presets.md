@@ -1,10 +1,10 @@
 ---
 id: 002
 title: Split presets and rounding
-status: ready
+status: done
 risk: risky
 depends_on: [001]
-pr:
+pr: 6
 ---
 
 ## Goal
