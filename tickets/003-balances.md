@@ -4,7 +4,7 @@ title: Balances, settlements and debt simplification
 status: in-review
 risk: risky
 depends_on: [002]
-pr:
+pr: 7
 ---
 
 ## Goal
