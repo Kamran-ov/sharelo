@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
     "accounts",
     "ledger",
 ]
@@ -78,6 +79,13 @@ REST_FRAMEWORK = {
     # 0 = ignore X-Forwarded-For, so a client cannot mint a fresh throttle bucket per request.
     "NUM_PROXIES": 0,
     "EXCEPTION_HANDLER": "accounts.api.errors.handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "sharelo",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 AUTH_PASSWORD_VALIDATORS = [

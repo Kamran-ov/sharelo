@@ -1,10 +1,10 @@
 ---
 id: 010
 title: Core REST API — groups, join, categories, expenses, balances, settlements, recurring
-status: ready
+status: done
 risk: risky
 depends_on: [007, 009]
-pr:
+pr: 16
 ---
 
 ## Goal
@@ -50,7 +50,7 @@ Every `LedgerError` → 400 `{code, detail}`.
   session gets 200 on the same URLs (one parametrised test over all routes — KEY TEST: it must
   fail if any single route forgets `require_member`).
 - Create group as first group → it is the profile's main group; second group → `link_active`
-  true; `as_main: true` on the second → no link, main group changes.
+  true; `as_main: true` on the second → 400 `main_group_exists`, no link, main unchanged.
 - Join by token anonymous → `/api/me.guest_memberships` contains the member; the same guest
   joining again returns the same member.
 - Create expense with `preset: "half"` (50/50) returns splits of 2500/2500 for 5000; omitted

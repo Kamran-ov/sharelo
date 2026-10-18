@@ -13,7 +13,7 @@ BACKEND = cd backend &&
 FRONTEND = cd frontend &&
 endif
 
-.PHONY: install test test-backend test-frontend lint
+.PHONY: install test test-backend test-frontend lint schema
 
 install:
 	$(PYTHON) -m pip install -q -r backend/requirements-dev.txt
@@ -31,3 +31,6 @@ lint:
 	$(BACKEND) $(PYTHON) -m ruff check .
 	$(BACKEND) $(PYTHON) -m ruff format --check .
 	$(FRONTEND) npm run lint
+
+schema:
+	$(BACKEND) $(PYTHON) manage.py spectacular --format openapi-json --file ../frontend/src/api/schema.json --validate --fail-on-warn

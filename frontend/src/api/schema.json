@@ -1,0 +1,2321 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "sharelo",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/auth/google": {
+            "post": {
+                "operationId": "auth_google_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Google"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Google"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Google"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "operationId": "auth_login_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "operationId": "auth_logout_create",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "operationId": "auth_register_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/categories/": {
+            "get": {
+                "operationId": "categories_list",
+                "tags": [
+                    "categories"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CategoryTree"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/": {
+            "get": {
+                "operationId": "groups_list",
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GroupSummary"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "groups_create",
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupCreate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupCreate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/": {
+            "get": {
+                "operationId": "groups_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/balances/": {
+            "get": {
+                "operationId": "groups_balances_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Balances"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/category-defaults/": {
+            "get": {
+                "operationId": "groups_category_defaults_list",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CategoryDefaultOut"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "groups_category_defaults_update",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CategoryDefaultOut"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/expenses/": {
+            "get": {
+                "operationId": "groups_expenses_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "member",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExpensePage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "groups_expenses_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExpenseWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExpenseWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExpenseWrite"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExpenseOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/expenses/{eid}/": {
+            "patch": {
+                "operationId": "groups_expenses_partial_update",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedExpenseWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedExpenseWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedExpenseWrite"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExpenseOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "groups_expenses_destroy",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/link": {
+            "post": {
+                "operationId": "groups_link_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Link"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Link"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Link"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LinkResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/move-to-home": {
+            "post": {
+                "operationId": "groups_move_to_home_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveToHome"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveToHome"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MoveToHome"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SettlementOut"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/recurring/": {
+            "get": {
+                "operationId": "groups_recurring_list",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RuleOut"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "groups_recurring_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RuleWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RuleWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RuleWrite"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/recurring/{rid}/": {
+            "patch": {
+                "operationId": "groups_recurring_partial_update",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRuleWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRuleWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedRuleWrite"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "groups_recurring_destroy",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/recurring/{rid}/pause": {
+            "post": {
+                "operationId": "groups_recurring_pause_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/recurring/{rid}/resume": {
+            "post": {
+                "operationId": "groups_recurring_resume_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/recurring/{rid}/skip": {
+            "post": {
+                "operationId": "groups_recurring_skip_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/settlements/": {
+            "get": {
+                "operationId": "groups_settlements_list",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SettlementOut"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "groups_settlements_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettlementWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettlementWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettlementWrite"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SettlementOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/join/{token}/": {
+            "get": {
+                "operationId": "join_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "join"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JoinPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "join_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "join"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JoinResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/me": {
+            "get": {
+                "operationId": "me_retrieve",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Me"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Balances": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "nets": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "transfers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Transfer"
+                        }
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MemberBalance"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "members",
+                    "nets",
+                    "transfers"
+                ]
+            },
+            "CategoryDefaultOut": {
+                "type": "object",
+                "properties": {
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "params",
+                    "preset"
+                ]
+            },
+            "CategoryTree": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubCategory"
+                        }
+                    }
+                },
+                "required": [
+                    "children",
+                    "id",
+                    "name"
+                ]
+            },
+            "ExpenseOut": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "original_amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "original_currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "rate_used": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,8})?$",
+                        "nullable": true
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "source": {
+                        "$ref": "#/components/schemas/SourceEnum"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "payers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PayerOut"
+                        }
+                    },
+                    "splits": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SplitOut"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "category",
+                    "created_at",
+                    "currency",
+                    "date",
+                    "description",
+                    "id",
+                    "original_amount_cents",
+                    "original_currency",
+                    "payers",
+                    "split_type",
+                    "splits"
+                ]
+            },
+            "ExpensePage": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer"
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExpenseOut"
+                        }
+                    }
+                },
+                "required": [
+                    "count",
+                    "page",
+                    "results"
+                ]
+            },
+            "ExpenseWrite": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "payer_member": {
+                        "type": "integer"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "original_currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "original_amount_cents": {
+                        "type": "integer"
+                    },
+                    "rate_used": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,8})?$"
+                    },
+                    "payers": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "splits": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "category",
+                    "date",
+                    "description"
+                ]
+            },
+            "FrequencyEnum": {
+                "enum": [
+                    "monthly",
+                    "yearly"
+                ],
+                "type": "string",
+                "description": "* `monthly` - Monthly\n* `yearly` - Yearly"
+            },
+            "Google": {
+                "type": "object",
+                "properties": {
+                    "id_token": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id_token"
+                ]
+            },
+            "GroupCreate": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "as_main": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "currency",
+                    "name"
+                ]
+            },
+            "GroupDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "is_main": {
+                        "type": "boolean"
+                    },
+                    "share_token": {
+                        "type": "string"
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Member"
+                        }
+                    },
+                    "my_member_id": {
+                        "type": "integer"
+                    },
+                    "link_active": {
+                        "type": "boolean",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "currency",
+                    "id",
+                    "is_main",
+                    "link_active",
+                    "members",
+                    "my_member_id",
+                    "name",
+                    "share_token"
+                ]
+            },
+            "GroupSummary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "is_main": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "currency",
+                    "id",
+                    "is_main",
+                    "name"
+                ]
+            },
+            "Join": {
+                "type": "object",
+                "properties": {
+                    "display_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "display_name"
+                ]
+            },
+            "JoinPreview": {
+                "type": "object",
+                "properties": {
+                    "group_name": {
+                        "type": "string"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "member_names": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "group_name",
+                    "member_names"
+                ]
+            },
+            "JoinResult": {
+                "type": "object",
+                "properties": {
+                    "group_id": {
+                        "type": "integer"
+                    },
+                    "member_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "group_id",
+                    "member_id"
+                ]
+            },
+            "Link": {
+                "type": "object",
+                "properties": {
+                    "active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "active"
+                ]
+            },
+            "LinkResult": {
+                "type": "object",
+                "properties": {
+                    "link_active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "link_active"
+                ]
+            },
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "Me": {
+                "type": "object",
+                "properties": {
+                    "authenticated": {
+                        "type": "boolean"
+                    },
+                    "profile": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MeProfile"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "guest_memberships": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "google_enabled": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "authenticated",
+                    "google_enabled",
+                    "guest_memberships",
+                    "profile"
+                ]
+            },
+            "MeProfile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "main_group_id": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "email",
+                    "id",
+                    "main_group_id"
+                ]
+            },
+            "Member": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "profile_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "is_guest": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "id",
+                    "is_guest",
+                    "profile_id"
+                ]
+            },
+            "MemberBalance": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    },
+                    "paid": {
+                        "type": "integer"
+                    },
+                    "owed_share": {
+                        "type": "integer"
+                    },
+                    "net": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "member_id",
+                    "net",
+                    "owed_share",
+                    "paid"
+                ]
+            },
+            "MoveToHome": {
+                "type": "object",
+                "properties": {
+                    "to_profile": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "date",
+                    "to_profile"
+                ]
+            },
+            "PatchedExpenseWrite": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "payer_member": {
+                        "type": "integer"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "original_currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "original_amount_cents": {
+                        "type": "integer"
+                    },
+                    "rate_used": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,8})?$"
+                    },
+                    "payers": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "splits": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PatchedRuleWrite": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "payer": {
+                        "type": "integer"
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "split_params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "frequency": {
+                        "$ref": "#/components/schemas/FrequencyEnum"
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768
+                    },
+                    "month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768,
+                        "nullable": true
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                }
+            },
+            "PayerOut": {
+                "type": "object",
+                "properties": {
+                    "member": {
+                        "type": "integer"
+                    },
+                    "paid_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    }
+                },
+                "required": [
+                    "member",
+                    "paid_cents"
+                ]
+            },
+            "Register": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "email",
+                    "password"
+                ]
+            },
+            "RuleOut": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "payer": {
+                        "type": "integer"
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "split_params": {},
+                    "category": {
+                        "type": "integer"
+                    },
+                    "frequency": {
+                        "$ref": "#/components/schemas/FrequencyEnum"
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768
+                    },
+                    "month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768,
+                        "nullable": true
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "next_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "paused": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "category",
+                    "day_of_month",
+                    "description",
+                    "frequency",
+                    "id",
+                    "next_date",
+                    "payer",
+                    "split_type",
+                    "start_date"
+                ]
+            },
+            "RuleWrite": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "maxLength": 300
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "payer": {
+                        "type": "integer"
+                    },
+                    "split_type": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "split_params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "frequency": {
+                        "$ref": "#/components/schemas/FrequencyEnum"
+                    },
+                    "day_of_month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768
+                    },
+                    "month": {
+                        "type": "integer",
+                        "maximum": 32767,
+                        "minimum": -32768,
+                        "nullable": true
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "category",
+                    "day_of_month",
+                    "description",
+                    "frequency",
+                    "payer",
+                    "split_type",
+                    "start_date"
+                ]
+            },
+            "SettlementOut": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "from_member": {
+                        "type": "integer"
+                    },
+                    "to_member": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "twin": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "created_at",
+                    "currency",
+                    "date",
+                    "from_member",
+                    "id",
+                    "to_member"
+                ]
+            },
+            "SettlementWrite": {
+                "type": "object",
+                "properties": {
+                    "from_member": {
+                        "type": "integer"
+                    },
+                    "to_member": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "date",
+                    "from_member",
+                    "to_member"
+                ]
+            },
+            "SourceEnum": {
+                "enum": [
+                    "manual",
+                    "splitwise",
+                    "revolut",
+                    "wise",
+                    "recurring"
+                ],
+                "type": "string",
+                "description": "* `manual` - Manual\n* `splitwise` - Splitwise\n* `revolut` - Revolut\n* `wise` - Wise\n* `recurring` - Recurring"
+            },
+            "SplitOut": {
+                "type": "object",
+                "properties": {
+                    "member": {
+                        "type": "integer"
+                    },
+                    "owed_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    }
+                },
+                "required": [
+                    "member",
+                    "owed_cents"
+                ]
+            },
+            "SplitTypeEnum": {
+                "enum": [
+                    "equal",
+                    "personal",
+                    "full_for_other",
+                    "percentage",
+                    "exact",
+                    "shares"
+                ],
+                "type": "string",
+                "description": "* `equal` - Equal\n* `personal` - Personal\n* `full_for_other` - Full For Other\n* `percentage` - Percentage\n* `exact` - Exact\n* `shares` - Shares"
+            },
+            "SubCategory": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "Transfer": {
+                "type": "object",
+                "properties": {
+                    "from_member": {
+                        "type": "integer"
+                    },
+                    "to_member": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "from_member",
+                    "to_member"
+                ]
+            }
+        },
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    }
+}

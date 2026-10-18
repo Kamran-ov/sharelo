@@ -14,3 +14,17 @@ class LoginSerializer(serializers.Serializer):
 
 class GoogleSerializer(serializers.Serializer):
     id_token = serializers.CharField()
+
+
+class MeProfileSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    display_name = serializers.CharField()
+    email = serializers.CharField()
+    main_group_id = serializers.IntegerField(allow_null=True)
+
+
+class MeSerializer(serializers.Serializer):
+    authenticated = serializers.BooleanField()
+    profile = MeProfileSerializer(allow_null=True)
+    guest_memberships = serializers.ListField(child=serializers.IntegerField())
+    google_enabled = serializers.BooleanField()
