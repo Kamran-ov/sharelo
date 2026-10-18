@@ -1,7 +1,7 @@
 ---
 id: 014
 title: Web — recurring rules page
-status: in-review
+status: done
 risk: normal
 depends_on: [012]
 pr: 20
