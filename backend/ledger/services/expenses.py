@@ -5,6 +5,8 @@ from decimal import Decimal
 from typing import Any
 
 from django.db import IntegrityError, transaction
+from django.db.models import QuerySet, Sum
+from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
 from ledger.errors import LedgerError
@@ -271,3 +273,22 @@ def create_expense_from_preset(
         split_type=preset,
         **rest,
     )
+
+
+def month_totals(rows: QuerySet[Expense], months: Collection[str]) -> dict[str, int]:
+    """Sum of `amount_cents` per "YYYY-MM" over the whole filtered set, `personal` rows included."""
+    if not months:
+        return {}
+    starts = [datetime.date.fromisoformat(f"{m}-01") for m in months]
+    sums = (
+        rows.filter(date__gte=min(starts), date__lt=_next_month(max(starts)))
+        .annotate(month=TruncMonth("date"))
+        .values("month")
+        .annotate(total=Sum("amount_cents"))
+    )
+    wanted = set(months)
+    return {key: row["total"] for row in sums if (key := row["month"].strftime("%Y-%m")) in wanted}
+
+
+def _next_month(day: datetime.date) -> datetime.date:
+    return (day.replace(day=28) + datetime.timedelta(days=4)).replace(day=1)

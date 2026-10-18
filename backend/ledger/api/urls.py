@@ -11,6 +11,7 @@ urlpatterns = [
     path("groups/<int:group_id>/category-defaults/", views.CategoryDefaultsView.as_view()),
     path("groups/<int:group_id>/expenses/", views.ExpenseListView.as_view()),
     path("groups/<int:group_id>/expenses/<int:eid>/", views.ExpenseDetailView.as_view()),
+    path("groups/<int:group_id>/rate/", views.RateView.as_view()),
     path("groups/<int:group_id>/balances/", views.BalancesView.as_view()),
     path("groups/<int:group_id>/settlements/", views.SettlementListView.as_view()),
     path("groups/<int:group_id>/move-to-home", views.MoveToHomeView.as_view()),

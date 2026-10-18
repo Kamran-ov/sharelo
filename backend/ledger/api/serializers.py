@@ -64,6 +64,11 @@ class ExpenseQuerySerializer(serializers.Serializer):
     page = serializers.IntegerField(required=False, min_value=1)
 
 
+class RateQuerySerializer(serializers.Serializer):
+    currency = serializers.RegexField(r"^[A-Z]{3}$")
+    date = serializers.DateField()
+
+
 class ExpenseWriteSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=300)
     amount_cents = StrictInt(required=False)
@@ -230,7 +235,14 @@ class ExpenseOutSerializer(serializers.ModelSerializer):
 class ExpensePageSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     page = serializers.IntegerField()
+    month_totals = serializers.DictField(child=serializers.IntegerField())
     results = ExpenseOutSerializer(many=True)
+
+
+class RateOutSerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    date = serializers.DateField()
+    rate = serializers.CharField()
 
 
 class TransferSerializer(serializers.Serializer):

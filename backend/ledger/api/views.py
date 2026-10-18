@@ -29,7 +29,7 @@ from ledger.models import (
     RecurringRule,
     Settlement,
 )
-from ledger.services import balances, expenses, groups, recurring
+from ledger.services import balances, expenses, groups, rates, recurring
 from ledger.services.rates import resolve_foreign_amount
 from ledger.services.splits import default_split_for, split_for_preset
 
@@ -283,9 +283,15 @@ class ExpenseListView(GroupScopedView):
         count = qs.count()
         if page > 1 and (page - 1) * PAGE_SIZE >= count:
             raise exceptions.NotFound("no such page")
-        rows = qs.order_by("-date", "-id")[(page - 1) * PAGE_SIZE : page * PAGE_SIZE]
+        rows = list(qs.order_by("-date", "-id")[(page - 1) * PAGE_SIZE : page * PAGE_SIZE])
+        months = {r.date.strftime("%Y-%m") for r in rows}
         return Response(
-            {"count": count, "page": page, "results": sz.ExpenseOutSerializer(rows, many=True).data}
+            {
+                "count": count,
+                "page": page,
+                "month_totals": expenses.month_totals(qs, months),
+                "results": sz.ExpenseOutSerializer(rows, many=True).data,
+            }
         )
 
     @extend_schema(request=sz.ExpenseWriteSerializer, responses={201: sz.ExpenseOutSerializer})
@@ -294,6 +300,21 @@ class ExpenseListView(GroupScopedView):
         data.is_valid(raise_exception=True)
         expense = _create_expense(self.group, data.validated_data)
         return Response(_expense_body(expense), status=201)
+
+
+class RateView(GroupScopedView):
+    @extend_schema(
+        parameters=[OpenApiParameter("currency", str), OpenApiParameter("date", datetime.date)],
+        responses=sz.RateOutSerializer,
+    )
+    def get(self, request, group_id):
+        query = sz.RateQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        currency, date = query.validated_data["currency"], query.validated_data["date"]
+        if currency == self.group.currency:
+            raise LedgerError("invalid_request", "the expense currency is the group currency")
+        value = rates.rate(date, currency, self.group.currency)
+        return Response({"currency": currency, "date": date, "rate": str(value)})
 
 
 def _expense_body(expense: Expense) -> dict:

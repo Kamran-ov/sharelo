@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import { api, ApiError, type GroupDetail } from "../api";
+import DefaultSplits from "./DefaultSplits";
 import { groupKey } from "./GroupShell";
 
 export default function Settings() {
@@ -42,6 +43,7 @@ export default function Settings() {
           ))}
         </ul>
       </div>
+      <DefaultSplits group={group} />
       {group.link_active !== null && (
         <div className="space-y-2">
           <label className="flex min-h-11 items-center gap-3">

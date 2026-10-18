@@ -791,6 +791,58 @@
                 }
             }
         },
+        "/api/groups/{group_id}/rate/": {
+            "get": {
+                "operationId": "groups_rate_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "currency",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RateOut"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/groups/{group_id}/recurring/": {
             "get": {
                 "operationId": "groups_recurring_list",
@@ -1498,6 +1550,12 @@
                     "page": {
                         "type": "integer"
                     },
+                    "month_totals": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
                     "results": {
                         "type": "array",
                         "items": {
@@ -1507,6 +1565,7 @@
                 },
                 "required": [
                     "count",
+                    "month_totals",
                     "page",
                     "results"
                 ]
@@ -2015,6 +2074,26 @@
                 "required": [
                     "member",
                     "paid_cents"
+                ]
+            },
+            "RateOut": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "rate": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "currency",
+                    "date",
+                    "rate"
                 ]
             },
             "Register": {
