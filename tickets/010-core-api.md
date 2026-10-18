@@ -4,7 +4,7 @@ title: Core REST API — groups, join, categories, expenses, balances, settlemen
 status: in-review
 risk: risky
 depends_on: [007, 009]
-pr:
+pr: 16
 ---
 
 ## Goal
