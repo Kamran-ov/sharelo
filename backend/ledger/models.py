@@ -221,3 +221,17 @@ class Settlement(models.Model):
                 name="uniq_settlement_source_external_id",
             ),
         ]
+
+
+class ExchangeRate(models.Model):
+    """Units of `currency` per 1 EUR, as the ECB publishes them. EUR itself is never stored."""
+
+    date = models.DateField()
+    currency = models.CharField(max_length=3)
+    rate_to_eur = models.DecimalField(max_digits=18, decimal_places=8)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["date", "currency"], name="uniq_rate_date_currency"),
+            models.CheckConstraint(condition=Q(rate_to_eur__gt=0), name="exchange_rate_positive"),
+        ]

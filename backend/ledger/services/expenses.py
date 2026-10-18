@@ -20,6 +20,7 @@ from ledger.models import (
     Source,
     SplitType,
 )
+from ledger.services.rates import convert_with_rate, quantize_rate, resolve_foreign_amount
 from ledger.services.splits import split_for_preset
 
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
@@ -55,6 +56,14 @@ def _validate(
         raise LedgerError("incomplete_original", "give original amount, currency and rate together")
     if original_currency is not None and not _CURRENCY_RE.match(original_currency):
         raise LedgerError("invalid_currency", repr(original_currency))
+    if (
+        original_amount_cents is not None
+        and original_currency != group.currency
+        and rate_used is not None
+    ):
+        expected = convert_with_rate(original_amount_cents, quantize_rate(rate_used))
+        if expected != amount_cents:
+            raise LedgerError("rate_mismatch", f"{amount_cents} != {expected} from the rate")
 
     if not payers:
         raise LedgerError("empty_payers")
@@ -96,7 +105,7 @@ def _original_fields(
     return {
         "original_amount_cents": original_amount_cents,
         "original_currency": original_currency,
-        "rate_used": rate_used,
+        "rate_used": quantize_rate(rate_used),
     }
 
 
@@ -233,12 +242,20 @@ def create_expense_from_preset(
     member_ids: Collection[int] | None = None,
     params: Mapping[str, Any] | None = None,
     description: str,
-    amount_cents: int,
     currency: str,
     date: datetime.date,
     category: Category,
+    amount_cents: int | None = None,
     **rest: Any,
 ) -> Expense:
+    if amount_cents is None:
+        original_amount = rest.get("original_amount_cents")
+        original_currency = rest.get("original_currency")
+        if original_amount is None or original_currency is None:
+            raise LedgerError("missing_amount", "give amount_cents or the original amount")
+        amount_cents, rest["rate_used"] = resolve_foreign_amount(
+            group, date, original_amount, original_currency, rest.get("rate_used")
+        )
     if member_ids is None:
         member_ids = sorted(group.members.values_list("id", flat=True))
     splits = split_for_preset(preset, amount_cents, member_ids, payer_id, params)
