@@ -4,7 +4,7 @@ title: Web — add an expense in two taps, expense list, edit and delete
 status: in-review
 risk: normal
 depends_on: [011]
-pr:
+pr: 18
 ---
 
 ## Goal
