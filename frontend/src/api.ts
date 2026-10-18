@@ -6,6 +6,11 @@ export type GroupSummary = Schemas["GroupSummary"];
 export type GroupDetail = Schemas["GroupDetail"];
 export type JoinPreview = Schemas["JoinPreview"];
 export type JoinResult = Schemas["JoinResult"];
+export type ExpensePage = Schemas["ExpensePage"];
+export type ExpenseRow = ExpensePage["results"][number];
+export type CategoryNode = Schemas["CategoryTree"];
+export type RateOut = Schemas["RateOut"];
+export type CategoryDefaults = Record<string, { preset: string; params: Record<string, unknown> }>;
 
 export class ApiError extends Error {
   constructor(

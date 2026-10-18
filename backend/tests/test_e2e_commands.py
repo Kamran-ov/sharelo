@@ -45,6 +45,7 @@ def test_e2e_reset_refuses_when_database_name_does_not_end_in_e2e(e2e_on, precio
 def test_e2e_reset_wipes_and_seeds_fixture_on_e2e_database(e2e_on, as_e2e_database, precious_user):
     categories = Category.objects.count()
     ExchangeRate.objects.create(date="2026-10-01", currency="USD", rate_to_eur="1.1")
+    ExchangeRate.objects.create(date="2026-10-01", currency="GBP", rate_to_eur="0.85")
     call_command("e2e_reset")
     assert not User.objects.filter(username="keep@example.com").exists()
     alice = Profile.objects.get(user__email="a@example.com")
@@ -56,12 +57,17 @@ def test_e2e_reset_wipes_and_seeds_fixture_on_e2e_database(e2e_on, as_e2e_databa
     assert list(Member.objects.filter(group=rome).values_list("display_name", flat=True)) == ["Bea"]
     assert GroupLink.objects.filter(sub_group=rome).count() == 1
     assert Category.objects.count() == categories
-    assert ExchangeRate.objects.count() == 1
+    # Reference data survives the wipe: the old USD row stays, today's is added, GBP is removed.
+    assert ExchangeRate.objects.filter(currency="GBP").count() == 0
+    assert ExchangeRate.objects.filter(currency="USD").count() == 2
+    default = alice.main_group.category_defaults.get()
+    assert (default.category.name, default.split_type) == ("General", "equal")
 
 
 def test_e2e_reset_twice_gives_same_fixture(e2e_on, as_e2e_database):
     call_command("e2e_reset")
     call_command("e2e_reset")
+    assert ExchangeRate.objects.filter(currency="USD").count() == 1
     assert Profile.objects.count() == 2
     assert Group.objects.get(share_token="e2e-rome-token").name == "Rome trip"
     assert Group.objects.get(name="Home").id == 1

@@ -1,4 +1,6 @@
+import datetime
 import os
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -6,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
 from accounts.models import Profile
-from ledger.models import Group
+from ledger.models import Category, CategoryDefault, ExchangeRate, Group
 from ledger.services import groups
 from sharelo.e2e import is_e2e_database
 
@@ -49,6 +51,15 @@ def seed() -> None:
     groups.join_group_by_token(home.share_token, "Bea", bea, as_main=True)
     rome = groups.create_group(bea, "Rome trip", "EUR")
     Group.objects.filter(pk=rome.pk).update(share_token=ROME_TOKEN)
+    # General is the category the add sheet preselects in a group with no expenses.
+    CategoryDefault.objects.create(
+        group=home, category=Category.objects.get(name="General"), split_type="equal"
+    )
+    # ledger_exchangerate survives the wipe, so these are idempotent rather than created.
+    ExchangeRate.objects.filter(currency="GBP").delete()
+    ExchangeRate.objects.update_or_create(
+        date=datetime.date.today(), currency="USD", defaults={"rate_to_eur": Decimal("1.10")}
+    )
 
 
 class Command(BaseCommand):

@@ -272,6 +272,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/rate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_rate_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{group_id}/recurring/": {
         parameters: {
             query?: never;
@@ -500,6 +522,9 @@ export interface components {
         ExpensePage: {
             count: number;
             page: number;
+            month_totals: {
+                [key: string]: number;
+            };
             results: components["schemas"]["ExpenseOut"][];
         };
         ExpenseWrite: {
@@ -653,6 +678,12 @@ export interface components {
         PayerOut: {
             member: number;
             paid_cents: number;
+        };
+        RateOut: {
+            currency: string;
+            /** Format: date */
+            date: string;
+            rate: string;
         };
         Register: {
             email: string;
@@ -1163,6 +1194,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettlementOut"][];
+                };
+            };
+        };
+    };
+    groups_rate_retrieve: {
+        parameters: {
+            query?: {
+                currency?: string;
+                date?: string;
+            };
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateOut"];
                 };
             };
         };

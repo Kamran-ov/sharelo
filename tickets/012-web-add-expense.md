@@ -1,10 +1,10 @@
 ---
 id: 012
 title: Web — add an expense in two taps, expense list, edit and delete
-status: ready
+status: done
 risk: normal
 depends_on: [011]
-pr:
+pr: 18
 ---
 
 ## Goal
