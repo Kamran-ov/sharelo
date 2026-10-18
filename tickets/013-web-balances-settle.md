@@ -1,7 +1,7 @@
 ---
 id: 013
 title: Web — balances, settle up, Move to Home
-status: in-review
+status: done
 risk: normal
 depends_on: [012]
 pr: 19
