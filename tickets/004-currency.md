@@ -1,7 +1,7 @@
 ---
 id: 004
 title: Exchange rates and conversion to group currency
-status: in-review
+status: done
 risk: normal
 depends_on: [001]
 pr: 8
