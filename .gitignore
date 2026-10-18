@@ -7,3 +7,5 @@ __pycache__/
 .ruff_cache/
 frontend/dist/
 frontend/test-results/
+backend/frontend_dist/
+backend/staticfiles/

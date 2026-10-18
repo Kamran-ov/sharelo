@@ -1,0 +1,2 @@
+# supercronic crontab; the container clock is UTC, so 06:00 UTC (08:00 Rome).
+0 6 * * * python manage.py run_daily

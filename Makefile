@@ -13,7 +13,7 @@ BACKEND = cd backend &&
 FRONTEND = cd frontend &&
 endif
 
-.PHONY: install test test-backend test-frontend lint schema e2e
+.PHONY: install test test-backend test-frontend lint schema e2e build-frontend
 
 install:
 	$(PYTHON) -m pip install -q -r backend/requirements-dev.txt
@@ -41,3 +41,10 @@ e2e: export E2E = 1
 e2e: export DATABASE_URL = postgres://sharelo:sharelo@localhost:5432/sharelo_e2e
 e2e:
 	cd frontend && npm run build && npx playwright test
+
+# The production image does this in its multi-stage build; this is the same sequence for a bare checkout.
+# Django serves backend/frontend_dist (settings.FRONTEND_DIST) at the site root.
+build-frontend:
+	cd frontend && npm ci && npm run build
+	rm -rf backend/frontend_dist && cp -r frontend/dist backend/frontend_dist
+	$(BACKEND) $(PYTHON) manage.py collectstatic --noinput
