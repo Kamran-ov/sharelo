@@ -1,7 +1,7 @@
 ---
 id: 010
 title: Core REST API — groups, join, categories, expenses, balances, settlements, recurring
-status: ready
+status: in-review
 risk: risky
 depends_on: [007, 009]
 pr:
