@@ -293,3 +293,17 @@ test("test_default_chip_is_general_in_a_group_without_expenses", async () => {
   await openAdd();
   expect(screen.getByRole("button", { name: /Uncategorized › General/ })).toBeInTheDocument();
 });
+
+test("test_same_currency_row_has_no_original_amount_text_but_foreign_row_has", async () => {
+  mockApi(
+    baseRoutes([
+      row({ id: 1, description: "Local", original_currency: "EUR", original_amount_cents: 4210 }),
+      row({ id: 2, description: "Abroad", original_currency: "USD", original_amount_cents: 10000, amount_cents: 9091 }),
+    ]),
+  );
+  renderPage();
+  const local = (await screen.findByText("Local")).closest("li")!;
+  const abroad = screen.getByText("Abroad").closest("li")!;
+  expect(local).not.toHaveTextContent("EUR");
+  expect(abroad).toHaveTextContent("100.00 USD");
+});

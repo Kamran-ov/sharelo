@@ -172,7 +172,7 @@ export default function Expenses() {
                     <div className="text-sm">saving…</div>
                   </li>
                 ) : (
-                  <li key={item.row.id} className="border-b border-slate-100">
+                  <li key={item.row.id} data-testid="expense-row" className="border-b border-slate-100">
                     <button type="button" className="w-full min-h-14 py-2 text-left" onClick={() => open(item.row)}>
                       <div className="flex justify-between gap-2">
                         <span className="break-words font-medium">{item.row.description}</span>
@@ -182,7 +182,7 @@ export default function Expenses() {
                         <span className="break-words">
                           {categoryName.get(item.row.category) ?? ""} · {item.row.date}
                         </span>
-                        {item.row.original_currency && item.row.original_amount_cents != null && (
+                        {item.row.original_currency && item.row.original_currency !== group.currency && item.row.original_amount_cents != null && (
                           <span className="shrink-0 text-xs">
                             {formatCents(item.row.original_amount_cents)} {item.row.original_currency}
                           </span>

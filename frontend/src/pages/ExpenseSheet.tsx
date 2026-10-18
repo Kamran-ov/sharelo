@@ -52,7 +52,7 @@ export function initialValues(
   const blank = { exactTexts: {}, sharesTexts: {}, subset: ids, mode: "none" as const };
   if (editing) {
     const payerId = editing.payers[0]?.member ?? group.my_member_id ?? ids[0];
-    const foreign = editing.original_currency != null && editing.original_amount_cents != null;
+    const foreign = editing.original_currency != null && editing.original_currency !== group.currency && editing.original_amount_cents != null;
     const detected = detectPreset(editing.amount_cents, payerId, ids, editing.splits);
     const exactTexts = Object.fromEntries(
       ids.map((id) => [id, formatCents(editing.splits.find((s) => s.member === id)?.owed_cents ?? 0)]),
