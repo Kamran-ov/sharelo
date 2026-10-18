@@ -4,7 +4,7 @@ title: Analytics core — spending per person and per category
 status: in-review
 risk: normal
 depends_on: [003]
-pr:
+pr: 9
 ---
 
 ## Goal
