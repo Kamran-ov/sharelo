@@ -11,6 +11,7 @@ afterwards; never start either by hand.
   `auth_permission`, `ledger_category` and `ledger_exchangerate`, then seeds the fixture below.
 - **Fixture:** `a@example.com` / `password1234` ("Alice") and `b@example.com` ("Bea") share main group "Home"
   (EUR). "Rome trip" (EUR) belongs to Bea only, share token `e2e-rome-token`.
+- **Fixture rows added in 012:** Home has one `CategoryDefault` for Uncategorized › General with preset `equal` (General is the category the add sheet preselects in a group with no expenses). `ledger_exchangerate` is not truncated, so the reset upserts USD 1.10 per EUR for today with `update_or_create` on `(date, currency)` and deletes every GBP row (GBP has no rate, which the no-rate test needs). A 100.00 USD expense stores `rate_used` `0.90909091` and `amount_cents` 9091.
 - **E2E mode:** `DEBUG` off, `ALLOWED_HOSTS` localhost only, plain-http cookies, no SSL redirect, auth throttle lifted.
 - **Browser:** Chromium at 390x844. The cloud image has it under `PLAYWRIGHT_BROWSERS_PATH` (`@playwright/test` is
   pinned to the matching 1.56.1); CI runs `npx playwright install --with-deps chromium` first.

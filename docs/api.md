@@ -65,7 +65,8 @@ need the CSRF token (see above), guests included.
 | `join/{token}/` | GET, POST | GET is public and sets the CSRF cookie; POST `{display_name}`; a guest who joins again gets the same member |
 | `categories/` | GET | two-level tree |
 | `groups/{id}/category-defaults/` | GET, PUT | PUT replaces the whole set: `{"<category id>": {preset, params}}`; `half` is stored and returned as `equal` |
-| `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404 |
+| `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404; the page carries `month_totals` (`"YYYY-MM"` → cents, `amount_cents` summed over the whole filtered set for the months on the page, `personal` rows included, computed by `services.expenses.month_totals`) |
+| `groups/{id}/rate/` | GET | `?currency=USD&date=YYYY-MM-DD` → `{currency, date, rate}` (group units per 1 foreign unit, string); 400 `no_rate` when there is none within 7 days; 400 `invalid_request` for the group's own currency; preview only, the POST stays the authority |
 | `groups/{id}/expenses/{eid}/` | PATCH, DELETE | DELETE is soft and idempotent (204) |
 | `groups/{id}/balances/` | GET | `nets`, `transfers` (`from_member` pays `to_member`), per-member `paid/owed_share/net` |
 | `groups/{id}/settlements/` | GET, POST | POST `{from_member, to_member, amount_cents, date, notes?}` |
