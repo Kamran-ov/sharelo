@@ -1,7 +1,7 @@
 ---
 id: 009
 title: Sign-in API — email and password, Google, guest sessions
-status: in-review
+status: blocked
 risk: risky
 depends_on: [006]
 pr: 14
