@@ -1,7 +1,7 @@
 ---
 id: 003
 title: Balances, settlements and debt simplification
-status: ready
+status: in-review
 risk: risky
 depends_on: [002]
 pr:
