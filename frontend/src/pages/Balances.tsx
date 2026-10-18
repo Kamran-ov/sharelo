@@ -96,7 +96,7 @@ export default function Balances() {
                   </span>
                   <span className="shrink-0">{formatCents(s.amount_cents)}</span>
                 </div>
-                {s.notes && <p className="break-words text-sm text-slate-600">{s.notes}</p>}
+                {s.notes && !badge && <p className="break-words text-sm text-slate-600">{s.notes}</p>}
                 {badge && (
                   <p className="text-sm text-slate-700" data-testid="move-badge">
                     {badge}
