@@ -139,6 +139,7 @@ export default function Expenses() {
 
   const open = (row: ExpenseRow) => {
     setEditError(null);
+    setToast(null); // the toast would sit on top of the sheet's Save button
     setSheet({ kind: "edit", row });
   };
 
@@ -210,7 +211,10 @@ export default function Expenses() {
           aria-label="Add expense"
           className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-emerald-600 text-3xl text-white shadow-lg"
           disabled={!tree.data || !defaults.data}
-          onClick={() => setSheet({ kind: "add" })}
+          onClick={() => {
+            setToast(null);
+            setSheet({ kind: "add" });
+          }}
         >
           +
         </button>

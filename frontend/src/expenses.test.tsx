@@ -81,14 +81,14 @@ function baseRoutes(rows: ExpenseRow[] = [], extra: Parameters<typeof mockApi>[0
   };
 }
 
-function renderPage(page: "expenses" | "settings" = "expenses") {
+function renderPage(page: "expenses" | "settings" = "expenses", g: GroupDetail = group) {
   document.cookie = "csrftoken=tok";
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={["/g/1/" + page]}>
         <Routes>
-          <Route path="/g/1" element={<Outlet context={group} />}>
+          <Route path="/g/1" element={<Outlet context={g} />}>
             <Route path="expenses" element={<Expenses />} />
             <Route path="settings" element={<Settings />} />
           </Route>
@@ -306,4 +306,77 @@ test("test_same_currency_row_has_no_original_amount_text_but_foreign_row_has", a
   const abroad = screen.getByText("Abroad").closest("li")!;
   expect(local).not.toHaveTextContent("EUR");
   expect(abroad).toHaveTextContent("100.00 USD");
+});
+
+const threeMembers = {
+  ...group,
+  members: [...group.members, { id: 3, display_name: "Cy", profile_id: 3, is_guest: false }],
+} as unknown as GroupDetail;
+
+test("test_custom_split_row_amount_change_keeps_save_disabled_until_advanced_sums", async () => {
+  const custom = row({ splits: [{ member: 1, owed_cents: 2000 }, { member: 2, owed_cents: 2210 }] });
+  const calls = mockApi(baseRoutes([custom], { "PATCH /groups/1/expenses/5/": () => ({ json: custom }) }));
+  renderPage();
+  fireEvent.click(await screen.findByText("Rent"));
+  const dialog = within(await screen.findByRole("dialog", { name: "Edit expense" }));
+  expect(dialog.getByText("Custom split — edit in Advanced")).toBeInTheDocument();
+  fireEvent.change(dialog.getByLabelText(/Amount/), { target: { value: "40" } });
+  expect(dialog.getByRole("button", { name: "Save" })).toBeDisabled();
+  fireEvent.change(dialog.getByLabelText("Exact Bea"), { target: { value: "20" } });
+  expect(dialog.getByRole("button", { name: "Save" })).toBeEnabled();
+  fireEvent.click(dialog.getByRole("button", { name: "Save" }));
+  await waitFor(() => expect(calls.some((c) => c.method === "PATCH")).toBe(true));
+  const body = calls.find((c) => c.method === "PATCH")!.body as { amount_cents: number; preset: string; params: { cents: Record<string, number> } };
+  expect(body.amount_cents).toBe(4000);
+  expect(body.preset).toBe("exact");
+  expect(Object.values(body.params.cents).reduce((a, b) => a + b, 0)).toBe(4000);
+});
+
+test.each([
+  ["percentage", { preset: "percentage", params: { basis_points: { "1": 7000, "2": 3000 } } }],
+  ["full_for_other", { preset: "full_for_other", params: {} }],
+])("test_three_member_group_falls_back_to_equal_for_%s_default", async (_name, stored) => {
+  const calls = mockApi(
+    baseRoutes([], {
+      "GET /groups/1/category-defaults/": () => ({ json: { "21": stored } }),
+      "POST /groups/1/expenses/": () => ({ status: 201, json: row({ id: 77 }) }),
+    }),
+  );
+  renderPage("expenses", threeMembers);
+  const dialog = within(await openAdd());
+  expect(dialog.getByRole("combobox", { name: "Who paid" })).toBeInTheDocument();
+  expect(dialog.getByRole("button", { name: "Equal among everyone" })).toHaveAttribute("aria-pressed", "true");
+  expect(dialog.queryByRole("button", { name: "Custom %" })).toBeNull();
+  fireEvent.change(dialog.getByLabelText(/Amount/), { target: { value: "30" } });
+  fireEvent.change(dialog.getByLabelText("Description"), { target: { value: "Dinner" } });
+  fireEvent.click(dialog.getByRole("button", { name: "Save" }));
+  await waitFor(() => expect(calls.some((c) => c.method === "POST")).toBe(true));
+  expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ preset: "equal", amount_cents: 3000 });
+});
+
+test("test_settings_in_three_member_group_keeps_percentage_default_as_other_and_offers_no_custom", async () => {
+  const stored = { preset: "percentage", params: { basis_points: { "1": 7000, "2": 3000 } } };
+  mockApi({
+    "GET /categories/": () => ({ json: tree }),
+    "GET /groups/1/category-defaults/": () => ({ json: { "12": stored } }),
+  });
+  renderPage("settings", threeMembers);
+  const select = (await screen.findByLabelText("Default split for Food and drink › Groceries")) as HTMLSelectElement;
+  expect(select.value).toBe("kept");
+  expect(within(select).queryByRole("option", { name: "Custom %" })).toBeNull();
+  expect(within(select).queryByRole("option", { name: "All the other" })).toBeNull();
+  expect(within(select).getByRole("option", { name: "Other (kept)" })).toBeInTheDocument();
+});
+
+test("test_toast_is_dismissed_when_a_sheet_opens", async () => {
+  mockApi(baseRoutes([row()], { "POST /groups/1/expenses/": () => ({ status: 201, json: row({ id: 77 }) }) }));
+  renderPage();
+  const dialog = within(await openAdd());
+  fireEvent.change(dialog.getByLabelText(/Amount/), { target: { value: "5" } });
+  fireEvent.change(dialog.getByLabelText("Description"), { target: { value: "Tea" } });
+  fireEvent.click(dialog.getByRole("button", { name: "Save" }));
+  await screen.findByRole("button", { name: "Undo" });
+  fireEvent.click(await screen.findByText("Rent"));
+  await screen.findByRole("dialog", { name: "Edit expense" });
+  expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
 });

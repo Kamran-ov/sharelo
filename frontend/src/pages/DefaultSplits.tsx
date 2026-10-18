@@ -58,9 +58,11 @@ export default function DefaultSplits({ group }: { group: GroupDetail }) {
           <h3 className="text-sm font-semibold text-slate-600">{parent.name}</h3>
           {parent.children.map((k) => {
             const current = defaults.data[String(k.id)];
-            const choice = choiceOf(current);
-            const percent = storedPercent(current?.params, me) ?? 50;
             const twoOnly = group.members.length !== 2;
+            // The sheet cannot honour these outside a 2-member group; keep them untouched instead of hiding them.
+            const stored = choiceOf(current);
+            const choice = twoOnly && (stored === "custom" || stored === "all_other") ? "kept" : stored;
+            const percent = storedPercent(current?.params, me) ?? 50;
             return (
               <div key={k.id} className="flex flex-wrap items-center gap-2 py-1" data-testid={`default-${k.id}`}>
                 <span className="min-w-0 flex-1 break-words">{k.name}</span>
