@@ -1,0 +1,210 @@
+import secrets
+
+from django.db import models
+from django.db.models import F, Q
+
+from .errors import LedgerError
+
+
+def new_share_token() -> str:
+    return secrets.token_urlsafe(16)
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=200)
+    currency = models.CharField(max_length=3)
+    share_token = models.CharField(max_length=40, unique=True, default=new_share_token)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Member(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="members")
+    display_name = models.CharField(max_length=100)
+    # NULL profile = guest; guest shares never roll into anyone's Home analytics.
+    profile = models.ForeignKey(
+        "accounts.Profile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["group", "display_name"], name="uniq_member_group_display_name"
+            )
+        ]
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="children"
+    )
+    is_default = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            # nulls_distinct=False: two root categories with the same name are rejected too.
+            models.UniqueConstraint(
+                fields=["parent", "name"], name="uniq_category_parent_name", nulls_distinct=False
+            )
+        ]
+
+    def check_depth(self) -> None:
+        """Max depth 2. A CHECK constraint cannot span rows, so the guard lives here.
+
+        Bounded on purpose: a parent must itself be a root, which also rejects self-parents
+        and cycles without walking the tree.
+        """
+        if self.parent_id is None:
+            return
+        if self.pk is not None and self.parent_id == self.pk:
+            raise LedgerError("category_depth", "a category cannot be its own parent")
+        if self.parent.parent_id is not None:
+            raise LedgerError("category_depth", "categories are two levels deep at most")
+        if self.pk is not None and self.children.exists():
+            raise LedgerError("category_depth", "a category with children must stay a root")
+
+    def clean(self) -> None:
+        self.check_depth()
+
+    def save(self, *args, **kwargs) -> None:
+        self.check_depth()
+        super().save(*args, **kwargs)
+
+
+class ImportBatch(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="import_batches")
+    source = models.CharField(max_length=20)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    label = models.CharField(max_length=200, blank=True)
+    rows_seen = models.IntegerField(default=0)
+    rows_created = models.IntegerField(default=0)
+    rows_skipped = models.IntegerField(default=0)
+
+
+class RecurringRule(models.Model):
+    """Stub: ticket 007 adds amount, payer, split, frequency, next date, paused."""
+
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="recurring_rules")
+
+
+class SplitType(models.TextChoices):
+    EQUAL = "equal"
+    PERSONAL = "personal"
+    FULL_FOR_OTHER = "full_for_other"
+    PERCENTAGE = "percentage"
+    EXACT = "exact"
+    SHARES = "shares"
+
+
+class Source(models.TextChoices):
+    MANUAL = "manual"
+    SPLITWISE = "splitwise"
+    REVOLUT = "revolut"
+    WISE = "wise"
+    RECURRING = "recurring"
+
+
+class ActiveExpenseManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class Expense(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="expenses")
+    description = models.CharField(max_length=300)
+    amount_cents = models.IntegerField()
+    currency = models.CharField(max_length=3)
+    original_amount_cents = models.IntegerField()
+    original_currency = models.CharField(max_length=3)
+    rate_used = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True)
+    date = models.DateField()
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="expenses")
+    split_type = models.CharField(max_length=20, choices=SplitType.choices)
+    source = models.CharField(max_length=20, choices=Source.choices, default=Source.MANUAL)
+    external_id = models.CharField(max_length=200, null=True, blank=True)
+    import_batch = models.ForeignKey(
+        ImportBatch, null=True, blank=True, on_delete=models.PROTECT, related_name="expenses"
+    )
+    recurring_rule = models.ForeignKey(
+        RecurringRule, null=True, blank=True, on_delete=models.PROTECT, related_name="expenses"
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ActiveExpenseManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        base_manager_name = "all_objects"
+        constraints = [
+            models.CheckConstraint(condition=Q(amount_cents__gt=0), name="expense_amount_positive"),
+            # Not filtered by deleted_at: a soft-deleted row still blocks re-import of its id.
+            models.UniqueConstraint(
+                fields=["source", "external_id"],
+                condition=Q(external_id__isnull=False),
+                name="uniq_expense_source_external_id",
+            ),
+        ]
+
+
+class ExpensePayer(models.Model):
+    expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name="payers")
+    member = models.ForeignKey(Member, on_delete=models.PROTECT, related_name="+")
+    paid_cents = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["expense", "member"], name="uniq_payer_expense_member"),
+            models.CheckConstraint(condition=Q(paid_cents__gte=0), name="payer_paid_nonnegative"),
+        ]
+
+
+class ExpenseSplit(models.Model):
+    expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name="splits")
+    member = models.ForeignKey(Member, on_delete=models.PROTECT, related_name="+")
+    owed_cents = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["expense", "member"], name="uniq_split_expense_member"),
+            models.CheckConstraint(condition=Q(owed_cents__gte=0), name="split_owed_nonnegative"),
+        ]
+
+
+class Settlement(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="settlements")
+    from_member = models.ForeignKey(
+        Member, on_delete=models.PROTECT, related_name="settlements_out"
+    )
+    to_member = models.ForeignKey(Member, on_delete=models.PROTECT, related_name="settlements_in")
+    amount_cents = models.IntegerField()
+    currency = models.CharField(max_length=3)
+    date = models.DateField()
+    notes = models.TextField(blank=True)
+    twin = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    source = models.CharField(max_length=20, choices=Source.choices, default=Source.MANUAL)
+    external_id = models.CharField(max_length=200, null=True, blank=True)
+    import_batch = models.ForeignKey(
+        ImportBatch, null=True, blank=True, on_delete=models.PROTECT, related_name="settlements"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(amount_cents__gt=0), name="settlement_amount_positive"
+            ),
+            models.CheckConstraint(
+                condition=~Q(from_member=F("to_member")), name="settlement_distinct_members"
+            ),
+            models.UniqueConstraint(
+                fields=["source", "external_id"],
+                condition=Q(external_id__isnull=False),
+                name="uniq_settlement_source_external_id",
+            ),
+        ]

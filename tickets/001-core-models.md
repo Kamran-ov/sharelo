@@ -1,10 +1,10 @@
 ---
 id: 001
 title: Core models — groups, members, expenses, payers, splits, settlements
-status: ready
+status: done
 risk: risky
 depends_on: [000]
-pr:
+pr: 5
 ---
 
 ## Goal
