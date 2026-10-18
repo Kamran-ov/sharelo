@@ -1,10 +1,10 @@
 ---
 id: 008
 title: Home analytics rollup — linked sub-groups into the main group
-status: ready
+status: done
 risk: risky
 depends_on: [005, 006]
-pr:
+pr: 13
 ---
 
 ## Goal
