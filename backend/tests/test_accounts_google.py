@@ -145,3 +145,10 @@ def test_google_sub_unique_when_present_and_many_nulls_allowed():
     mk("c", "s")
     with pytest.raises(IntegrityError), transaction.atomic():
         mk("d", "s")
+
+
+def test_makemigrations_check_clean():
+    from django.core.management import call_command
+
+    # exits non-zero (SystemExit) if any model change lacks a migration, e.g. google_sub
+    call_command("makemigrations", "--check", "--dry-run", verbosity=0)
