@@ -38,3 +38,10 @@ def expense_kwargs(members, category, day):
         "splits": {ann.id: 334, ben.id: 333, cy.id: 333},
         "split_type": "equal",
     }
+
+
+@pytest.fixture(autouse=True)
+def _clear_throttle_cache():
+    from django.core.cache import cache
+
+    cache.clear()
