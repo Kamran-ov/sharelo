@@ -220,6 +220,31 @@ def test_bad_rule_fails_alone(group, ann, category):
     assert broken.next_date == D(2026, 7, 1)  # failed rule does not advance
 
 
+def test_failed_rule_does_not_advance_next_date(group, ann, category):
+    other = Member.objects.create(
+        group=Group.objects.create(name="O", currency="EUR"), display_name="Zed"
+    )
+    rule = make_rule(group, ann, category)
+    RecurringRule.objects.filter(pk=rule.pk).update(payer=other)
+    generate_due(D(2026, 9, 1))
+    rule.refresh_from_db()
+    assert rule.next_date == D(2026, 7, 1)
+    RecurringRule.objects.filter(pk=rule.pk).update(payer=ann)  # twin: fixed rule catches up
+    assert len(generate_due(D(2026, 9, 1)).created) == 3
+
+
+def test_run_daily_prints_counts(group, ann, category, monkeypatch):
+    monkeypatch.setattr("ledger.management.commands.run_daily.fetch_ecb_rates", lambda: 5)
+    make_rule(group, ann, category)
+    out = StringIO()
+    call_command("run_daily", "--today=2026-08-02", stdout=out)
+    assert out.getvalue().splitlines() == [
+        "rates upserted: 5",
+        "expenses created: 2",
+        "rules failed: 0",
+    ]
+
+
 @pytest.mark.parametrize(
     "bad",
     [
