@@ -1,6 +1,8 @@
 import datetime
 import re
+from collections.abc import Collection, Mapping
 from decimal import Decimal
+from typing import Any
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -18,6 +20,7 @@ from ledger.models import (
     Source,
     SplitType,
 )
+from ledger.services.splits import split_for_preset
 
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
 _DUPLICATE_CONSTRAINT = "uniq_expense_source_external_id"
@@ -220,3 +223,34 @@ def delete_expense(expense: Expense) -> None:
         return  # keep the real deletion time
     expense.deleted_at = timezone.now()
     expense.save(update_fields=["deleted_at", "updated_at"])
+
+
+def create_expense_from_preset(
+    group: Group,
+    *,
+    preset: str,
+    payer_id: int,
+    member_ids: Collection[int] | None = None,
+    params: Mapping[str, Any] | None = None,
+    description: str,
+    amount_cents: int,
+    currency: str,
+    date: datetime.date,
+    category: Category,
+    **rest: Any,
+) -> Expense:
+    if member_ids is None:
+        member_ids = sorted(group.members.values_list("id", flat=True))
+    splits = split_for_preset(preset, amount_cents, member_ids, payer_id, params)
+    return create_expense(
+        group,
+        description=description,
+        amount_cents=amount_cents,
+        currency=currency,
+        date=date,
+        category=category,
+        payers={payer_id: amount_cents},
+        splits=splits,
+        split_type=preset,
+        **rest,
+    )
