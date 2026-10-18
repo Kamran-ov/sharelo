@@ -1,7 +1,7 @@
 ---
 id: 002
 title: Split presets and rounding
-status: in-review
+status: done
 risk: risky
 depends_on: [001]
 pr: 6
