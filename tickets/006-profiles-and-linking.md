@@ -1,10 +1,10 @@
 ---
 id: 006
 title: Profiles, main group, linked sub-groups, Move to Home
-status: ready
+status: done
 risk: risky
 depends_on: [003]
-pr:
+pr: 10
 ---
 
 ## Goal
