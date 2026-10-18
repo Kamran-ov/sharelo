@@ -8,8 +8,8 @@ import { BACKEND_ENV } from "../playwright.config";
 const SHOTS = (ticket: string) => path.resolve(process.cwd(), `../docs/screenshots/${ticket}`);
 
 /** Wipes user data and re-seeds the known fixture; the command finishes on its own. */
-export function resetFixture() {
-  execFileSync("python3", ["manage.py", "e2e_reset"], {
+export function resetFixture(...flags: string[]) {
+  execFileSync("python3", ["manage.py", "e2e_reset", ...flags], {
     cwd: path.resolve(process.cwd(), "../backend"),
     env: { ...process.env, ...BACKEND_ENV },
     stdio: "pipe",

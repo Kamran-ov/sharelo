@@ -18,7 +18,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from ledger.errors import LedgerError
-from ledger.models import Frequency, Group, Member, RecurringRule, Source
+from ledger.models import Frequency, Group, JobRun, Member, RecurringRule, Source
 from ledger.services.expenses import create_expense_from_preset
 from ledger.services.splits import split_for_preset
 
@@ -149,6 +149,9 @@ def resume_rule(rule: RecurringRule, today: datetime.date) -> None:
 
 
 def skip_next(rule: RecurringRule) -> None:
+    # A paused rule creates nothing, so moving its cursor would be a silent change.
+    if rule.paused:
+        raise LedgerError("rule_paused", f"rule {rule.pk} is paused")
     rule.next_date = next_occurrence(rule.next_date, rule)
     rule.save(update_fields=["next_date", "updated_at"])
 
@@ -232,3 +235,11 @@ def generate_due(today: datetime.date) -> GenerateResult:
             if expense is not None:
                 result.created.append(expense)
     return result
+
+
+def record_job_run(name: str, at: datetime.datetime) -> None:
+    JobRun.objects.update_or_create(name=name, defaults={"last_run_at": at})
+
+
+def job_status(name: str) -> datetime.datetime | None:
+    return JobRun.objects.filter(name=name).values_list("last_run_at", flat=True).first()

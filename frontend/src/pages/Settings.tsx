@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
-import { api, ApiError, type GroupDetail } from "../api";
+import { api, ApiError, type GroupDetail, type RecurringStatus } from "../api";
 import DefaultSplits from "./DefaultSplits";
 import { groupKey } from "./GroupShell";
 
@@ -15,6 +15,11 @@ export default function Settings() {
     mutationFn: (active: boolean) => api("POST", `/groups/${group.id}/link`, { active }),
     onSuccess: () => qc.invalidateQueries({ queryKey: groupKey(String(group.id)) }),
   });
+  const status = useQuery({
+    queryKey: ["recurring-status", group.id],
+    queryFn: () => api<RecurringStatus>("GET", `/groups/${group.id}/recurring/status/`),
+  });
+  const lastRun = status.data ? (status.data.last_run_at ? status.data.last_run_at.slice(0, 10) : "never") : "…";
   const copy = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
@@ -44,6 +49,9 @@ export default function Settings() {
         </ul>
       </div>
       <DefaultSplits group={group} />
+      <p className="text-sm text-slate-600" data-testid="recurring-status">
+        Recurring expenses are created by the daily job; last run: {lastRun}
+      </p>
       {group.link_active !== null && (
         <div className="space-y-2">
           <label className="flex min-h-11 items-center gap-3">

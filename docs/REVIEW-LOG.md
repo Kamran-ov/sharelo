@@ -220,3 +220,33 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 013 — result review round 2, head b9d723c
 - Verdict: ACCEPT — merge. All three 5358b59 items are closed. The debtor-only check moved into `groups.can_move_to_home`, and the same mutation now gives `5 failed, 1 passed`. The zero-amount PNG shows the open sheet with the server's `detail` inline, with the 400, `toHaveText(detail)` and empty-GET assertions cited at `balances.spec.ts:74-77`. The Home-side PNG shows "you owe 200.00" and "Rome trip: moved to Home", with the `toHaveText` lines cited. CI run 39165618551 passed `test` and `e2e` on the head, verified by the reviewer. Optional: the Home History arrow "Alice → Bea" shows the twin row's direction, not the debt's, and a friendlier `amount_not_positive` message.
 - Worth remembering: a screenshot is evidence only of the state it captures. Twice in this ticket the PNG named for an outcome (the inline error, the mirrored Home entry) showed the step before that outcome. When the Acceptance line names a result, ask for the image taken after the assertion that proves it, and for the assertion's `file:line` next to it.
+
+
+- Ticket 014 — plan review, head f36108e
+- Verdict: REVISE (three items: the e2e KEY expected dates ("next 1st", "+1 month") depend on today's date and on browser/server TZ, so type an explicit start date and quote the expected dates as literals, with the inclusive rule stated and one vitest case where `from` = rule day; the `--with-recurring-run` fixture must state a 95000-cent Rent rule so "existing expense still shows 950" asserts a real row by id before and after the edit; the `JobRun` write should be one service used by `run_daily` and `e2e_reset`, with the garbled §Proposal 3 sentence replaced and the fixture's skipping of `run_daily` declared. All three open questions accepted as assumed.)
+- Worth remembering: scheduling UIs hide a clock in their e2e. "Next date = next 1st" is a different literal depending on the day the test runs, and on the 1st it hinges on an inclusive/exclusive rule nobody wrote down. Recurring plans must pin the start date in the test and quote the expected dates, or the KEY test only proves what happens on most days.
+
+
+- Ticket 014 — plan review, head 500ff38
+- Verdict: ACCEPT PLAN (second round; all three REVISE items closed: the e2e start date is fixed and expected dates are literals, the fixture's Rent 95000 rule is stated exactly, and `record_job_run`/`job_status` are the only JobRun writer and reader, with the fixture's skipping of `run_daily` declared)
+- Worth remembering: an e2e fixture that seeds a past-dated rule and then calls `generate_due(fixed date)` is only meaningful if `create_rule` honours `start_date` and not today. The fixture's pytest must assert the exact expense and `next_date`, or the fixture can quietly produce nothing.
+
+
+- Ticket 014 — plan review round 2, head 500ff38
+- Verdict: ACCEPT PLAN. All three f36108e items are closed. The e2e uses an explicit `start` with literal dates and a stated inclusive/strictly-after rule, plus a vitest boundary case. The Rent 95000 fixture is stated exactly, and the edit test asserts 950.00 on the same id before and after. There is one `record_job_run` writer and one `job_status` reader, with the fixture's skip of the `run_daily` command declared. Watch: how the e2e reaches the 2026-01-01 fixture expense in the month-grouped list, and whether an amount edit leaves the January expense untouched on the server.
+- Worth remembering: a fixture pinned to a literal past date fixes the clock problem but moves the risk to the list UI. The row now sits in a month the page may not show by default, so the plan must say how the test navigates to it.
+
+
+- Ticket 014: result review, head a36d457
+- Verdict: REVISE, four evidence items:
+  - CI wasn't cited and was still running.
+  - `test_settings_shows_last_run.png` doesn't show the last-run line.
+  - The pytest and vitest day-31/Feb-29 values aren't side by side. The listed day-31 sequence (02-28, 03-31, 04-30 from 2027-01-31) contradicts the stated inclusive rule.
+  - The two round-2 watch items aren't answered: how the January row is reached, and a server-side check that the amount edit leaves the expense untouched.
+- Accepted: every planned test is present and green, the backend and e2e KEY red proofs, the `rule_paused` and 950.00/1000.00 PNGs, and the justified plan changes.
+- Worth remembering: a fixture "copied from the backend" is only proven copied when both assertion lines are shown together. Here, the one prose list given breaks the inclusive rule the plan set out, which is exactly the boundary a mirrored date helper gets wrong.
+
+
+- Ticket 014: result review round 2, head 36ce3ed
+- Verdict: ACCEPT — merge. All four a36d457 items are closed: CI run 39168775386 is green (test, e2e), the Settings PNG shows "last run: 2026-01-15" after its assertion, the pytest/vitest date table is side by side with the mode stated, and both watch items are answered with an API re-read in the e2e.
+- Worth remembering: what looked like a broken copy (day-31 list missing its first date) was a write-up that left out the inclusive first element. Asking for the two assertion lines side by side settled it in one round, where a written explanation would not have.

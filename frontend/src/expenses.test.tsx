@@ -380,3 +380,24 @@ test("test_toast_is_dismissed_when_a_sheet_opens", async () => {
   await screen.findByRole("dialog", { name: "Edit expense" });
   expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
 });
+
+test("test_repeat_icon_only_for_rule_expenses", async () => {
+  mockApi(baseRoutes([row({ id: 1, description: "Rent", recurring_rule: 9 } as Partial<ExpenseRow>), row({ id: 2, description: "Taxi" })]));
+  renderPage();
+  const rows = await screen.findAllByTestId("expense-row");
+  const icon = within(rows[0]).getByLabelText("Created by a recurring rule");
+  expect(icon).toHaveAttribute("href", "/g/1/recurring#rule-9");
+  expect(within(rows[1]).queryByLabelText("Created by a recurring rule")).toBeNull();
+});
+
+test("test_settings_shows_last_run_date_or_never", async () => {
+  mockApi(baseRoutes([], { "GET /groups/1/recurring/status/": () => ({ json: { last_run_at: "2026-01-15T07:13:00Z" } }) }));
+  renderPage("settings");
+  expect(await screen.findByText(/last run: 2026-01-15/)).toBeInTheDocument();
+});
+
+test("test_settings_says_never_before_the_first_run", async () => {
+  mockApi(baseRoutes([], { "GET /groups/1/recurring/status/": () => ({ json: { last_run_at: null } }) }));
+  renderPage("settings");
+  expect(await screen.findByText(/last run: never/)).toBeInTheDocument();
+});

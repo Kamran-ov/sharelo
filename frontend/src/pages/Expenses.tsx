@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 
 import { api, ApiError, type CategoryDefaults, type CategoryNode, type ExpensePage, type ExpenseRow, type GroupDetail } from "../api";
 import Toast from "../components/Toast";
@@ -173,8 +173,17 @@ export default function Expenses() {
                     <div className="text-sm">saving…</div>
                   </li>
                 ) : (
-                  <li key={item.row.id} data-testid="expense-row" className="border-b border-slate-100">
-                    <button type="button" className="w-full min-h-14 py-2 text-left" onClick={() => open(item.row)}>
+                  <li key={item.row.id} data-testid="expense-row" className="relative border-b border-slate-100">
+                    {item.row.recurring_rule != null && (
+                      <Link
+                        to={`/g/${group.id}/recurring#rule-${item.row.recurring_rule}`}
+                        aria-label="Created by a recurring rule"
+                        className="absolute right-0 top-8 z-10 flex size-11 items-center justify-center text-slate-500"
+                      >
+                        ↻
+                      </Link>
+                    )}
+                    <button type="button" className={`w-full min-h-14 py-2 text-left ${item.row.recurring_rule != null ? "pr-11" : ""}`} onClick={() => open(item.row)}>
                       <div className="flex justify-between gap-2">
                         <span className="break-words font-medium">{item.row.description}</span>
                         <span className="shrink-0">{formatCents(item.row.amount_cents)}</span>

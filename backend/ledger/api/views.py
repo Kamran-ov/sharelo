@@ -626,6 +626,12 @@ class RuleActionView(RecurringScopedView):
         return Response(sz.RuleOutSerializer(rule).data)
 
 
+class RecurringStatusView(GroupScopedView):
+    @extend_schema(responses=sz.RecurringStatusSerializer)
+    def get(self, request, group_id):
+        return Response({"last_run_at": recurring.job_status("run_daily")})
+
+
 class PauseView(RuleActionView):
     action = "pause"
 

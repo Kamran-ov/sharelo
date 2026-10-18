@@ -8,8 +8,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
 from accounts.models import Profile
-from ledger.models import Category, CategoryDefault, ExchangeRate, Group
-from ledger.services import groups
+from ledger.models import Category, CategoryDefault, ExchangeRate, Group, Member
+from ledger.services import groups, recurring
 from sharelo.e2e import is_e2e_database
 
 # Reference data that migrations seed; wiping it would leave the app unusable.
@@ -21,6 +21,9 @@ KEEP_TABLES = {
     "ledger_exchangerate",
 }
 ROME_TOKEN = "e2e-rome-token"
+# Literals, not derived from today: the fixture and its assertions must not drift with the clock.
+RECURRING_RUN_DAY = datetime.date(2026, 1, 15)
+RECURRING_RUN_AT = datetime.datetime(2026, 1, 15, 7, 13, tzinfo=datetime.UTC)
 PASSWORD = "password1234"
 
 
@@ -62,8 +65,38 @@ def seed() -> None:
     )
 
 
+def seed_recurring_run(home: Group) -> None:
+    """One "Rent" rule and the expense the daily job creates for it.
+
+    Calls the two services `run_daily` calls instead of the command: the command fetches ECB
+    rates over the network.
+    """
+    alice = Member.objects.get(group=home, display_name="Alice")
+    recurring.create_rule(
+        home,
+        description="Rent",
+        amount_cents=95000,
+        payer=alice,
+        split_type="equal",
+        split_params={},
+        category=Category.objects.get(name="General"),
+        frequency="monthly",
+        day_of_month=1,
+        start_date=datetime.date(2026, 1, 1),
+    )
+    recurring.generate_due(RECURRING_RUN_DAY)
+    recurring.record_job_run("run_daily", RECURRING_RUN_AT)
+
+
 class Command(BaseCommand):
     help = "Wipe user data and seed the fixed browser-test fixture. Only on a *_e2e database."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--with-recurring-run",
+            action="store_true",
+            help="also seed the Rent rule in Home and the expense one daily run creates for it",
+        )
 
     def handle(self, *args, **options):
         if os.environ.get("E2E") != "1" or not settings.E2E:
@@ -75,4 +108,6 @@ class Command(BaseCommand):
         with transaction.atomic():
             wipe()
             seed()
+            if options["with_recurring_run"]:
+                seed_recurring_run(Group.objects.get(name="Home"))
         self.stdout.write("e2e fixture ready")

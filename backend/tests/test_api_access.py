@@ -29,6 +29,7 @@ ROUTES = [
     ("groups/{g}/settlements/{s}/", "DELETE", None, 204),
     ("groups/{g}/move-to-home", "POST", lambda w: {}, 401),
     ("groups/{g}/recurring/", "GET", None, 200),
+    ("groups/{g}/recurring/status/", "GET", None, 200),
     ("groups/{g}/recurring/", "POST", lambda w: {}, 400),
     ("groups/{g}/recurring/{r}/", "PATCH", lambda w: {"description": "x"}, 200),
     ("groups/{g}/recurring/{r}/", "DELETE", None, 204),

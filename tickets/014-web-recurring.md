@@ -1,10 +1,10 @@
 ---
 id: 014
 title: Web — recurring rules page
-status: ready
+status: done
 risk: normal
 depends_on: [012]
-pr:
+pr: 20
 ---
 
 ## Goal
