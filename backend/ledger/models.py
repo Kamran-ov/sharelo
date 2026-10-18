@@ -311,3 +311,10 @@ class ExchangeRate(models.Model):
             models.UniqueConstraint(fields=["date", "currency"], name="uniq_rate_date_currency"),
             models.CheckConstraint(condition=Q(rate_to_eur__gt=0), name="exchange_rate_positive"),
         ]
+
+
+class JobRun(models.Model):
+    """When a scheduled job last ran; one row per job name."""
+
+    name = models.CharField(max_length=50, unique=True)
+    last_run_at = models.DateTimeField()

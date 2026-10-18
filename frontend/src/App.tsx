@@ -1,13 +1,13 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RequireAccess } from "./auth";
-import Placeholder from "./components/Placeholder";
 import Balances from "./pages/Balances";
 import Expenses from "./pages/Expenses";
 import GroupShell from "./pages/GroupShell";
 import Groups from "./pages/Groups";
 import Join from "./pages/Join";
 import Login from "./pages/Login";
+import Recurring from "./pages/Recurring";
 import Settings from "./pages/Settings";
 
 export default function App() {
@@ -22,7 +22,7 @@ export default function App() {
             <Route index element={<Navigate to="expenses" replace />} />
             <Route path="expenses" element={<Expenses />} />
             <Route path="balances" element={<Balances />} />
-            <Route path="recurring" element={<Placeholder title="Recurring" ticket="014" />} />
+            <Route path="recurring" element={<Recurring />} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Route>

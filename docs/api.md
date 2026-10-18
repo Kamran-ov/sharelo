@@ -65,7 +65,7 @@ need the CSRF token (see above), guests included.
 | `join/{token}/` | GET, POST | GET is public and sets the CSRF cookie; POST `{display_name}`; a guest who joins again gets the same member |
 | `categories/` | GET | two-level tree |
 | `groups/{id}/category-defaults/` | GET, PUT | PUT replaces the whole set: `{"<category id>": {preset, params}}`; `half` is stored and returned as `equal` |
-| `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404; the page carries `month_totals` (`"YYYY-MM"` → cents, `amount_cents` summed over the whole filtered set for the months on the page, `personal` rows included, computed by `services.expenses.month_totals`) |
+| `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404; the page carries `month_totals` (`"YYYY-MM"` → cents, `amount_cents` summed over the whole filtered set for the months on the page, `personal` rows included, computed by `services.expenses.month_totals`); every expense row carries `recurring_rule` (the rule id for an expense a recurring rule created, else `null`) |
 | `groups/{id}/rate/` | GET | `?currency=USD&date=YYYY-MM-DD` → `{currency, date, rate}` (group units per 1 foreign unit, string); 400 `no_rate` when there is none within 7 days; 400 `invalid_request` for the group's own currency; preview only, the POST stays the authority |
 | `groups/{id}/expenses/{eid}/` | PATCH, DELETE | DELETE is soft and idempotent (204) |
 | `groups/{id}/balances/` | GET | `nets`, `transfers` (`from_member` pays `to_member`; each carries `to_profile`, the creditor's profile id or null for a guest, and `can_move_to_home`, a display hint that is true only for the debtor's own session when the group is not their main group, both members have profiles, both profiles share that main group and the currencies match; `move-to-home` stays the authority), per-member `paid/owed_share/net` |
@@ -74,7 +74,8 @@ need the CSRF token (see above), guests included.
 | `groups/{id}/move-to-home` | POST | `{to_profile, amount_cents, date}`; the main group → 400 `not_a_sub_group` |
 | `groups/{id}/recurring/` | GET, POST | rule fields use the model's `split_type` + `split_params` (service form) |
 | `groups/{id}/recurring/{rid}/` | PATCH, DELETE | |
-| `groups/{id}/recurring/{rid}/pause`, `resume`, `skip` | POST | |
+| `groups/{id}/recurring/{rid}/pause`, `resume`, `skip` | POST | `skip` on a paused rule is refused: 400 `rule_paused` (resume it first) |
+| `groups/{id}/recurring/status/` | GET | `{last_run_at}`: when `run_daily` last ran (ISO datetime), `null` before the first run; same for every group |
 
 ## Creating an expense
 

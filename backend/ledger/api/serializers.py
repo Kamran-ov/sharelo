@@ -225,6 +225,7 @@ class ExpenseOutSerializer(serializers.ModelSerializer):
             "category",
             "split_type",
             "source",
+            "recurring_rule",
             "notes",
             "payers",
             "splits",
@@ -316,3 +317,7 @@ class RuleOutSerializer(serializers.ModelSerializer):
             "end_date",
             "paused",
         ]
+
+
+class RecurringStatusSerializer(serializers.Serializer):
+    last_run_at = serializers.DateTimeField(allow_null=True)

@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
@@ -6,7 +8,8 @@ from django.core.management.base import CommandError
 
 from accounts.models import Profile
 from ledger.management.commands import e2e_reset
-from ledger.models import Category, ExchangeRate, Group, GroupLink, Member
+from ledger.models import Category, ExchangeRate, Expense, Group, GroupLink, Member, RecurringRule
+from ledger.services.recurring import job_status
 from sharelo.e2e import check_e2e_settings
 
 pytestmark = pytest.mark.django_db
@@ -62,6 +65,24 @@ def test_e2e_reset_wipes_and_seeds_fixture_on_e2e_database(e2e_on, as_e2e_databa
     assert ExchangeRate.objects.filter(currency="USD").count() == 2
     default = alice.main_group.category_defaults.get()
     assert (default.category.name, default.split_type) == ("General", "equal")
+
+
+def test_e2e_reset_with_recurring_run_creates_one_expense_and_moves_next_date(
+    e2e_on, as_e2e_database
+):
+    call_command("e2e_reset", "--with-recurring-run")
+    rule = RecurringRule.objects.get()
+    expense = Expense.objects.get()
+    assert (rule.description, rule.amount_cents) == ("Rent", 95000)
+    assert rule.next_date == datetime.date(2026, 2, 1)
+    assert (expense.amount_cents, expense.date) == (95000, datetime.date(2026, 1, 1))
+    assert expense.recurring_rule_id == rule.id
+    assert job_status("run_daily") == datetime.datetime(2026, 1, 15, 7, 13, tzinfo=datetime.UTC)
+
+
+def test_e2e_reset_without_the_flag_seeds_no_rule(e2e_on, as_e2e_database):
+    call_command("e2e_reset")
+    assert RecurringRule.objects.count() == 0 and job_status("run_daily") is None
 
 
 def test_e2e_reset_twice_gives_same_fixture(e2e_on, as_e2e_database):

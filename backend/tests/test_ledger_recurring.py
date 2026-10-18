@@ -16,8 +16,10 @@ from ledger.services.recurring import (
     delete_rule,
     first_occurrence,
     generate_due,
+    job_status,
     next_occurrence,
     pause_rule,
+    record_job_run,
     resume_rule,
     skip_next,
     update_rule,
@@ -155,6 +157,24 @@ def test_skip_next_advances_one_occurrence_without_expense(group, ann, category)
     assert Expense.objects.count() == 0
 
 
+def test_skip_next_refuses_a_paused_rule(group, ann, category):
+    rule = make_rule(group, ann, category)
+    pause_rule(rule)
+    with pytest.raises(LedgerError) as exc:
+        skip_next(rule)
+    assert exc.value.code == "rule_paused"
+    rule.refresh_from_db()
+    assert rule.next_date == D(2026, 7, 1)
+
+
+def test_skip_after_resume_advances_one_occurrence(group, ann, category):
+    rule = make_rule(group, ann, category)
+    pause_rule(rule)
+    resume_rule(rule, D(2026, 7, 1))
+    skip_next(rule)
+    assert rule.next_date == D(2026, 8, 1)
+
+
 def test_update_rule_changes_only_future_expenses(group, ann, category):
     rule = make_rule(group, ann, category)
     generate_due(D(2026, 7, 2))
@@ -243,6 +263,39 @@ def test_run_daily_prints_counts(group, ann, category, monkeypatch):
         "expenses created: 2",
         "rules failed: 0",
     ]
+
+
+def test_run_daily_records_last_run(group, ann, category, monkeypatch):
+    monkeypatch.setattr("ledger.management.commands.run_daily.fetch_ecb_rates", lambda: 0)
+    assert job_status("run_daily") is None
+    call_command("run_daily", "--today=2026-08-02", stdout=StringIO())
+    assert job_status("run_daily") is not None
+
+
+def test_run_daily_records_last_run_even_when_a_rule_fails(group, ann, category, monkeypatch):
+    monkeypatch.setattr("ledger.management.commands.run_daily.fetch_ecb_rates", lambda: 0)
+    other = Member.objects.create(
+        group=Group.objects.create(name="O", currency="EUR"), display_name="Zed"
+    )
+    rule = make_rule(group, ann, category)
+    RecurringRule.objects.filter(pk=rule.pk).update(payer=other)
+    with pytest.raises(CommandError):
+        call_command("run_daily", "--today=2026-08-02", stdout=StringIO())
+    assert job_status("run_daily") is not None
+
+
+def test_run_daily_with_invalid_today_records_nothing(db):
+    with pytest.raises(CommandError):
+        call_command("run_daily", "--today=nope", stdout=StringIO())
+    assert job_status("run_daily") is None
+
+
+def test_record_job_run_keeps_one_row_per_name(db):
+    first = datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC)
+    second = datetime.datetime(2026, 1, 2, tzinfo=datetime.UTC)
+    record_job_run("run_daily", first)
+    record_job_run("run_daily", second)
+    assert job_status("run_daily") == second
 
 
 @pytest.mark.parametrize(

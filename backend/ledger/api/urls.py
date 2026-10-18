@@ -17,6 +17,7 @@ urlpatterns = [
     path("groups/<int:group_id>/settlements/<int:sid>/", views.SettlementDetailView.as_view()),
     path("groups/<int:group_id>/move-to-home", views.MoveToHomeView.as_view()),
     path("groups/<int:group_id>/recurring/", views.RuleListView.as_view()),
+    path("groups/<int:group_id>/recurring/status/", views.RecurringStatusView.as_view()),
     path("groups/<int:group_id>/recurring/<int:rid>/", views.RuleDetailView.as_view()),
     path("groups/<int:group_id>/recurring/<int:rid>/pause", views.PauseView.as_view()),
     path("groups/<int:group_id>/recurring/<int:rid>/resume", views.ResumeView.as_view()),

@@ -416,6 +416,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/recurring/status/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_recurring_status_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{group_id}/settlements/": {
         parameters: {
             query?: never;
@@ -535,6 +557,7 @@ export interface components {
             category: number;
             split_type: components["schemas"]["SplitTypeEnum"];
             source?: components["schemas"]["SourceEnum"];
+            recurring_rule?: number | null;
             notes?: string;
             payers: components["schemas"]["PayerOut"][];
             splits: components["schemas"]["SplitOut"][];
@@ -706,6 +729,10 @@ export interface components {
             /** Format: date */
             date: string;
             rate: string;
+        };
+        RecurringStatus: {
+            /** Format: date-time */
+            last_run_at: string | null;
         };
         Register: {
             email: string;
@@ -1407,6 +1434,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RuleOut"];
+                };
+            };
+        };
+    };
+    groups_recurring_status_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurringStatus"];
                 };
             };
         };

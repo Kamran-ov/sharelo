@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from ledger.services.rates import fetch_ecb_rates
-from ledger.services.recurring import generate_due
+from ledger.services.recurring import generate_due, record_job_run
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,8 @@ class Command(BaseCommand):
             rates = 0
 
         result = generate_due(today)
+        # Recorded before the failure check: the job did run, some rules just failed.
+        record_job_run("run_daily", timezone.now())
         self.stdout.write(
             f"rates upserted: {rates}\n"
             f"expenses created: {len(result.created)}\n"
