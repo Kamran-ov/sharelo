@@ -27,6 +27,14 @@ test("test_manifest_served_with_name_and_icons", async ({ page, request }, testI
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("image/png");
   }
+  // Chromium downloads a .webmanifest instead of showing it, so the screenshot renders what was
+  // asserted: the manifest's name and each icon, loaded from the served URLs.
+  await page.evaluate((m) => {
+    document.body.innerHTML = `<h1>${m.name}</h1>${m.icons
+      .map((i: { src: string; sizes: string }) => `<p>${i.sizes}<br><img src="${i.src}" width="96"></p>`)
+      .join("")}`;
+  }, manifest);
+  await expect(page.locator("img")).toHaveCount(manifest.icons.length);
   await snap(page, testInfo);
 });
 
@@ -127,12 +135,14 @@ test("test_install_hint_visible_then_dismissed", async ({ browser }, testInfo) =
       "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
   });
   const page = await context.newPage();
-  await page.goto("/login");
-  await expect(page.getByRole("region", { name: "Install Sharelo" })).toContainText("Add to Home Screen");
+  await loginAsFixtureUser(page);
+  const hint = page.getByRole("region", { name: "Install Sharelo" });
+  await expect(hint).toContainText("Add to Home Screen");
+  await expect(page.getByText("Home", { exact: true }).first()).toBeVisible();
   await snap(page, testInfo);
   await page.getByRole("button", { name: "Dismiss" }).click();
   await page.reload();
-  await expect(page.getByRole("heading").first()).toBeVisible();
-  await expect(page.getByRole("region", { name: "Install Sharelo" })).toHaveCount(0);
+  await expect(page.getByText("Home", { exact: true }).first()).toBeVisible();
+  await expect(hint).toHaveCount(0);
   await context.close();
 });
