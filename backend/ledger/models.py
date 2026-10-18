@@ -29,7 +29,30 @@ class Member(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["group", "display_name"], name="uniq_member_group_display_name"
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["group", "profile"],
+                condition=Q(profile__isnull=False),
+                name="uniq_member_group_profile",
+            ),
+        ]
+
+
+class GroupLink(models.Model):
+    """`profile` feeds `sub_group` into `main_group`; `active=False` unlinks, never deletes."""
+
+    profile = models.ForeignKey("accounts.Profile", on_delete=models.CASCADE, related_name="+")
+    sub_group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    main_group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["profile", "sub_group"], name="uniq_link_profile_sub"),
+            models.CheckConstraint(
+                condition=~Q(sub_group=F("main_group")), name="link_sub_not_main"
+            ),
         ]
 
 
