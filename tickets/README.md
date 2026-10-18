@@ -10,8 +10,8 @@ lowest-numbered ticket with `status: ready` whose `depends_on` tickets are all
 |-------------|----------------------------------------------------------------------|--------------------|
 | `draft`     | Being written; the builder ignores it                                | Kamran             |
 | `ready`     | Can be built                                                         | Kamran             |
-| `in-review` | A PR is open for it (draft = plan under review, ready = build under review) | Builder     |
-| `blocked`   | Builder needs an answer; a GitHub issue `needs-operator` names the question | Builder       |
+| `in-review` | A PR is open for it (label `plan-review` or `result-review` says which stage) | Builder |
+| `blocked`   | Builder needs an answer; a GitHub issue labelled `needs-operator` names the question | Builder |
 | `done`      | PR merged into `develop`                                             | Builder, at merge  |
 
 ## Format
@@ -46,3 +46,9 @@ Every ticket starts with a PLAN at `docs/specs/<id>.md` (current state, proposal
 incl. the key test, docs, out of scope, open questions), per the spec-driven-development
 skill. A `risk: risky` ticket's plan also has edge cases and production checks. The
 reviewer reviews the plan before any code is written.
+
+## UI tickets (011 onward)
+
+The REPORT must list every Playwright e2e test with its result, the screenshot paths under
+`docs/screenshots/<id>/` (committed PNGs, phone viewport), and what the e2e did not cover.
+Servers are started only by Playwright's `webServer`; never by hand.
