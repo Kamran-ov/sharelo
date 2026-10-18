@@ -1,10 +1,10 @@
 ---
 id: 007
 title: Recurring rules and the daily job
-status: ready
+status: done
 risk: risky
 depends_on: [002, 004]
-pr:
+pr: 12
 ---
 
 ## Goal

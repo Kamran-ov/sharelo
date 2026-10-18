@@ -105,12 +105,6 @@ class ImportBatch(models.Model):
     rows_skipped = models.IntegerField(default=0)
 
 
-class RecurringRule(models.Model):
-    """Stub: ticket 007 adds amount, payer, split, frequency, next date, paused."""
-
-    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="recurring_rules")
-
-
 class SplitType(models.TextChoices):
     EQUAL = "equal"
     PERSONAL = "personal"
@@ -126,6 +120,55 @@ class Source(models.TextChoices):
     REVOLUT = "revolut"
     WISE = "wise"
     RECURRING = "recurring"
+
+
+class Frequency(models.TextChoices):
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+
+
+class ActiveRuleManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class RecurringRule(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, related_name="recurring_rules")
+    description = models.CharField(max_length=300)
+    amount_cents = models.IntegerField()
+    payer = models.ForeignKey(Member, on_delete=models.PROTECT, related_name="+")
+    split_type = models.CharField(max_length=20, choices=SplitType.choices)
+    # Same shape as CategoryDefault.split_params.
+    split_params = models.JSONField(default=dict, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="+")
+    frequency = models.CharField(max_length=10, choices=Frequency.choices)
+    day_of_month = models.SmallIntegerField()
+    month = models.SmallIntegerField(null=True, blank=True)
+    start_date = models.DateField()
+    next_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    paused = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ActiveRuleManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        # Expense.recurring_rule must still resolve after the rule is soft-deleted.
+        base_manager_name = "all_objects"
+        constraints = [
+            models.CheckConstraint(condition=Q(amount_cents__gt=0), name="rule_amount_positive"),
+            models.CheckConstraint(
+                condition=Q(day_of_month__gte=1, day_of_month__lte=31), name="rule_day_in_range"
+            ),
+            models.CheckConstraint(
+                condition=(Q(frequency="monthly", month__isnull=True))
+                | Q(frequency="yearly", month__gte=1, month__lte=12),
+                name="rule_month_matches_frequency",
+            ),
+        ]
 
 
 class CategoryDefault(models.Model):
