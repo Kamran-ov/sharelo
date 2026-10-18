@@ -16,8 +16,8 @@ export function resetFixture() {
   });
 }
 
-export async function shot(page: Page, testInfo: TestInfo, ticket = "011") {
-  await page.screenshot({ path: path.join(SHOTS(ticket), `${testInfo.title}.png`) });
+export async function shot(page: Page, testInfo: TestInfo, ticket = "011", suffix = "") {
+  await page.screenshot({ path: path.join(SHOTS(ticket), `${testInfo.title}${suffix}.png`) });
 }
 
 export async function loginAsFixtureUser(page: Page) {

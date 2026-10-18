@@ -16,7 +16,7 @@ import {
 
 test.beforeEach(() => resetFixture());
 
-const snap = (page: Page, info: TestInfo) => shot(page, info, "013");
+const snap = (page: Page, info: TestInfo, suffix = "") => shot(page, info, "013", suffix);
 const card = (page: Page) => page.getByTestId("top-card");
 const transfer = (page: Page) => page.getByTestId("transfer");
 const sheet = (page: Page, name: string) => page.getByRole("dialog", { name });
@@ -75,9 +75,9 @@ test("test_settle_zero_shows_api_error_and_creates_nothing", async ({ page }, te
   const { detail } = (await response.json()) as { detail: string };
   await expect(sheet(page, "Settle up").getByRole("alert")).toHaveText(detail);
   expect(await apiCall(page, "GET", `/groups/${HOME}/settlements/`)).toEqual([]);
+  await snap(page, testInfo); // sheet still open, error showing
   await sheet(page, "Settle up").getByLabel("Close").click();
   await expect(card(page)).toHaveText("you are owed 21.05");
-  await snap(page, testInfo);
 });
 
 test("test_undo_after_settle_restores_the_previous_balances", async ({ page }, testInfo) => {
@@ -112,6 +112,7 @@ test("test_move_to_home_from_trip_settles_trip_and_mirrors_in_home", async ({ pa
   await expect(page.getByTestId("member-row").filter({ hasText: "Alice" })).toContainText("is owed 200.00");
   await page.getByText("History").click();
   await expect(page.getByTestId("move-badge")).toHaveText("Rome trip: moved to Home");
+  await snap(page, testInfo, "-home");
 });
 
 test("test_move_to_home_button_absent_when_creditor_is_a_guest", async ({ page, browser }, testInfo) => {

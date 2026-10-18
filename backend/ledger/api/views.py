@@ -482,15 +482,14 @@ class BalancesView(GroupScopedView):
             home = Group.objects.filter(pk=viewer.profile.main_group_id).first()
         transfers = []
         for f, t, c in balances.simplify_debts(nets):
-            # Debtor's own session only: move-to-home takes the caller as from_profile.
-            mine = f == viewer.id
             transfers.append(
                 {
                     "from_member": f,
                     "to_member": t,
                     "amount_cents": c,
-                    "can_move_to_home": mine
-                    and groups.can_move_to_home(self.group, home, viewer, members[t]),
+                    "can_move_to_home": groups.can_move_to_home(
+                        self.group, home, viewer, members[f], members[t]
+                    ),
                     "to_profile": members[t].profile_id,
                 }
             )

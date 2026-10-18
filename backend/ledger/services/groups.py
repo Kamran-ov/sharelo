@@ -92,16 +92,20 @@ def _member_in(group: Group, profile: Profile) -> Member:
     return member
 
 
-def can_move_to_home(group: Group, home: Group | None, viewer: Member, to_member: Member) -> bool:
+def can_move_to_home(
+    group: Group, home: Group | None, viewer: Member, from_member: Member, to_member: Member
+) -> bool:
     """Display hint for the Move to Home button; `move_debt_to_home` stays the authority.
 
-    `home` is the viewer's main group (None when they have none). Members arrive with `profile`
-    already loaded so a page of transfers costs no extra queries.
+    `home` is the viewer's main group (None when they have none). Only the debtor's own session
+    may move the debt: `move_debt_to_home` takes the caller as `from_profile`. Members arrive with
+    `profile` already loaded so a page of transfers costs no extra queries.
     """
     if home is None or viewer.profile is None or to_member.profile is None:
         return False
     return (
-        group.pk != home.pk
+        from_member.pk == viewer.pk
+        and group.pk != home.pk
         and to_member.profile.main_group_id == home.pk
         and group.currency == home.currency
     )

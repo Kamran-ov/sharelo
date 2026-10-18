@@ -42,6 +42,15 @@ def test_delete_settlement_removes_it_from_balances(world, api_a, api_b):
     assert api_b.get(f"/api/groups/{world.home.id}/settlements/").json() == []
 
 
+def test_second_delete_of_the_same_settlement_is_404_and_first_is_204(world, api_b):
+    ann, bea = home_pair(world)
+    sid = settle(api_b, world.home, bea, ann, 100)
+    url = f"/api/groups/{world.home.id}/settlements/{sid}/"
+    assert api_b.delete(url).status_code == 204
+    again = api_b.delete(url)
+    assert again.status_code == 404 and again.json()["code"] == "not_found"
+
+
 def test_deleted_settlement_stays_in_the_database(world, api_b):
     ann, bea = home_pair(world)
     sid = settle(api_b, world.home, bea, ann, 100)
