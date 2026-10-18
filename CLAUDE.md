@@ -106,7 +106,7 @@ body; `docs/REVIEW-LOG.md` updated with the reviewer's entries; ticket `status: 
 
 ## 6. CURRENT STATE
 
-Scaffold exists (ticket 000): Django 5 + DRF project `sharelo` in `backend/` (Postgres only, `DATABASE_URL`), Vite/React/TS skeleton in `frontend/`, `Makefile`, compose, CI. No apps or models yet. Roadmap in `docs/PLAN.md` "Build order". Tickets 000–006 cover
+Scaffold exists (ticket 000): Django 5 + DRF project `sharelo` in `backend/` (Postgres only, `DATABASE_URL`), Vite/React/TS skeleton in `frontend/`, `Makefile`, compose, CI. Ticket 001 added apps `accounts` (stub `Profile`) and `ledger` (all core models, constraints, seeded Splitwise categories, `services/expenses.py` create/update/delete with `LedgerError`). Roadmap in `docs/PLAN.md` "Build order". Tickets 000–006 cover
 step 0 (scaffold) and step 1 (core engine). This section is updated by the Author at each
 merge: one line, what now exists.
 

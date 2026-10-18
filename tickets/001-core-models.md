@@ -1,7 +1,7 @@
 ---
 id: 001
 title: Core models — groups, members, expenses, payers, splits, settlements
-status: in-review
+status: done
 risk: risky
 depends_on: [000]
 pr: 5
