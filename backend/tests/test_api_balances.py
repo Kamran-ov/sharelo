@@ -49,7 +49,15 @@ def test_two_half_expenses_give_the_production_numbers(world, api_a):
     }
     body = api_a.get(f"/api/groups/{world.home.id}/balances/").json()
     assert body["nets"] == {str(ann.id): 1000, str(bea.id): -1000}
-    assert body["transfers"] == [{"from_member": bea.id, "to_member": ann.id, "amount_cents": 1000}]
+    assert body["transfers"] == [
+        {
+            "from_member": bea.id,
+            "to_member": ann.id,
+            "amount_cents": 1000,
+            "can_move_to_home": False,  # Home is the main group
+            "to_profile": world.a.id,
+        }
+    ]
 
 
 def test_settlement_of_full_transfer_zeroes_nets_in_next_get(world, api_a, api_b):

@@ -249,6 +249,8 @@ class TransferSerializer(serializers.Serializer):
     from_member = serializers.IntegerField()
     to_member = serializers.IntegerField()
     amount_cents = serializers.IntegerField()
+    can_move_to_home = serializers.BooleanField()
+    to_profile = serializers.IntegerField(allow_null=True)
 
 
 class MemberBalanceSerializer(serializers.Serializer):
@@ -266,6 +268,18 @@ class BalancesSerializer(serializers.Serializer):
 
 
 class SettlementOutSerializer(serializers.ModelSerializer):
+    twin_group_name = serializers.SerializerMethodField()
+    is_home_side = serializers.SerializerMethodField()
+
+    def get_twin_group_name(self, obj) -> str | None:
+        return obj.twin.group.name if obj.twin_id else None
+
+    def get_is_home_side(self, obj) -> bool:
+        if not obj.twin_id:
+            return False
+        mains = {obj.from_member.profile, obj.to_member.profile} - {None}
+        return any(p.main_group_id == obj.group_id for p in mains)
+
     class Meta:
         model = Settlement
         fields = [
@@ -277,6 +291,8 @@ class SettlementOutSerializer(serializers.ModelSerializer):
             "date",
             "notes",
             "twin",
+            "twin_group_name",
+            "is_home_side",
             "created_at",
         ]
 

@@ -1268,6 +1268,44 @@
                 }
             }
         },
+        "/api/groups/{group_id}/settlements/{sid}/": {
+            "delete": {
+                "operationId": "groups_settlements_destroy",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "sid",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/join/{token}/": {
             "get": {
                 "operationId": "join_retrieve",
@@ -2276,6 +2314,15 @@
                         "type": "integer",
                         "nullable": true
                     },
+                    "twin_group_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "is_home_side": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -2289,7 +2336,9 @@
                     "date",
                     "from_member",
                     "id",
-                    "to_member"
+                    "is_home_side",
+                    "to_member",
+                    "twin_group_name"
                 ]
             },
             "SettlementWrite": {
@@ -2385,12 +2434,21 @@
                     },
                     "amount_cents": {
                         "type": "integer"
+                    },
+                    "can_move_to_home": {
+                        "type": "boolean"
+                    },
+                    "to_profile": {
+                        "type": "integer",
+                        "nullable": true
                     }
                 },
                 "required": [
                     "amount_cents",
+                    "can_move_to_home",
                     "from_member",
-                    "to_member"
+                    "to_member",
+                    "to_profile"
                 ]
             }
         },

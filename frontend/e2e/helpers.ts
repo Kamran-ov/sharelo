@@ -16,8 +16,8 @@ export function resetFixture() {
   });
 }
 
-export async function shot(page: Page, testInfo: TestInfo, ticket = "011") {
-  await page.screenshot({ path: path.join(SHOTS(ticket), `${testInfo.title}.png`) });
+export async function shot(page: Page, testInfo: TestInfo, ticket = "011", suffix = "") {
+  await page.screenshot({ path: path.join(SHOTS(ticket), `${testInfo.title}${suffix}.png`) });
 }
 
 export async function loginAsFixtureUser(page: Page) {
@@ -86,9 +86,34 @@ export async function seedExpense(page: Page, over: Record<string, unknown> = {}
 }
 
 export async function balances(page: Page) {
-  return (await apiCall(page, "GET", `/groups/${HOME}/balances/`)) as {
+  const body = (await apiCall(page, "GET", `/groups/${HOME}/balances/`)) as {
     transfers: { from_member: number; to_member: number; amount_cents: number }[];
   };
+  // The 013 flags (can_move_to_home, to_profile) are asserted in balances.spec.ts, not here.
+  return { transfers: body.transfers.map(({ from_member, to_member, amount_cents }) => ({ from_member, to_member, amount_cents })) };
+}
+
+export const ROME_TOKEN = "e2e-rome-token";
+
+/** Rome trip id and its members by display name, as the logged-in user sees them. */
+export async function romeMembers(page: Page) {
+  const list = (await apiCall(page, "GET", "/groups/")) as { id: number; name: string }[];
+  const rome = list.find((g) => g.name === "Rome trip")!;
+  const detail = (await apiCall(page, "GET", `/groups/${rome.id}/`)) as { members: { id: number; display_name: string }[] };
+  return { id: rome.id, byName: Object.fromEntries(detail.members.map((m) => [m.display_name, m.id])) as Record<string, number> };
+}
+
+/** `creditor` paid `cents` for `debtor` alone, so the debtor owes the whole amount. */
+export async function owes(page: Page, groupId: number, debtor: number, creditor: number, cents: number) {
+  return apiCall(page, "POST", `/groups/${groupId}/expenses/`, {
+    description: "Seeded debt",
+    amount_cents: cents,
+    date: today(),
+    category: await generalCategoryId(page),
+    payer_member: creditor,
+    preset: "full_for_other",
+    params: { other_id: debtor },
+  });
 }
 
 export async function openExpenses(page: Page) {
@@ -106,4 +131,14 @@ export async function quickAdd(page: Page, amount: string, description: string) 
   await page.getByLabel(/Amount/).fill(amount);
   await page.getByLabel("Description").fill(description);
   await page.getByRole("button", { name: "Save" }).click();
+}
+
+/** Fixture profile by email; the cookies of whoever was logged in before are dropped. */
+export async function loginAs(page: Page, email: string) {
+  await page.context().clearCookies();
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("password1234");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/groups$/);
 }
