@@ -1,7 +1,7 @@
 ---
 id: 011
 title: Web app shell — sign-in, groups, join by link, Playwright e2e
-status: ready
+status: in-review
 risk: normal
 depends_on: [010]
 pr:
