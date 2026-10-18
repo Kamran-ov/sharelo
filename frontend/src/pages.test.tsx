@@ -39,10 +39,21 @@ function renderGuard() {
 }
 
 test("google_button_renders_only_when_enabled", () => {
+  vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "dummy-client-id.apps.googleusercontent.com");
   const { rerender } = render(<GoogleButton enabled onCredential={() => {}} />);
   expect(screen.getByTestId("google-button")).toBeInTheDocument();
+  expect(screen.getByText("Sign in with Google")).toBeInTheDocument();
+  expect(screen.queryByText(/not set up/)).not.toBeInTheDocument();
   rerender(<GoogleButton enabled={false} onCredential={() => {}} />);
   expect(screen.queryByTestId("google-button")).not.toBeInTheDocument();
+  vi.unstubAllEnvs();
+});
+
+test("google_button_without_client_id_says_not_set_up", () => {
+  vi.stubEnv("VITE_GOOGLE_CLIENT_ID", "");
+  render(<GoogleButton enabled onCredential={() => {}} />);
+  expect(screen.getByText(/not set up/)).toBeInTheDocument();
+  vi.unstubAllEnvs();
 });
 
 test("guard_redirects_anonymous_to_login", async () => {

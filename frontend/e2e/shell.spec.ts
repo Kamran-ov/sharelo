@@ -33,7 +33,9 @@ test("test_wrong_password_shows_message_inline_without_redirect", async ({ page 
   const body = await (await response).json();
   const alert = page.getByRole("alert");
   await expect(alert).toBeVisible();
-  await expect(alert).toHaveText(body.detail || body.code);
+  // The API's `detail` for a wrong password is the bare code today; a friendlier sentence is a later ticket.
+  expect(body.detail).toBe("invalid_credentials");
+  await expect(alert).toHaveText(body.detail);
   await expect(page).toHaveURL(/\/login$/);
   await shot(page, testInfo);
 });
