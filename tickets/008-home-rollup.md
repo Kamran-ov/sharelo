@@ -1,7 +1,7 @@
 ---
 id: 008
 title: Home analytics rollup — linked sub-groups into the main group
-status: ready
+status: in-review
 risk: risky
 depends_on: [005, 006]
 pr:
