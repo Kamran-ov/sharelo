@@ -97,7 +97,7 @@ body; `docs/REVIEW-LOG.md` updated with the reviewer's entries; ticket `status: 
 | What | Command | Trap |
 |---|---|---|
 | Tests (cloud / plain Postgres) | `make test` | Needs `DATABASE_URL`; run `scripts/cloud-setup.sh` first in a fresh cloud session |
-| Tests (laptop, Docker) | `USE_DOCKER=1 make test` | `docker compose up` without `-d` never returns; use `make`, which uses `run --rm` |
+| Tests (laptop, Docker) | `USE_DOCKER=1 make test` | `docker compose up` without `-d` never returns; use `make`, which uses `run --rm`; the backend container mounts the whole repo at `/repo` (tests read repo-root files) |
 | Backend only / frontend only | `make test-backend` / `make test-frontend` | Both must exit non-zero on failure; CI relies on it |
 | Lint | `make lint` | `ruff check` + `ruff format --check` for Python, `tsc --noEmit` for TS |
 | Wait for CI | `timeout 1800 gh run watch <run-id> --exit-status` | Take the run id from `gh run list --branch <b>`; no output = no run exists, not "finished" |

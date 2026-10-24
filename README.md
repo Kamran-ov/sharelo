@@ -24,6 +24,8 @@ USE_DOCKER=1 make lint
 docker compose up -d db backend frontend   # dev servers; always with -d
 ```
 
+The backend container mounts the whole repo at `/repo` (working dir `/repo/backend`), because tests read `compose.prod.yml`, `deploy/`, `scripts/` and `frontend/src/api/schema.json`. After changing `frontend/package.json`, run `docker compose build frontend` so the `node_modules` volume is seeded with current deps.
+
 PostgreSQL is 17 in compose and CI, and the distro's 16 in cloud sessions; both are supported.
 
 ## Daily job
