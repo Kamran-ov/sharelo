@@ -122,6 +122,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/analytics/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_analytics_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{group_id}/balances/": {
         parameters: {
             query?: never;
@@ -693,6 +715,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/home/analytics/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["home_analytics_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/home/analytics/trip/{group_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["home_analytics_trip_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/join/{token}/": {
         parameters: {
             query?: never;
@@ -745,6 +799,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Analytics: {
+            currency: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            rows: components["schemas"]["AnalyticsRow"][];
+        };
+        AnalyticsLeafRow: {
+            key: string;
+            label: string;
+            cents: number;
+        };
+        AnalyticsRow: {
+            key: string;
+            label: string;
+            cents: number;
+            rows?: components["schemas"]["AnalyticsLeafRow"][];
+        };
         Balances: {
             currency: string;
             nets: {
@@ -1440,6 +1513,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GroupDetail"];
+                };
+            };
+        };
+    };
+    groups_analytics_retrieve: {
+        parameters: {
+            query?: {
+                /** @description default: category */
+                by?: "category" | "member" | "member_category" | "month";
+                /** @description default: first day of this month */
+                from?: string;
+                /** @description category level, default 1 */
+                level?: 1 | 2;
+                /** @description default: last day of this month */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Analytics"];
                 };
             };
         };
@@ -2212,6 +2315,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ShareSummary"];
+                };
+            };
+        };
+    };
+    home_analytics_retrieve: {
+        parameters: {
+            query?: {
+                /** @description default: category */
+                by?: "category" | "member" | "month";
+                /** @description default: first day of this month */
+                from?: string;
+                /** @description category level, default 1 */
+                level?: 1 | 2;
+                /** @description default: last day of this month */
+                to?: string;
+                /** @description default: lines */
+                trips?: "lines" | "spread";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Analytics"];
+                };
+            };
+        };
+    };
+    home_analytics_trip_retrieve: {
+        parameters: {
+            query?: {
+                /** @description default: first day of this month */
+                from?: string;
+                /** @description category level, default 1 */
+                level?: 1 | 2;
+                /** @description default: last day of this month */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Analytics"];
                 };
             };
         };

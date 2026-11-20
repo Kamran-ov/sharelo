@@ -29,7 +29,15 @@ from ledger.models import (
     RecurringRule,
     Settlement,
 )
-from ledger.services import balances, expenses, groups, rates, recurring, summary
+from ledger.services import (
+    analytics_report,
+    balances,
+    expenses,
+    groups,
+    rates,
+    recurring,
+    summary,
+)
 from ledger.services.rates import resolve_foreign_amount
 from ledger.services.splits import default_split_for, split_for_preset
 
@@ -688,3 +696,108 @@ class ResumeView(RuleActionView):
 
 class SkipView(RuleActionView):
     action = "skip"
+
+
+_ANALYTICS_PARAMS = [
+    OpenApiParameter("from", datetime.date, description="default: first day of this month"),
+    OpenApiParameter("to", datetime.date, description="default: last day of this month"),
+    OpenApiParameter("level", int, enum=[1, 2], description="category level, default 1"),
+]
+
+
+def _analytics_dates(params) -> tuple[datetime.date, datetime.date]:
+    default_from, default_to = analytics_report.default_range(today())
+    out = []
+    for name, default in (("from", default_from), ("to", default_to)):
+        if name not in params:
+            out.append(default)
+            continue
+        try:
+            out.append(datetime.date.fromisoformat(params[name]))
+        except ValueError:
+            raise LedgerError("invalid_date", f"{name}={params[name]!r}") from None
+    return out[0], out[1]
+
+
+def _analytics_level(params) -> int:
+    level = params.get("level", "1")
+    if level not in ("1", "2"):
+        raise LedgerError("invalid_level", f"level={level!r}")
+    return int(level)
+
+
+def _home_group(request) -> Group:
+    """Home analytics are a profile's; a guest session has none (401), a profile may lack Home."""
+    profile = require_profile(request)
+    if profile.main_group_id is None:
+        raise LedgerError("not_found")
+    return profile.main_group
+
+
+class GroupAnalyticsView(GroupScopedView):
+    @extend_schema(
+        parameters=[
+            *_ANALYTICS_PARAMS,
+            OpenApiParameter(
+                "by", str, enum=list(analytics_report.BY), description="default: category"
+            ),
+        ],
+        responses=sz.AnalyticsSerializer,
+    )
+    def get(self, request, group_id):
+        params = request.query_params
+        date_from, date_to = _analytics_dates(params)
+        report = analytics_report.group_report(
+            self.group,
+            date_from,
+            date_to,
+            params.get("by", "category"),
+            _analytics_level(params),
+        )
+        return Response(sz.AnalyticsSerializer(report).data)
+
+
+class HomeAnalyticsView(CsrfProtectedAPIView):
+    @extend_schema(
+        parameters=[
+            *_ANALYTICS_PARAMS,
+            OpenApiParameter(
+                "by", str, enum=list(analytics_report.HOME_BY), description="default: category"
+            ),
+            OpenApiParameter("trips", str, enum=["lines", "spread"], description="default: lines"),
+        ],
+        responses=sz.AnalyticsSerializer,
+    )
+    def get(self, request):
+        main_group = _home_group(request)
+        params = request.query_params
+        date_from, date_to = _analytics_dates(params)
+        report = analytics_report.home_report(
+            main_group,
+            date_from,
+            date_to,
+            params.get("by", "category"),
+            params.get("trips", "lines"),
+            _analytics_level(params),
+        )
+        return Response(sz.AnalyticsSerializer(report).data)
+
+
+class HomeTripAnalyticsView(CsrfProtectedAPIView):
+    @extend_schema(parameters=_ANALYTICS_PARAMS, responses=sz.AnalyticsSerializer)
+    def get(self, request, group_id):
+        main_group = _home_group(request)
+        params = request.query_params
+        date_from, date_to = _analytics_dates(params)
+        level = _analytics_level(params)
+        trip = Group.objects.filter(pk=group_id).first()
+        if trip is None:
+            raise LedgerError("not_found")
+        try:
+            report = analytics_report.trip_report(main_group, trip, date_from, date_to, level)
+        except LedgerError as exc:
+            if exc.code == "trip_not_linked":
+                # Same 404 as a missing group: the route must not reveal other groups.
+                raise LedgerError("not_found") from exc
+            raise
+        return Response(sz.AnalyticsSerializer(report).data)

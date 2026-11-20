@@ -364,3 +364,26 @@ class RuleOutSerializer(serializers.ModelSerializer):
 
 class RecurringStatusSerializer(serializers.Serializer):
     last_run_at = serializers.DateTimeField(allow_null=True)
+
+
+class AnalyticsLeafRowSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()
+    cents = serializers.IntegerField()
+
+
+class AnalyticsRowSerializer(AnalyticsLeafRowSerializer):
+    rows = AnalyticsLeafRowSerializer(many=True, required=False)
+
+
+# `from` is a Python keyword, so the class is built with type() to keep the JSON name.
+AnalyticsSerializer = type(
+    "AnalyticsSerializer",
+    (serializers.Serializer,),
+    {
+        "currency": serializers.CharField(),
+        "from": serializers.DateField(),
+        "to": serializers.DateField(),
+        "rows": AnalyticsRowSerializer(many=True),
+    },
+)
