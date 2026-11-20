@@ -34,14 +34,14 @@ function AddPerson({ groupId }: { groupId: number }) {
     >
       <label className="block">
         <span className="text-sm">Add person</span>
-        <input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input className="min-h-11 w-full rounded-md border border-line px-3" value={name} onChange={(e) => setName(e.target.value)} required />
       </label>
       {error && (
-        <p role="alert" className="break-words text-sm text-red-700">
+        <p role="alert" className="break-words text-sm text-danger">
           {error}
         </p>
       )}
-      <button type="submit" className="min-h-11 w-full rounded-lg border border-slate-300" disabled={add.isPending}>
+      <button type="submit" className="min-h-11 w-full rounded-md border border-line" disabled={add.isPending}>
         Add
       </button>
     </form>
@@ -71,10 +71,10 @@ export default function Settings() {
     <section className="space-y-6 p-4">
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Share link</h2>
-        <p className="break-all rounded-lg bg-slate-100 p-3 text-sm" data-testid="share-url">
+        <p className="break-all rounded-md bg-sunken p-3 text-sm" data-testid="share-url">
           {shareUrl}
         </p>
-        <button className="min-h-11 w-full rounded-lg border border-slate-300" onClick={copy}>
+        <button className="min-h-11 w-full rounded-md border border-line" onClick={copy}>
           {copied ? "Copied" : "Copy link"}
         </button>
       </div>
@@ -84,8 +84,8 @@ export default function Settings() {
           {group.members.map((m) => (
             <li key={m.id} className="break-words" data-testid={`member-${m.id}`}>
               {m.display_name}
-              {m.id === group.my_member_id && <span className="text-slate-500"> (you)</span>}
-              <span className="text-slate-500"> · {STATUS_LABEL[m.status]}</span>
+              {m.id === group.my_member_id && <span className="text-muted"> (you)</span>}
+              <span className="text-muted"> · {STATUS_LABEL[m.status]}</span>
             </li>
           ))}
         </ul>
@@ -93,7 +93,7 @@ export default function Settings() {
       </div>
       <DefaultSplits group={group} />
       <ShopRules group={group} />
-      <p className="text-sm text-slate-600" data-testid="recurring-status">
+      <p className="text-sm text-muted" data-testid="recurring-status">
         Recurring expenses are created by the daily job; last run: {lastRun}
       </p>
       {group.link_active !== null && (
@@ -109,7 +109,7 @@ export default function Settings() {
             <span>Linked to Home</span>
           </label>
           {toggleError && (
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className="text-sm text-danger">
               {toggleError}
             </p>
           )}

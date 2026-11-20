@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 import { api, ApiError, type Me } from "../api";
 import GoogleButton from "./GoogleButton";
 
-const input = "min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base";
-const primary = "min-h-11 w-full rounded-lg bg-emerald-600 px-4 font-medium text-white";
+const input = "min-h-11 w-full rounded-md border border-line px-3 text-md";
+const primary = "min-h-11 w-full rounded-md bg-primary px-4 font-medium text-on-primary";
 
 /** Sign-in / create-account form shared by the login page and the guest account sheet. */
 export default function AuthForm({
@@ -39,7 +39,7 @@ export default function AuthForm({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{creating ? "Create account" : "Sign in"}</h1>
+      <h1 className="text-xl font-semibold">{creating ? "Create account" : "Sign in"}</h1>
       <form onSubmit={submit} className="space-y-3">
         {creating && (
           <label className="block">
@@ -63,7 +63,7 @@ export default function AuthForm({
           />
         </label>
         {error && (
-          <p role="alert" className="break-words text-sm text-red-700">
+          <p role="alert" className="break-words text-sm text-danger">
             {error}
           </p>
         )}
@@ -74,7 +74,7 @@ export default function AuthForm({
       <GoogleButton enabled={googleEnabled} onCredential={(id_token) => signIn.mutate({ path: "/auth/google", body: { id_token } })} />
       <button
         type="button"
-        className="min-h-11 w-full text-emerald-700 underline"
+        className="min-h-11 w-full text-primary underline"
         onClick={() => {
           setCreating(!creating);
           signIn.reset();

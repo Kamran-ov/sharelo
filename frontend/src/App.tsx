@@ -14,7 +14,7 @@ import Settings from "./pages/Settings";
 
 export default function App() {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-white text-slate-900">
+    <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-card text-ink">
       <InstallHint />
       <Routes>
         <Route path="/login" element={<Login />} />

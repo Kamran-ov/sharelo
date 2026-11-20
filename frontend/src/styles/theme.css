@@ -1,0 +1,77 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./fonts.css";
+
+/* Tailwind's own palette, font stacks, type scale (with its line-heights), radii and shadows are
+   switched off: a leftover default-palette class renders nothing instead of a second palette.
+   tokens.css is the only source of brand values. */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+}
+
+/* `inline` makes utilities emit var(--token) directly; `reference` stops Tailwind writing its
+   own definitions, which for same-named keys (--font-heading, --radius-sm, …) would be
+   self-references like `--font-heading: var(--font-heading)`. */
+@theme inline reference {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-highlight: var(--brand-highlight);
+  --color-highlight-soft: var(--brand-highlight-soft);
+  --color-owed: var(--money-owed);
+  --color-owe: var(--money-owe);
+  --color-owe-soft: var(--money-owe-soft);
+  --color-neutral: var(--money-neutral);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ground: var(--surface-ground);
+  --color-card: var(--surface-card);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--border);
+  --color-line-subtle: var(--border-subtle);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-on-primary: var(--text-on-primary);
+  --color-overlay: var(--overlay);
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-md: var(--text-md);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-amount: var(--text-amount);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-card: var(--radius-lg);
+  --radius-hero: var(--radius-xl);
+  --radius-sheet: var(--radius-sheet);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-fab: var(--shadow-fab);
+  --shadow-segment: var(--shadow-segment);
+}
+
+body {
+  margin: 0;
+  background: var(--surface-ground);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}

@@ -9,9 +9,9 @@ import { otherOf, type Who } from "../lib/presets";
 import { MONTH_NAMES, nextOccurrences } from "../lib/recurrence";
 import { ruleBody, rulePatchBody, scheduleOf, whoOfRule, type RuleLike, type RuleValues } from "../lib/ruleBody";
 
-const input = "min-h-11 w-full rounded-lg border border-slate-300 px-3";
+const input = "min-h-11 w-full rounded-md border border-line px-3";
 const seg = (on: boolean) =>
-  `min-h-11 flex-1 rounded-lg border px-2 text-sm ${on ? "border-emerald-600 bg-emerald-50 font-semibold" : "border-slate-300"}`;
+  `min-h-11 flex-1 rounded-md border px-2 text-sm ${on ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`;
 
 export function initialRuleValues(group: GroupDetail, tree: CategoryNode[], editing?: RuleLike): RuleValues {
   const ids = group.members.map((m) => m.id);
@@ -96,7 +96,7 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
         <label className="block">
           <span className="text-sm">Amount ({group.currency})</span>
           <input
-            className={`${input} text-2xl`}
+            className={`${input} text-xl`}
             inputMode="decimal"
             autoFocus
             value={v.amountText}
@@ -159,7 +159,7 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
               </button>
             ))}
           </div>
-          {v.who === null && <p className="mt-1 text-sm text-slate-600">Custom split — kept as it is</p>}
+          {v.who === null && <p className="mt-1 text-sm text-muted">Custom split — kept as it is</p>}
           {two && v.who === "custom" && (
             <label className="mt-2 block">
               <span className="text-sm">
@@ -213,17 +213,17 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
           <input type="date" className={input} value={v.endDate} onChange={(e) => set({ endDate: e.target.value })} aria-invalid={!endOk} />
         </label>
         {preview.length > 0 && (
-          <p className="break-words rounded-lg bg-slate-100 p-3 text-sm" data-testid="preview">
+          <p className="break-words rounded-md bg-sunken p-3 text-sm" data-testid="preview">
             Next: {preview.join(", ")}
           </p>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
-        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-lg bg-emerald-600 font-medium text-white disabled:bg-slate-300">
+        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-md bg-primary font-medium text-on-primary disabled:bg-line">
           Save
         </button>
       </form>

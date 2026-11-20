@@ -147,18 +147,18 @@ export default function Expenses() {
 
   return (
     <section className="p-4">
-      <Link to={`/g/${group.id}/bank-import`} className="mb-3 flex min-h-11 items-center justify-between rounded-lg border border-slate-300 px-3 text-sm">
+      <Link to={`/g/${group.id}/bank-import`} className="mb-3 flex min-h-11 items-center justify-between rounded-md border border-line px-3 text-sm">
         <span>Import bank file</span>
-        {toReview > 0 && <span data-testid="to-review" className="rounded-full bg-emerald-600 px-2 text-white">{toReview} to review</span>}
+        {toReview > 0 && <span data-testid="to-review" className="rounded-full bg-primary px-2 text-on-primary">{toReview} to review</span>}
       </Link>
-      {list.isPending && <p className="text-slate-500">Loading…</p>}
+      {list.isPending && <p className="text-muted">Loading…</p>}
       {list.isError && <p role="alert">Could not load expenses.</p>}
-      {list.isSuccess && items.length === 0 && <p className="text-slate-600">No expenses yet.</p>}
+      {list.isSuccess && items.length === 0 && <p className="text-muted">No expenses yet.</p>}
       {months.map((m) => (
         <div key={m} className="mb-4">
-          <h2 className="flex items-baseline justify-between border-b border-slate-200 pb-1 font-semibold" data-testid={`month-${m}`}>
+          <h2 className="flex items-baseline justify-between border-b border-line pb-1 font-semibold" data-testid={`month-${m}`}>
             <span>{monthLabel(m)}</span>
-            <span className="text-sm text-slate-600" data-testid={`month-total-${m}`}>
+            <span className="text-sm text-muted" data-testid={`month-total-${m}`}>
               {m in totals ? `${formatCents(totals[m])} ${group.currency}` : ""}
             </span>
           </h2>
@@ -167,7 +167,7 @@ export default function Expenses() {
               .filter((i) => monthKey(i.date) === m)
               .map((item) =>
                 "pending" in item ? (
-                  <li key={item.pending.tempId} aria-busy="true" className="border-b border-slate-100 py-2 text-slate-500">
+                  <li key={item.pending.tempId} aria-busy="true" className="border-b border-line-subtle py-2 text-muted">
                     <div className="flex justify-between gap-2">
                       <span className="break-words">{item.pending.description}</span>
                       <span>
@@ -179,12 +179,12 @@ export default function Expenses() {
                     <div className="text-sm">saving…</div>
                   </li>
                 ) : (
-                  <li key={item.row.id} data-testid="expense-row" className="relative border-b border-slate-100">
+                  <li key={item.row.id} data-testid="expense-row" className="relative border-b border-line-subtle">
                     {item.row.recurring_rule != null && (
                       <Link
                         to={`/g/${group.id}/recurring#rule-${item.row.recurring_rule}`}
                         aria-label="Created by a recurring rule"
-                        className="absolute right-0 top-8 z-10 flex size-11 items-center justify-center text-slate-500"
+                        className="absolute right-0 top-8 z-10 flex size-11 items-center justify-center text-muted"
                       >
                         ↻
                       </Link>
@@ -194,7 +194,7 @@ export default function Expenses() {
                         <span className="break-words font-medium">{item.row.description}</span>
                         <span className="shrink-0">{formatCents(item.row.amount_cents)}</span>
                       </div>
-                      <div className="flex justify-between gap-2 text-sm text-slate-600">
+                      <div className="flex justify-between gap-2 text-sm text-muted">
                         <span className="break-words">
                           {categoryName.get(item.row.category) ?? ""} · {item.row.date}
                         </span>
@@ -206,7 +206,7 @@ export default function Expenses() {
                       </div>
                       <div className="flex justify-between gap-2 text-sm">
                         <span>{item.row.payers.length > 1 ? "multiple payers" : item.row.payers[0]?.member === group.my_member_id ? "you paid" : `${memberName(item.row.payers[0]?.member)} paid`}</span>
-                        <span className="text-slate-700">{shareText(item.row, group.my_member_id)}</span>
+                        <span className="text-muted">{shareText(item.row, group.my_member_id)}</span>
                       </div>
                     </button>
                   </li>
@@ -216,7 +216,7 @@ export default function Expenses() {
         </div>
       ))}
       {list.hasNextPage && (
-        <button type="button" className="min-h-11 w-full rounded-lg border border-slate-300" disabled={list.isFetchingNextPage} onClick={() => list.fetchNextPage()}>
+        <button type="button" className="min-h-11 w-full rounded-md border border-line" disabled={list.isFetchingNextPage} onClick={() => list.fetchNextPage()}>
           Load more
         </button>
       )}
@@ -224,7 +224,7 @@ export default function Expenses() {
         <button
           type="button"
           aria-label="Add expense"
-          className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-emerald-600 text-3xl text-white shadow-lg"
+          className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-primary text-xl text-on-primary shadow-fab"
           disabled={!tree.data || !defaults.data}
           onClick={() => {
             setToast(null);

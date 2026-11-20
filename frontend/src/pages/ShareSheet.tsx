@@ -71,10 +71,10 @@ export default function ShareSheet({ group, onClose }: { group: GroupDetail; onC
     <Sheet title="Share summary" onClose={onClose}>
       {summary.isError && <p role="alert">Could not load the summary.</p>}
       <div className="flex flex-col gap-3">
-        <button type="button" disabled={!fresh} onClick={onText} className="min-h-11 rounded bg-emerald-700 px-3 font-semibold text-white disabled:opacity-50">
+        <button type="button" disabled={!fresh} onClick={onText} className="min-h-11 rounded-sm bg-primary-hover px-3 font-semibold text-on-primary disabled:opacity-50">
           Share as text
         </button>
-        <button type="button" disabled={!imageReady} onClick={onImage} className="min-h-11 rounded border border-emerald-700 px-3 font-semibold text-emerald-800 disabled:opacity-50">
+        <button type="button" disabled={!imageReady} onClick={onImage} className="min-h-11 rounded-sm border border-primary px-3 font-semibold text-owed disabled:opacity-50">
           Share as image
         </button>
         {manualText !== null && (
@@ -84,7 +84,7 @@ export default function ShareSheet({ group, onClose }: { group: GroupDetail; onC
             value={manualText}
             rows={Math.min(14, manualText.split("\n").length + 1)}
             ref={(el) => el?.select()}
-            className="w-full rounded border border-slate-300 p-2 font-mono text-sm"
+            className="w-full rounded-sm border border-line p-2 font-mono text-sm"
           />
         )}
       </div>

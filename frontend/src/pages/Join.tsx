@@ -37,13 +37,13 @@ export default function Join() {
     e.preventDefault();
     join.mutate();
   };
-  if (preview.isPending) return <p className="p-4 text-slate-500">Loading…</p>;
+  if (preview.isPending) return <p className="p-4 text-muted">Loading…</p>;
   if (preview.isError) {
     return (
       <main className="space-y-3 p-4">
-        <h1 className="text-2xl font-semibold">Link not found</h1>
+        <h1 className="text-xl font-semibold">Link not found</h1>
         <p>This invitation link is not valid.</p>
-        <Link to="/groups" className="inline-flex min-h-11 items-center text-emerald-700 underline">
+        <Link to="/groups" className="inline-flex min-h-11 items-center text-primary underline">
           Go to your groups
         </Link>
       </main>
@@ -55,8 +55,8 @@ export default function Join() {
   const unclaimed = preview.data.unclaimed_members;
   return (
     <main className="space-y-4 p-4">
-      <h1 className="break-words text-2xl font-semibold">Join {preview.data.group_name}</h1>
-      <p className="text-sm text-slate-600">
+      <h1 className="break-words text-xl font-semibold">Join {preview.data.group_name}</h1>
+      <p className="text-sm text-muted">
         {preview.data.currency} · {preview.data.member_names.join(", ")}
       </p>
       {unclaimed.length > 0 && (
@@ -69,7 +69,7 @@ export default function Join() {
               <li key={m.id}>
                 <button
                   type="button"
-                  className="min-h-11 w-full break-words rounded-lg border border-slate-300 px-3 text-left font-medium"
+                  className="min-h-11 w-full break-words rounded-md border border-line px-3 text-left font-medium"
                   disabled={claim.isPending}
                   onClick={() => claim.mutate(m.id)}
                 >
@@ -79,7 +79,7 @@ export default function Join() {
             ))}
           </ul>
           {claimError && (
-            <p role="alert" className="break-words text-sm text-red-700">
+            <p role="alert" className="break-words text-sm text-danger">
               {claimError}
             </p>
           )}
@@ -90,15 +90,15 @@ export default function Join() {
         {!signedIn && (
           <label className="block">
             <span className="text-sm">Your name</span>
-            <input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={name} onChange={(e) => setName(e.target.value)} required />
+            <input className="min-h-11 w-full rounded-md border border-line px-3" value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
         )}
         {error && (
-          <p role="alert" className="break-words text-sm text-red-700">
+          <p role="alert" className="break-words text-sm text-danger">
             {error}
           </p>
         )}
-        <button type="submit" className="min-h-11 w-full rounded-lg bg-emerald-600 font-medium text-white" disabled={join.isPending}>
+        <button type="submit" className="min-h-11 w-full rounded-md bg-primary font-medium text-on-primary" disabled={join.isPending}>
           Join
         </button>
       </form>

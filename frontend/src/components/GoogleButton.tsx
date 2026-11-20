@@ -50,7 +50,7 @@ export default function GoogleButton({
     <div data-testid="google-button" className="flex min-h-11 flex-col items-center">
       <span className="sr-only">Sign in with Google</span>
       <div ref={slot} />
-      {!clientId && <p className="text-sm text-slate-500">Google sign-in is not set up in this build.</p>}
+      {!clientId && <p className="text-sm text-muted">Google sign-in is not set up in this build.</p>}
     </div>
   );
 }

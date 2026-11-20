@@ -9,7 +9,7 @@ import GuestSignOutSheet from "./GuestSignOutSheet";
 // EUR first (the default for this household), then common ECB-published currencies.
 export const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "TRY", "JPY", "CAD", "AUD"];
 
-const badge = "rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700";
+const badge = "rounded-full bg-sunken px-2 py-0.5 text-xs text-muted";
 
 export function NewGroupSheet({ hasMainGroup, onClose }: { hasMainGroup: boolean; onClose: () => void }) {
   const qc = useQueryClient();
@@ -30,21 +30,21 @@ export function NewGroupSheet({ hasMainGroup, onClose }: { hasMainGroup: boolean
   };
   const error = create.error instanceof ApiError ? create.error.detail || create.error.code : null;
   return (
-    <div className="fixed inset-0 z-10 flex items-end justify-center bg-black/40">
+    <div className="fixed inset-0 z-10 flex items-end justify-center bg-overlay/60">
       <form
         role="dialog"
         aria-label="New group"
         onSubmit={submit}
-        className="w-full max-w-[480px] space-y-3 rounded-t-2xl bg-white p-4"
+        className="w-full max-w-[480px] space-y-3 rounded-t-sheet bg-card p-4"
       >
         <h2 className="text-lg font-semibold">New group</h2>
         <label className="block">
           <span className="text-sm">Name</span>
-          <input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input className="min-h-11 w-full rounded-md border border-line px-3" value={name} onChange={(e) => setName(e.target.value)} required />
         </label>
         <label className="block">
           <span className="text-sm">Currency</span>
-          <select className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+          <select className="min-h-11 w-full rounded-md border border-line px-3" value={currency} onChange={(e) => setCurrency(e.target.value)}>
             {CURRENCIES.map((c) => (
               <option key={c}>{c}</option>
             ))}
@@ -55,15 +55,15 @@ export function NewGroupSheet({ hasMainGroup, onClose }: { hasMainGroup: boolean
           <span>Make this my main group</span>
         </label>
         {error && (
-          <p role="alert" className="break-words text-sm text-red-700">
+          <p role="alert" className="break-words text-sm text-danger">
             {error}
           </p>
         )}
         <div className="flex gap-3">
-          <button type="button" className="min-h-11 flex-1 rounded-lg border border-slate-300" onClick={onClose}>
+          <button type="button" className="min-h-11 flex-1 rounded-md border border-line" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="min-h-11 flex-1 rounded-lg bg-emerald-600 font-medium text-white" disabled={create.isPending}>
+          <button type="submit" className="min-h-11 flex-1 rounded-md bg-primary font-medium text-on-primary" disabled={create.isPending}>
             Create group
           </button>
         </div>
@@ -90,16 +90,16 @@ export default function Groups() {
   return (
     <main className="space-y-4 p-4">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Groups</h1>
-        <button className="min-h-11 px-2 text-sm text-slate-600 underline" onClick={() => (me && !me.authenticated ? setGuestSignOut(true) : logout.mutate())}>
+        <h1 className="text-xl font-semibold">Groups</h1>
+        <button className="min-h-11 px-2 text-sm text-muted underline" onClick={() => (me && !me.authenticated ? setGuestSignOut(true) : logout.mutate())}>
           Sign out
         </button>
       </header>
-      {groups.isPending && <p className="text-slate-500">Loading…</p>}
+      {groups.isPending && <p className="text-muted">Loading…</p>}
       <ul className="space-y-2">
         {groups.data?.map((g) => (
           <li key={g.id}>
-            <Link to={`/g/${g.id}/expenses`} className="flex min-h-11 items-center justify-between gap-2 rounded-lg border border-slate-200 p-3">
+            <Link to={`/g/${g.id}/expenses`} className="flex min-h-11 items-center justify-between gap-2 rounded-md border border-line p-3">
               <span className="min-w-0 break-words font-medium">{g.name}</span>
               <span className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                 <span className={badge}>{g.currency}</span>
@@ -111,7 +111,7 @@ export default function Groups() {
         ))}
       </ul>
       {signedIn && (
-        <button className="min-h-11 w-full rounded-lg bg-emerald-600 font-medium text-white" onClick={() => setSheet(true)}>
+        <button className="min-h-11 w-full rounded-md bg-primary font-medium text-on-primary" onClick={() => setSheet(true)}>
           New group
         </button>
       )}

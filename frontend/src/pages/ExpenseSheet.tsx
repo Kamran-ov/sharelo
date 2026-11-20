@@ -10,9 +10,9 @@ import { formatCents, parseAmount } from "../lib/money";
 import { descriptionSuggestions, detectPreset, otherOf, whoFromDefault, type Who } from "../lib/presets";
 import { CURRENCIES } from "./Groups";
 
-const input = "min-h-11 w-full rounded-lg border border-slate-300 px-3";
+const input = "min-h-11 w-full rounded-md border border-line px-3";
 const seg = (on: boolean) =>
-  `min-h-11 flex-1 rounded-lg border px-2 text-sm ${on ? "border-emerald-600 bg-emerald-50 font-semibold" : "border-slate-300"}`;
+  `min-h-11 flex-1 rounded-md border px-2 text-sm ${on ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`;
 
 export interface SheetSubmit {
   values: FormValues;
@@ -140,7 +140,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
     return (
       <Sheet title="Edit expense" onClose={onClose}>
         <p className="mb-4">{editing.description}</p>
-        <p role="note" className="mb-4 rounded-lg bg-slate-100 p-3 text-sm">
+        <p role="note" className="mb-4 rounded-md bg-sunken p-3 text-sm">
           multiple payers — edit not supported yet
         </p>
         <DeleteBlock confirm={confirmDelete} setConfirm={setConfirmDelete} onDelete={onDelete} />
@@ -154,7 +154,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
         <label className="block">
           <span className="text-sm">Amount ({v.currency})</span>
           <input
-            className={`${input} text-2xl`}
+            className={`${input} text-xl`}
             inputMode="decimal"
             autoFocus
             value={v.amountText}
@@ -163,13 +163,13 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
           />
         </label>
         {foreign && cents !== null && (
-          <p className="text-sm text-slate-600" data-testid="converted">
+          <p className="text-sm text-muted" data-testid="converted">
             {preview !== null ? `≈ ${formatCents(preview)} ${group.currency}` : rateQuery.isPending && !editing ? "Looking up the rate…" : ""}
           </p>
         )}
         {foreign && noRate && !editing && (
           <label className="block">
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className="text-sm text-danger">
               No rate for {v.currency} on {v.date}. Enter one ({group.currency} per 1 {v.currency}).
             </p>
             <input className={input} inputMode="decimal" aria-label="Manual rate" value={v.manualRate} onChange={(e) => set({ manualRate: e.target.value })} />
@@ -186,7 +186,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
               <button
                 key={s.description}
                 type="button"
-                className="min-h-11 rounded-full border border-slate-300 px-3 text-sm"
+                className="min-h-11 rounded-full border border-line px-3 text-sm"
                 onClick={() => {
                   const next = whoFromDefault(defaults[String(s.category)], ids.length, v.payerId);
                   set({ description: s.description, category: s.category, who: next.who, percent: next.percent, mode: "none" });
@@ -244,7 +244,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
               </button>
             ))}
           </div>
-          {v.who === null && v.mode === "exact" && <p className="mt-1 text-sm text-slate-600">Custom split — edit in Advanced</p>}
+          {v.who === null && v.mode === "exact" && <p className="mt-1 text-sm text-muted">Custom split — edit in Advanced</p>}
           {two && v.who === "custom" && v.mode === "none" && (
             <label className="mt-2 block">
               <span className="text-sm">
@@ -255,7 +255,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
           )}
         </div>
 
-        <details open={v.mode !== "none"} className="rounded-lg border border-slate-200 p-3">
+        <details open={v.mode !== "none"} className="rounded-md border border-line p-3">
           <summary className="min-h-11 cursor-pointer leading-[2.75rem]">Advanced</summary>
           <div className="space-y-3">
             <label className="block">
@@ -281,7 +281,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
                 </label>
               ))}
             {v.mode === "exact" && (
-              <p className="text-sm text-slate-600">{cents === null ? "" : `Remaining ${formatCents(cents - exactSum(v, group))}`}</p>
+              <p className="text-sm text-muted">{cents === null ? "" : `Remaining ${formatCents(cents - exactSum(v, group))}`}</p>
             )}
             {v.mode === "shares" &&
               group.members.map((m) => (
@@ -301,11 +301,11 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
         </details>
 
         {error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
-        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-lg bg-emerald-600 font-medium text-white disabled:bg-slate-300">
+        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-md bg-primary font-medium text-on-primary disabled:bg-line">
           Save
         </button>
         {editing && <DeleteBlock confirm={confirmDelete} setConfirm={setConfirmDelete} onDelete={onDelete} />}
@@ -317,19 +317,19 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
 function DeleteBlock({ confirm, setConfirm, onDelete }: { confirm: boolean; setConfirm: (b: boolean) => void; onDelete?: () => void }) {
   if (!confirm) {
     return (
-      <button type="button" className="min-h-11 w-full rounded-lg border border-red-300 text-red-700" onClick={() => setConfirm(true)}>
+      <button type="button" className="min-h-11 w-full rounded-md border border-danger text-danger" onClick={() => setConfirm(true)}>
         Delete
       </button>
     );
   }
   return (
-    <div role="alertdialog" aria-label="Confirm delete" className="space-y-2 rounded-lg border border-red-300 p-3">
+    <div role="alertdialog" aria-label="Confirm delete" className="space-y-2 rounded-md border border-danger p-3">
       <p>Delete this expense?</p>
       <div className="flex gap-2">
-        <button type="button" className="min-h-11 flex-1 rounded-lg border border-slate-300" onClick={() => setConfirm(false)}>
+        <button type="button" className="min-h-11 flex-1 rounded-md border border-line" onClick={() => setConfirm(false)}>
           Keep
         </button>
-        <button type="button" className="min-h-11 flex-1 rounded-lg bg-red-600 text-white" onClick={onDelete}>
+        <button type="button" className="min-h-11 flex-1 rounded-md bg-danger text-on-primary" onClick={onDelete}>
           Delete for good
         </button>
       </div>

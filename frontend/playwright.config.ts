@@ -24,6 +24,8 @@ export default defineConfig({
     hasTouch: true,
     isMobile: true,
     permissions: ["clipboard-read", "clipboard-write"],
+    // Optional: a Chromium that is not the one pinned @playwright/test downloads (cloud image). Unset in CI.
+    launchOptions: process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
   },
   // `preview` goes through vite preview (4173); `served` is Django serving the built SPA itself (8002).
   projects: [
