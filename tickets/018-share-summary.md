@@ -4,7 +4,7 @@ title: Share a group summary to WhatsApp (text and image)
 status: in-review
 risk: normal
 depends_on: [017]
-pr:
+pr: 27
 ---
 
 ## Goal
