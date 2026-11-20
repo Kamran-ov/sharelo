@@ -12,9 +12,10 @@ from accounts.api.throttles import AuthThrottle
 from accounts.services import auth, google
 from accounts.services.access import GUEST_KEY
 from ledger.models import Member
+from ledger.services import groups
 
 
-def me_body(request) -> dict:
+def me_body(request, guest_refused: list[dict] | None = None) -> dict:
     user = request.user
     profile = getattr(user, "profile", None) if user.is_authenticated else None
     ids = request.session.get(GUEST_KEY) or []
@@ -30,17 +31,25 @@ def me_body(request) -> dict:
             "main_group_id": profile.main_group_id,
         },
         "guest_memberships": guests,
+        "guest_refused": guest_refused or [],
         "google_enabled": bool(settings.GOOGLE_CLIENT_ID),
     }
 
 
 def sign_in(request, user) -> Response:
     # login() flushes the session when the user changes; guest memberships must survive it.
-    guest_ids = request.session.get(GUEST_KEY)
+    guest_ids = list(request.session.get(GUEST_KEY) or [])
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-    if guest_ids:
+    refused: list[dict] = []
+    profile = getattr(user, "profile", None)
+    if guest_ids and profile is None:
         request.session[GUEST_KEY] = guest_ids
-    return Response(me_body(request))
+    elif guest_ids:
+        # The session's guest members become this profile's; only the refused ones stay guests.
+        result = groups.adopt_guest_members(profile, guest_ids)
+        request.session[GUEST_KEY] = result.kept
+        refused = [{"member_id": m, "group_id": g, "code": c} for m, g, c in result.refused]
+    return Response(me_body(request, refused))
 
 
 @method_decorator(ensure_csrf_cookie, name="get")
@@ -85,5 +94,9 @@ class GoogleView(CsrfProtectedAPIView):
 class LogoutView(CsrfProtectedAPIView):
     @extend_schema(request=None, responses=serializers.MeSerializer)
     def post(self, request):
+        # logout() flushes the session; free its guest names first so the link can offer them again.
+        ids = request.session.get(GUEST_KEY) or []
+        for member in Member.objects.filter(id__in=ids):
+            groups.release_guest(member)
         logout(request)
         return Response(me_body(request))

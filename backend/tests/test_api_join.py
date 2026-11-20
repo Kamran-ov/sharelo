@@ -15,6 +15,7 @@ def test_join_preview_is_public_and_unknown_token_404(world):
         "group_name": "Rome",
         "currency": "EUR",
         "member_names": ["Ann", "Bea", "Gus"],
+        "unclaimed_members": [],
     }
     assert APIClient().get("/api/join/nope/").status_code == 404
 

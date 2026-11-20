@@ -16,6 +16,7 @@ OK_STATUSES = {200, 201, 204}
 ROUTES = [
     ("groups/{g}/", "GET", None, 200),
     ("groups/{g}/link", "POST", lambda w: {"active": False}, 401),
+    ("groups/{g}/members/", "POST", lambda w: {"display_name": "Janet"}, 201),
     ("groups/{g}/category-defaults/", "GET", None, 200),
     ("groups/{g}/category-defaults/", "PUT", lambda w: {}, 200),
     ("groups/{g}/expenses/", "GET", None, 200),

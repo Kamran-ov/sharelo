@@ -731,6 +731,63 @@
                 }
             }
         },
+        "/api/groups/{group_id}/members/": {
+            "post": {
+                "operationId": "groups_members_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Member"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/groups/{group_id}/move-to-home": {
             "post": {
                 "operationId": "groups_move_to_home_create",
@@ -1433,6 +1490,62 @@
                 }
             }
         },
+        "/api/join/{token}/claim": {
+            "post": {
+                "operationId": "join_claim_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "join"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JoinResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/me": {
             "get": {
                 "operationId": "me_retrieve",
@@ -1530,6 +1643,17 @@
                     "children",
                     "id",
                     "name"
+                ]
+            },
+            "Claim": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "member_id"
                 ]
             },
             "ExpenseOut": {
@@ -1823,6 +1947,25 @@
                     "name"
                 ]
             },
+            "GuestRefused": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    },
+                    "group_id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "group_id",
+                    "member_id"
+                ]
+            },
             "Join": {
                 "type": "object",
                 "properties": {
@@ -1849,12 +1992,19 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "unclaimed_members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UnclaimedMember"
+                        }
                     }
                 },
                 "required": [
                     "currency",
                     "group_name",
-                    "member_names"
+                    "member_names",
+                    "unclaimed_members"
                 ]
             },
             "JoinResult": {
@@ -1929,6 +2079,12 @@
                             "type": "integer"
                         }
                     },
+                    "guest_refused": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GuestRefused"
+                        }
+                    },
                     "google_enabled": {
                         "type": "boolean"
                     }
@@ -1937,6 +2093,7 @@
                     "authenticated",
                     "google_enabled",
                     "guest_memberships",
+                    "guest_refused",
                     "profile"
                 ]
             },
@@ -1979,13 +2136,17 @@
                     },
                     "is_guest": {
                         "type": "boolean"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/StatusEnum"
                     }
                 },
                 "required": [
                     "display_name",
                     "id",
                     "is_guest",
-                    "profile_id"
+                    "profile_id",
+                    "status"
                 ]
             },
             "MemberBalance": {
@@ -2462,6 +2623,15 @@
                 "type": "string",
                 "description": "* `equal` - Equal\n* `personal` - Personal\n* `full_for_other` - Full For Other\n* `percentage` - Percentage\n* `exact` - Exact\n* `shares` - Shares"
             },
+            "StatusEnum": {
+                "enum": [
+                    "joined",
+                    "guest",
+                    "unclaimed"
+                ],
+                "type": "string",
+                "description": "* `joined` - joined\n* `guest` - guest\n* `unclaimed` - unclaimed"
+            },
             "SubCategory": {
                 "type": "object",
                 "properties": {
@@ -2503,6 +2673,21 @@
                     "from_member",
                     "to_member",
                     "to_profile"
+                ]
+            },
+            "UnclaimedMember": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "id"
                 ]
             }
         },

@@ -51,6 +51,10 @@ class JoinSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length=100)
 
 
+class ClaimSerializer(serializers.Serializer):
+    member_id = serializers.IntegerField()
+
+
 class CategoryDefaultSerializer(serializers.Serializer):
     preset = serializers.CharField()
     params = serializers.DictField(required=False)
@@ -150,6 +154,7 @@ class MemberSerializer(serializers.Serializer):
     display_name = serializers.CharField()
     profile_id = serializers.IntegerField(allow_null=True)
     is_guest = serializers.BooleanField()
+    status = serializers.ChoiceField(choices=["joined", "guest", "unclaimed"])
 
 
 class GroupSummarySerializer(serializers.Serializer):
@@ -166,10 +171,16 @@ class GroupDetailSerializer(GroupSummarySerializer):
     my_member_id = serializers.IntegerField()
 
 
+class UnclaimedMemberSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    display_name = serializers.CharField()
+
+
 class JoinPreviewSerializer(serializers.Serializer):
     group_name = serializers.CharField()
     currency = serializers.CharField()
     member_names = serializers.ListField(child=serializers.CharField())
+    unclaimed_members = UnclaimedMemberSerializer(many=True)
 
 
 class JoinResultSerializer(serializers.Serializer):

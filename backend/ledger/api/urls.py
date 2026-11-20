@@ -7,6 +7,8 @@ urlpatterns = [
     path("groups/<int:group_id>/", views.GroupDetailView.as_view()),
     path("groups/<int:group_id>/link", views.LinkView.as_view()),
     path("join/<str:token>/", views.JoinView.as_view()),
+    path("join/<str:token>/claim", views.ClaimView.as_view()),
+    path("groups/<int:group_id>/members/", views.MemberListView.as_view()),
     path("categories/", views.CategoryListView.as_view()),
     path("groups/<int:group_id>/category-defaults/", views.CategoryDefaultsView.as_view()),
     path("groups/<int:group_id>/expenses/", views.ExpenseListView.as_view()),
