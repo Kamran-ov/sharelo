@@ -4,7 +4,7 @@ title: Bank import review list and shop rules
 status: in-review
 risk: normal
 depends_on: [020]
-pr:
+pr: 30
 ---
 
 ## Goal
