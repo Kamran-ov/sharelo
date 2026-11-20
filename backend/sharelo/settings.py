@@ -101,6 +101,12 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "StatusEnum": ["joined", "guest", "unclaimed"],
         "BankRowStatusEnum": "importers.models.BankRowStatus",
+        # ShopRule.preset shares the choice set with Expense.split_type: keep one name.
+        "SplitTypeEnum": "ledger.models.SplitType",
+        # Two `source` fields (expense, bank row) with different choices: name both, so the
+        # existing SourceEnum keeps its name.
+        "SourceEnum": "ledger.models.Source",
+        "BankSourceEnum": "importers.models.BankSource",
     },
 }
 

@@ -236,6 +236,31 @@ def delete_expense(expense: Expense) -> None:
     expense.save(update_fields=["deleted_at", "updated_at"])
 
 
+def _preset_values(
+    group: Group,
+    *,
+    preset: str,
+    payer_id: int,
+    member_ids: Collection[int] | None,
+    params: Mapping[str, Any] | None,
+    date: datetime.date,
+    amount_cents: int | None,
+    rest: dict[str, Any],
+) -> tuple[int, dict[int, int]]:
+    """Amount and splits for a preset; the one computation behind create and revive."""
+    if amount_cents is None:
+        original_amount = rest.get("original_amount_cents")
+        original_currency = rest.get("original_currency")
+        if original_amount is None or original_currency is None:
+            raise LedgerError("missing_amount", "give amount_cents or the original amount")
+        amount_cents, rest["rate_used"] = resolve_foreign_amount(
+            group, date, original_amount, original_currency, rest.get("rate_used")
+        )
+    if member_ids is None:
+        member_ids = sorted(group.members.values_list("id", flat=True))
+    return amount_cents, split_for_preset(preset, amount_cents, member_ids, payer_id, params)
+
+
 def create_expense_from_preset(
     group: Group,
     *,
@@ -250,17 +275,16 @@ def create_expense_from_preset(
     amount_cents: int | None = None,
     **rest: Any,
 ) -> Expense:
-    if amount_cents is None:
-        original_amount = rest.get("original_amount_cents")
-        original_currency = rest.get("original_currency")
-        if original_amount is None or original_currency is None:
-            raise LedgerError("missing_amount", "give amount_cents or the original amount")
-        amount_cents, rest["rate_used"] = resolve_foreign_amount(
-            group, date, original_amount, original_currency, rest.get("rate_used")
-        )
-    if member_ids is None:
-        member_ids = sorted(group.members.values_list("id", flat=True))
-    splits = split_for_preset(preset, amount_cents, member_ids, payer_id, params)
+    amount_cents, splits = _preset_values(
+        group,
+        preset=preset,
+        payer_id=payer_id,
+        member_ids=member_ids,
+        params=params,
+        date=date,
+        amount_cents=amount_cents,
+        rest=rest,
+    )
     return create_expense(
         group,
         description=description,
@@ -273,6 +297,54 @@ def create_expense_from_preset(
         split_type=preset,
         **rest,
     )
+
+
+def revive_expense_from_preset(
+    expense: Expense,
+    *,
+    preset: str,
+    payer_id: int,
+    member_ids: Collection[int] | None = None,
+    params: Mapping[str, Any] | None = None,
+    description: str,
+    date: datetime.date,
+    category: Category,
+    amount_cents: int | None = None,
+    **rest: Any,
+) -> Expense:
+    """Bring back a soft-deleted expense with a new decision, keeping its id and external_id.
+
+    Needed because a soft-deleted expense still holds its (source, external_id): creating a new
+    one for the same imported row would be refused as a duplicate.
+    """
+    if expense.deleted_at is None:
+        raise LedgerError("expense_not_deleted", f"expense {expense.pk}")
+    group = expense.group
+    amount_cents, splits = _preset_values(
+        group,
+        preset=preset,
+        payer_id=payer_id,
+        member_ids=member_ids,
+        params=params,
+        date=date,
+        amount_cents=amount_cents,
+        rest=rest,
+    )
+    with transaction.atomic():
+        expense.deleted_at = None
+        update_expense(
+            expense,
+            description=description,
+            amount_cents=amount_cents,
+            currency=group.currency,
+            date=date,
+            category=category,
+            payers={payer_id: amount_cents},
+            splits=splits,
+            split_type=preset,
+            **rest,
+        )
+    return expense
 
 
 def month_totals(rows: QuerySet[Expense], months: Collection[str]) -> dict[str, int]:

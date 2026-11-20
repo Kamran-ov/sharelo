@@ -143,6 +143,42 @@ Codes: 400 `unknown_bank_format` (detail: `revolut missing: …; wise missing: �
 `bad_bank_row` (every unreadable line listed; nothing is staged), 400 `file_too_large` (> 2 MiB),
 400 `invalid_request` (no `file`), 415 for a non-multipart body.
 
+## Bank review list and shop rules (ticket 021)
+
+Rows are the uploader's (as above): another member's row is 404. Shop rules are group data: every
+member reads and edits them.
+
+`GET groups/{id}/bank-rows/` → `{rows, category_splits}`. `rows`: my `pending` rows of every
+batch, ordered by date, each with `suggestion: {category, category_name, decision, preset,
+params, basis, rule}`. `decision` (`shared`/`personal`) is the highlighted button; `preset` and
+`params` are the split the **Shared** button uses (never `personal`). Suggestion order: the
+longest shop rule whose text is in the merchant or description (case-insensitive) → `basis
+rule`; else the group's latest decided row for the same shop (preset and params from that row,
+category from its expense) → `history`; else Uncategorized › General with its default →
+`default`. A rule or history split the members no longer fit falls back to the category split.
+`category_splits`: `{<leaf category id>: {preset, params}}` — the Shared split for a category
+(its default; `equal` when that is `personal` or no longer valid). When the user changes a row's
+category the page shows and sends `category_splits[new]`; choosing the suggested category again
+restores the suggestion's own split. The server applies the same rule when `preset` is omitted.
+
+`POST groups/{id}/bank-rows/{row}/resolve` `{decision: shared|personal|skip, category?, preset?,
+params?, remember?}` → 200 `{row, expense, rule}`. Shared/Personal create the expense with
+`create_expense_from_preset` (payer = the uploader, `source` = the bank, `external_id` = the
+row's, foreign rows converted at the row's date); Skip creates nothing. `remember` creates or
+updates the shop rule for the row's merchant (else description). Presets accept the sheet's
+`half` and `percent_payer`. 400 codes: `row_already_resolved`, `shared_needs_split` (Shared with
+`personal`), `remember_needs_category` (remember with skip), `no_rate`, `duplicate_external_id`
+(the same bank row is already an expense in another group), `invalid_params`.
+
+`POST groups/{id}/bank-rows/{row}/undo` → 200 row, back to `pending`; its expense is soft-deleted
+(balances revert). Deciding again revives that same expense (a deleted expense keeps its
+`(source, external_id)`). 400 `row_not_resolved` on a pending row. A remembered rule stays.
+
+`GET groups/{id}/shop-rules/` → live rules `{id, match_text, category, category_name, preset,
+params, created_by, last_used_at}`; `POST` → 201; `PATCH groups/{id}/shop-rules/{rule}/`;
+`DELETE` → 204 (soft). 400 `duplicate_rule` (same text, case-insensitive), `invalid_category`
+(a main type), `invalid_params`/`empty_members` (a split the group cannot take).
+
 # Frontend
 
 `vite dev` (port 5173) and `vite preview` (port 4173) both proxy `/api` to Django with `changeOrigin: false`.

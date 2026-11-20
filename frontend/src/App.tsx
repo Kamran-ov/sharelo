@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RequireAccess } from "./auth";
 import InstallHint from "./components/InstallHint";
+import BankImport from "./pages/BankImport";
 import Balances from "./pages/Balances";
 import Expenses from "./pages/Expenses";
 import GroupShell from "./pages/GroupShell";
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/g/:id" element={<GroupShell />}>
             <Route index element={<Navigate to="expenses" replace />} />
             <Route path="expenses" element={<Expenses />} />
+            <Route path="bank-import" element={<BankImport />} />
             <Route path="balances" element={<Balances />} />
             <Route path="recurring" element={<Recurring />} />
             <Route path="settings" element={<Settings />} />
