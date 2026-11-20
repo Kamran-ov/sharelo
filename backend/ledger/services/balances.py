@@ -13,11 +13,14 @@ number of transfers is below the number of people involved.
 
 import datetime
 
+from django.db import IntegrityError, transaction
 from django.db.models import Sum
 from django.utils import timezone
 
 from ledger.errors import LedgerError
-from ledger.models import ExpensePayer, ExpenseSplit, Group, Member, Settlement
+from ledger.models import ExpensePayer, ExpenseSplit, Group, ImportBatch, Member, Settlement, Source
+
+_DUPLICATE_CONSTRAINT = "uniq_settlement_source_external_id"
 
 
 def _sum_by_member(rows, field: str) -> dict[int, int]:
@@ -89,6 +92,10 @@ def record_settlement(
     amount_cents: int,
     date: datetime.date,
     notes: str = "",
+    *,
+    source: str = Source.MANUAL,
+    external_id: str | None = None,
+    import_batch: ImportBatch | None = None,
 ) -> Settlement:
     if amount_cents <= 0:
         raise LedgerError("amount_not_positive", f"amount_cents={amount_cents}")
@@ -96,15 +103,27 @@ def record_settlement(
         raise LedgerError("same_member", "a settlement needs two different members")
     if from_member.group_id != group.pk or to_member.group_id != group.pk:
         raise LedgerError("member_not_in_group", "settlement members must belong to the group")
-    return Settlement.objects.create(
-        group=group,
-        from_member=from_member,
-        to_member=to_member,
-        amount_cents=amount_cents,
-        currency=group.currency,
-        date=date,
-        notes=notes,
-    )
+    if source not in Source.values:
+        raise LedgerError("invalid_source", repr(source))
+    try:
+        with transaction.atomic():  # savepoint: keeps a caller's outer transaction usable
+            return Settlement.objects.create(
+                group=group,
+                from_member=from_member,
+                to_member=to_member,
+                amount_cents=amount_cents,
+                currency=group.currency,
+                date=date,
+                notes=notes,
+                source=source,
+                external_id=external_id,
+                import_batch=import_batch,
+            )
+    except IntegrityError as exc:
+        constraint = getattr(getattr(exc.__cause__, "diag", None), "constraint_name", None)
+        if constraint == _DUPLICATE_CONSTRAINT:
+            raise LedgerError("duplicate_external_id", f"{source}/{external_id}") from exc
+        raise
 
 
 def delete_settlement(group: Group, settlement_id: int) -> None:

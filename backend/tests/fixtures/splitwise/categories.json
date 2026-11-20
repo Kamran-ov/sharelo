@@ -1,0 +1,80 @@
+{
+ "categories": [
+  {
+   "id": 1,
+   "name": "Entertainment",
+   "subcategories": [
+    {
+     "id": 5,
+     "name": "Other"
+    },
+    {
+     "id": 6,
+     "name": "Games"
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "name": "Food and drink",
+   "subcategories": [
+    {
+     "id": 12,
+     "name": "Groceries"
+    },
+    {
+     "id": 13,
+     "name": "Dining out"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "name": "Home",
+   "subcategories": [
+    {
+     "id": 28,
+     "name": "Other"
+    },
+    {
+     "id": 29,
+     "name": "Rent"
+    }
+   ]
+  },
+  {
+   "id": 40,
+   "name": "Life",
+   "subcategories": [
+    {
+     "id": 41,
+     "name": "Clothing"
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "name": "Transportation",
+   "subcategories": [
+    {
+     "id": 32,
+     "name": "Hotel"
+    },
+    {
+     "id": 33,
+     "name": "Taxi"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Uncategorized",
+   "subcategories": [
+    {
+     "id": 18,
+     "name": "General"
+    }
+   ]
+  }
+ ]
+}
