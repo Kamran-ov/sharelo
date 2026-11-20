@@ -303,3 +303,25 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 017: result review, head ee27e3d
 - Verdict: ACCEPT — merge. The backend KEY red is a guard-dropping `sed` with restore and an empty `git status`. The e2e KEY red mutates the join-preview filter, because the UI never offers a claimed name. CI 44769628378 is green (test, e2e on ubuntu-24.04), checked by the reviewer. The seven PNGs I opened match their Acceptance views, and the deleted-profile watch item has an outcome with a test. Plan change 2 lowers existing main-group Home totals that held guest shares; that is correct by FACTS and must be noted at merge.
 - Worth remembering: when the UI cannot reach a refused state, mutating the server guard leaves the e2e KEY green. The e2e needs its own mutation aimed at what the page shows (here, the preview filter), and the report should say so rather than claim a red it cannot produce.
+
+- Ticket 018: plan review, head fd0ddb3
+- Verdict: REVISE. Two items:
+  - The summary must be current when the user taps Share. Today only settle, undo and move-to-home invalidate it, while expense mutations leave a cached summary and its pre-rendered PNG. Add a re-share test.
+  - Name the behaviour when neither Web Share nor the clipboard is usable (plain http, `writeText` rejecting), with a vitest.
+  - All four assumptions are accepted.
+- Worth remembering: "fetch when the sheet opens" plus "enable once data is ready" shares cached data in TanStack Query. A share or export built from a pre-rendered snapshot needs a freshness rule tied to every mutation that changes its numbers, not only the ones on the same page.
+
+- Ticket 018: plan review round 2, head d5a72c4
+- Verdict: ACCEPT PLAN. Both items are closed:
+  - Freshness rests on one rule: the sheet is mounted only while open, with `staleTime`/`gcTime` 0 and `refetchOnMount: "always"`, and the buttons are disabled while `isFetching`. There is no list of invalidation sites to maintain.
+  - The share fallbacks end in named outcomes, including a "manual" path with a selectable textarea.
+- Worth remembering: a freshness rule that removes the cache entirely beats one that lists invalidation sites, which go stale the moment someone adds a mutation. The test that guards it must seed the cache itself, though, or it passes vacuously.
+
+- Ticket 018: result review, head 7834bb2
+- Verdict: ACCEPT — merge. Everything is in place:
+  - Every planned test is listed and green, and the KEY red (direction swap) is shown with the command, the restore and an empty `git status`.
+  - CI 44775024853 is green (test, e2e), checked by the reviewer.
+  - The card PNG wraps the long name and the long description.
+  - The freshness vitest seeds the cache, asserts the new response and was shown biting.
+  - The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: the freshness guard for a share or export is only proven when its test seeds stale data itself and asserts that the *new* value is what gets shared. "Buttons disabled while fetching" alone passes even when the stale data would be sent.
