@@ -291,3 +291,23 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 015: result review round 2, head b2a6c26
 - Verdict: ACCEPT — merge. All six 0016797 items are closed: CI run 39171709101 is green (test, e2e) on the head, verified by the reviewer. The manifest PNG renders the name and 3 served icons, with assertions at `pwa.spec.ts:23-37`. The install-hint PNG shows the banner above Groups. The `sw.js` grep counts (offline 1, index 0) and the two-URL offline loop are quoted. `git status --short` after the restore is pasted, with the e2e twin green. The spec matches the build.
 - Worth remembering: for a property with no visual (a web manifest), a page that renders the fetched fields and the `<img>`s from the served URLs, next to the assertion `file:line`, is acceptable evidence when the browser refuses to display the raw resource. The unverified Docker/supercronic checksum path carries over to the first real deploy.
+
+
+- Ticket 016: plan review, head e28193f
+- Verdict: REVISE, five items. The 9 failing tests aren't enumerated with their path source. The Acceptance line on Docker timing before and after is missing. The Makefile `test:`/`/app` references and frontend `node_modules` on a clean checkout are claimed, not quoted. OQ1 is decided: the simulated pair is fine for the build, but merge waits on Kamran's laptop `USE_DOCKER=1 make test` paste. OQ2 is accepted.
+- Worth remembering: when the cloud session can't run the environment an Acceptance line names (Docker), a simulation is acceptable build evidence but does not satisfy the ticket. Make the operator's paste an explicit merge precondition at plan time, so it isn't found missing at result review.
+
+
+- Ticket 016: plan review round 2, head 3b3bae0
+- Verdict: ACCEPT PLAN. All six e28193f items are closed: the 9 tests are tabled with their path sources, the timings section is in, the Makefile, `/app` and `node_modules` facts are quoted, and the laptop Docker paste is now an explicit merge precondition. Watch: the subprocess settings-module assertion, and a fresh `docker compose build` before the paste.
+- Worth remembering: an anonymous volume such as `/app/node_modules` under a bind mount is seeded from the image only when it is created. So a "clean checkout" Docker run proves the deps only if the image was rebuilt after the last `package.json` change.
+
+
+- Ticket 016: result review, head b3f3021
+- Verdict: REVISE, four items: the laptop Docker paste is still missing (the merge precondition: backend 409/0, vitest, KEY red/green under Docker, Docker timings); CI isn't cited (run 40121066931 was in progress); the KEY restore and `git status --short` are prose rather than pasted; and the planned "login test passes under MD5" isn't shown. Accepted: all planned tests green, the SETTINGS_MODULE assertion, cloud 123.67 s → 22.40 s, and the simulation labelled as one.
+- Worth remembering: setting an operator-only merge precondition at plan time worked. The REPORT asked for the paste instead of claiming it, so the result review is a quick wait-on-Kamran rather than an argument over whether a simulation is good enough.
+
+
+- Ticket 016: result review round 2, head b3f3021 (REPORT updated, sha unchanged)
+- Verdict: ACCEPT — merge. The laptop paste checks out: 409 passed in 20.25 s under `sharelo.settings_test` at `/repo/backend`, and vitest is 91/91. CI run 40121066931 is green. The KEY under Docker was waived by the operator. The missing Docker "before" timing is accepted because it measures speed, not correctness, and the cloud runs already show it (123.67 s → 22.40 s).
+- Worth remembering: when the only missing evidence is an operator paste, a re-applied label on an unchanged sha is still a real review event, because the REPORT changed. Use the sha rule to avoid re-reviewing an unchanged REPORT; it shouldn't block evidence from arriving. Side finding for a new ticket: `test_spa_serving` `/login` deep link likely lacks `django_db`.
