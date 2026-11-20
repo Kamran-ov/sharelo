@@ -1,7 +1,7 @@
 ---
 id: 016
 title: Laptop Docker test run sees the whole repo; faster test hashing
-status: in-review
+status: done
 risk: normal
 depends_on: [015]
 pr: 23
