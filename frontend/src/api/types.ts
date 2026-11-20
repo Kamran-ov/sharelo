@@ -250,6 +250,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/members/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        post: operations["groups_members_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{group_id}/move-to-home": {
         parameters: {
             query?: never;
@@ -504,6 +526,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/join/{token}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["join_claim_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me": {
         parameters: {
             query?: never;
@@ -542,6 +580,9 @@ export interface components {
             id: number;
             name: string;
             children: components["schemas"]["SubCategory"][];
+        };
+        Claim: {
+            member_id: number;
         };
         ExpenseOut: {
             readonly id: number;
@@ -627,6 +668,11 @@ export interface components {
             is_main: boolean;
             link_active: boolean | null;
         };
+        GuestRefused: {
+            member_id: number;
+            group_id: number;
+            code: string;
+        };
         Join: {
             display_name: string;
         };
@@ -634,6 +680,7 @@ export interface components {
             group_name: string;
             currency: string;
             member_names: string[];
+            unclaimed_members: components["schemas"]["UnclaimedMember"][];
         };
         JoinResult: {
             group_id: number;
@@ -653,6 +700,7 @@ export interface components {
             authenticated: boolean;
             profile: components["schemas"]["MeProfile"] | null;
             guest_memberships: number[];
+            guest_refused: components["schemas"]["GuestRefused"][];
             google_enabled: boolean;
         };
         MeProfile: {
@@ -666,6 +714,7 @@ export interface components {
             display_name: string;
             profile_id: number | null;
             is_guest: boolean;
+            status: components["schemas"]["StatusEnum"];
         };
         MemberBalance: {
             member_id: number;
@@ -821,6 +870,13 @@ export interface components {
          * @enum {string}
          */
         SplitTypeEnum: "equal" | "personal" | "full_for_other" | "percentage" | "exact" | "shares";
+        /**
+         * @description * `joined` - joined
+         *     * `guest` - guest
+         *     * `unclaimed` - unclaimed
+         * @enum {string}
+         */
+        StatusEnum: "joined" | "guest" | "unclaimed";
         SubCategory: {
             id: number;
             name: string;
@@ -831,6 +887,10 @@ export interface components {
             amount_cents: number;
             can_move_to_home: boolean;
             to_profile: number | null;
+        };
+        UnclaimedMember: {
+            id: number;
+            display_name: string;
         };
     };
     responses: never;
@@ -1224,6 +1284,33 @@ export interface operations {
             };
         };
     };
+    groups_members_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Join"];
+                "application/x-www-form-urlencoded": components["schemas"]["Join"];
+                "multipart/form-data": components["schemas"]["Join"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Member"];
+                };
+            };
+        };
+    };
     groups_move_to_home_create: {
         parameters: {
             query?: never;
@@ -1563,6 +1650,33 @@ export interface operations {
                 "application/json": components["schemas"]["Join"];
                 "application/x-www-form-urlencoded": components["schemas"]["Join"];
                 "multipart/form-data": components["schemas"]["Join"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinResult"];
+                };
+            };
+        };
+    };
+    join_claim_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Claim"];
+                "application/x-www-form-urlencoded": components["schemas"]["Claim"];
+                "multipart/form-data": components["schemas"]["Claim"];
             };
         };
         responses: {

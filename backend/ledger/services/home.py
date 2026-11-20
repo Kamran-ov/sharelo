@@ -143,7 +143,7 @@ def home_spending_by_member(
     trips: Trips = "lines",
 ) -> dict[int, int]:
     _check_trips(trips)
-    result = analytics.spending_by_member(main_group, date_from, date_to)
+    result = analytics.spending_by_member(main_group, date_from, date_to, profiles_only=True)
     cells, _ = _trip_cells(main_group, date_from, date_to)
     if not cells:
         return result
@@ -167,7 +167,9 @@ def home_spending_by_category(
     _check_trips(trips)
     _check_level(level)
     result: dict[CategoryKey, int] = dict(
-        analytics.spending_by_category(main_group, date_from, date_to, level=level)
+        analytics.spending_by_category(
+            main_group, date_from, date_to, level=level, profiles_only=True
+        )
     )
     cells, _ = _trip_cells(main_group, date_from, date_to)
     for cell in cells:
@@ -183,7 +185,7 @@ def home_spending_by_month(
     trips: Trips = "lines",
 ) -> dict[str, int]:
     _check_trips(trips)
-    result = dict(analytics.spending_by_month(main_group, date_from, date_to))
+    result = dict(analytics.spending_by_month(main_group, date_from, date_to, profiles_only=True))
     cells, _ = _trip_cells(main_group, date_from, date_to)
     for cell in cells:
         month = cell.date.strftime("%Y-%m")

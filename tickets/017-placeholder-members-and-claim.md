@@ -1,10 +1,10 @@
 ---
 id: 017
 title: Placeholder members, claim by link, guest to account
-status: ready
+status: done
 risk: risky
 depends_on: [015]
-pr:
+pr: 25
 ---
 
 ## Goal

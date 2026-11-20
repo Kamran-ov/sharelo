@@ -23,8 +23,15 @@ class MeProfileSerializer(serializers.Serializer):
     main_group_id = serializers.IntegerField(allow_null=True)
 
 
+class GuestRefusedSerializer(serializers.Serializer):
+    member_id = serializers.IntegerField()
+    group_id = serializers.IntegerField()
+    code = serializers.CharField()
+
+
 class MeSerializer(serializers.Serializer):
     authenticated = serializers.BooleanField()
     profile = MeProfileSerializer(allow_null=True)
     guest_memberships = serializers.ListField(child=serializers.IntegerField())
+    guest_refused = GuestRefusedSerializer(many=True)
     google_enabled = serializers.BooleanField()

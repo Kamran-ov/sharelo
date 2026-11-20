@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { api, ApiError, type GroupSummary } from "../api";
 import { meKey, useMe } from "../auth";
+import GuestSignOutSheet from "./GuestSignOutSheet";
 
 // EUR first (the default for this household), then common ECB-published currencies.
 export const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "TRY", "JPY", "CAD", "AUD"];
@@ -76,6 +77,7 @@ export default function Groups() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [sheet, setSheet] = useState(false);
+  const [guestSignOut, setGuestSignOut] = useState(false);
   const groups = useQuery({ queryKey: ["groups"], queryFn: () => api<GroupSummary[]>("GET", "/groups/") });
   const logout = useMutation({
     mutationFn: () => api("POST", "/auth/logout"),
@@ -89,7 +91,7 @@ export default function Groups() {
     <main className="space-y-4 p-4">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Groups</h1>
-        <button className="min-h-11 px-2 text-sm text-slate-600 underline" onClick={() => logout.mutate()}>
+        <button className="min-h-11 px-2 text-sm text-slate-600 underline" onClick={() => (me && !me.authenticated ? setGuestSignOut(true) : logout.mutate())}>
           Sign out
         </button>
       </header>
@@ -113,6 +115,7 @@ export default function Groups() {
           New group
         </button>
       )}
+      {guestSignOut && <GuestSignOutSheet onClose={() => setGuestSignOut(false)} />}
       {sheet && <NewGroupSheet hasMainGroup={me?.profile?.main_group_id != null} onClose={() => setSheet(false)} />}
     </main>
   );

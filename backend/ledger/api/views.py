@@ -48,20 +48,21 @@ def _group_detail(request, group: Group, me: Member | None) -> dict:
         if profile is not None
         else None
     )
-    members = group.members.order_by("id")
     return {
         **_group_summary(profile, group, link.active if link is not None else None),
         "share_token": group.share_token,
-        "members": [
-            {
-                "id": m.id,
-                "display_name": m.display_name,
-                "profile_id": m.profile_id,
-                "is_guest": m.profile_id is None,
-            }
-            for m in members
-        ],
+        "members": [_member_row(m) for m in group.members.order_by("id")],
         "my_member_id": me.id if me else None,
+    }
+
+
+def _member_row(m: Member) -> dict:
+    return {
+        "id": m.id,
+        "display_name": m.display_name,
+        "profile_id": m.profile_id,
+        "is_guest": m.profile_id is None,
+        "status": m.claim_state,
     }
 
 
@@ -142,9 +143,18 @@ class JoinView(CsrfProtectedAPIView):
     @extend_schema(responses=sz.JoinPreviewSerializer)
     def get(self, request, token):
         group = _group_by_token(token)
-        names = list(group.members.order_by("id").values_list("display_name", flat=True))
+        members = list(group.members.order_by("id"))
         return Response(
-            {"group_name": group.name, "currency": group.currency, "member_names": names}
+            {
+                "group_name": group.name,
+                "currency": group.currency,
+                "member_names": [m.display_name for m in members],
+                "unclaimed_members": [
+                    {"id": m.id, "display_name": m.display_name}
+                    for m in members
+                    if m.claim_state == "unclaimed"
+                ],
+            }
         )
 
     @extend_schema(request=sz.JoinSerializer, responses=sz.JoinResultSerializer)
@@ -162,6 +172,34 @@ class JoinView(CsrfProtectedAPIView):
             if profile is None:
                 add_guest_member(request, member)
         return Response({"group_id": group.id, "member_id": member.id})
+
+
+@extend_schema(request=sz.ClaimSerializer, responses=sz.JoinResultSerializer)
+class ClaimView(CsrfProtectedAPIView):
+    def post(self, request, token):
+        data = sz.ClaimSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        profile = profile_of(request)
+        member = groups.claim_member(
+            token,
+            data.validated_data["member_id"],
+            list(request.session.get(GUEST_KEY) or []),
+            profile,
+        )
+        if profile is None:
+            add_guest_member(request, member)
+        return Response({"group_id": member.group_id, "member_id": member.id})
+
+
+@extend_schema(request=sz.JoinSerializer, responses=sz.MemberSerializer)
+class MemberListView(GroupScopedView):
+    def post(self, request, group_id):
+        data = sz.JoinSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        member = groups.add_placeholder_member(
+            self.group, data.validated_data["display_name"], self.me
+        )
+        return Response(_member_row(member), status=201)
 
 
 @extend_schema(responses=sz.CategoryTreeSerializer(many=True))

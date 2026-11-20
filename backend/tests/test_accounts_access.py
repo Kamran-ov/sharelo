@@ -112,18 +112,20 @@ def test_require_member_refusal_maps_to_404_with_same_body_as_missing(group):
 
 
 def test_guest_ids_survive_login_but_not_logout(group):
+    # 017: sign-in now adopts guest members, so the id survives the login flush only when it
+    # cannot be adopted (the profile already has a member in that group).
+    from accounts.services.auth import register
+
+    ann = register("ann@example.com", "correct-horse-battery-staple", "Ann")
+    Member.objects.create(group=group, display_name="Ann", profile=ann)
     guest = Member.objects.create(group=group, display_name="Gus")
     c = APIClient()
     s = c.session
     s["guest_member_ids"] = [guest.id]
     s.save()
     c.post(
-        "/api/auth/register",
-        {
-            "email": "ann@example.com",
-            "password": "correct-horse-battery-staple",
-            "display_name": "Ann",
-        },
+        "/api/auth/login",
+        {"email": "ann@example.com", "password": "correct-horse-battery-staple"},
         format="json",
     )
     assert c.get("/api/me").json()["guest_memberships"] == [guest.id]

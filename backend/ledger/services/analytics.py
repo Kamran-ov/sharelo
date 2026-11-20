@@ -20,7 +20,11 @@ from ledger.models import ExpenseSplit, Group, Member
 
 
 def _splits_in_range(
-    group: Group, date_from: datetime.date, date_to: datetime.date, member: Member | None
+    group: Group,
+    date_from: datetime.date,
+    date_to: datetime.date,
+    member: Member | None,
+    profiles_only: bool = False,
 ) -> QuerySet[ExpenseSplit]:
     _check_member(group, member)
     splits = ExpenseSplit.objects.filter(
@@ -29,6 +33,9 @@ def _splits_in_range(
         expense__date__gte=date_from,
         expense__date__lte=date_to,
     )
+    if profiles_only:
+        # Home analytics: guests and placeholders (no profile) are nobody's spending (FACTS).
+        splits = splits.filter(member__profile__isnull=False)
     return splits if member is None else splits.filter(member_id=member.id)
 
 
@@ -50,17 +57,20 @@ def spending_by_member(
     date_from: datetime.date,
     date_to: datetime.date,
     member: Member | None = None,
+    profiles_only: bool = False,
 ) -> dict[int, int]:
     _check_member(group, member)
     # The conditions sit inside the subquery so members with no spending stay in the result as 0.
     owed = (
-        _splits_in_range(group, date_from, date_to, None)
+        _splits_in_range(group, date_from, date_to, None, profiles_only)
         .filter(member_id=OuterRef("pk"))
         .values("member_id")
         .annotate(total=Sum("owed_cents"))
         .values("total")
     )
     members = Member.objects.filter(group=group)
+    if profiles_only:
+        members = members.filter(profile__isnull=False)
     if member is not None:
         members = members.filter(pk=member.id)
     rows = members.annotate(total=Coalesce(Subquery(owed), 0)).values_list("id", "total")
@@ -73,9 +83,10 @@ def spending_by_category(
     date_to: datetime.date,
     member: Member | None = None,
     level: int = 1,
+    profiles_only: bool = False,
 ) -> dict[int, int]:
     rows = (
-        _splits_in_range(group, date_from, date_to, member)
+        _splits_in_range(group, date_from, date_to, member, profiles_only)
         .annotate(cat=_category_key(level))
         .values("cat")
         .annotate(total=Sum("owed_cents"))
@@ -89,10 +100,11 @@ def spending_by_month(
     date_from: datetime.date,
     date_to: datetime.date,
     member: Member | None = None,
+    profiles_only: bool = False,
 ) -> dict[str, int]:
     # TruncMonth on a DateField applies no timezone shift: the group's day is the date given.
     rows = (
-        _splits_in_range(group, date_from, date_to, member)
+        _splits_in_range(group, date_from, date_to, member, profiles_only)
         .annotate(month=TruncMonth("expense__date"))
         .values("month")
         .annotate(total=Sum("owed_cents"))
@@ -107,9 +119,10 @@ def spending_by_member_and_category(
     date_to: datetime.date,
     member: Member | None = None,
     level: int = 1,
+    profiles_only: bool = False,
 ) -> dict[int, dict[int, int]]:
     rows = (
-        _splits_in_range(group, date_from, date_to, member)
+        _splits_in_range(group, date_from, date_to, member, profiles_only)
         .annotate(cat=_category_key(level))
         .values("member_id", "cat")
         .annotate(total=Sum("owed_cents"))
