@@ -4,7 +4,7 @@ import pytest
 from django.urls import URLPattern, URLResolver, get_resolver
 from rest_framework.test import APIClient
 
-from ledger.models import Expense, RecurringRule
+from ledger.models import Expense, ImportBatch, RecurringRule
 from ledger.services import balances, expenses, recurring
 
 pytestmark = pytest.mark.django_db
@@ -12,7 +12,7 @@ pytestmark = pytest.mark.django_db
 OK_STATUSES = {200, 201, 204}
 
 # (path template, method) -> body factory, and the status a guest of Rome gets by design.
-# Templates use {g} group, {e} expense, {r} rule, {s} settlement.
+# Templates use {g} group, {e} expense, {r} rule, {s} settlement, {b} bank import batch.
 ROUTES = [
     ("groups/{g}/", "GET", None, 200),
     ("groups/{g}/link", "POST", lambda w: {"active": False}, 401),
@@ -38,6 +38,10 @@ ROUTES = [
     ("groups/{g}/recurring/{r}/pause", "POST", None, 200),
     ("groups/{g}/recurring/{r}/resume", "POST", None, 200),
     ("groups/{g}/recurring/{r}/skip", "POST", None, 200),
+    # JSON instead of a multipart file: past the membership check, refused by the parser.
+    ("groups/{g}/bank-imports/", "POST", lambda w: {}, 415),
+    # {b} is a batch without rows, which any member may read (one with rows is uploader-only).
+    ("groups/{g}/bank-imports/{b}/", "GET", None, 200),
 ]
 ROW_IDS = [f"{m} {t}" for t, m, _, _ in ROUTES]
 
@@ -70,7 +74,8 @@ def rome_ids(world):
         start_date=datetime.date(2026, 10, 1),
     )
     settlement = balances.record_settlement(rome, b_rome, a_rome, 100, datetime.date(2026, 10, 2))
-    return {"g": rome.id, "e": expense.id, "r": rule.id, "s": settlement.id}
+    batch = ImportBatch.objects.create(group=rome, source="wise")
+    return {"g": rome.id, "e": expense.id, "r": rule.id, "s": settlement.id, "b": batch.id}
 
 
 def call(client, ids, template, method, body):
@@ -119,6 +124,7 @@ def test_route_table_covers_every_group_url():
             .replace("<int:eid>", "{e}")
             .replace("<int:rid>", "{r}")
             .replace("<int:sid>", "{s}")
+            .replace("<int:batch_id>", "{b}")
         )
         for method in ("get", "post", "put", "patch", "delete"):
             if hasattr(callback.cls, method):

@@ -1,10 +1,10 @@
 ---
 id: 020
 title: Bank CSV import — Revolut and Wise parsers, dedupe, import batches
-status: ready
+status: done
 risk: risky
 depends_on: [017]
-pr:
+pr: 29
 ---
 
 ## Goal

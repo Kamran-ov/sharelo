@@ -83,6 +83,27 @@ Tested against recorded, anonymised fixtures and stubs only. The real API shapes
 the `date` format, paging, users who left the group) and Bearer auth against the real host are
 first exercised by your first `--dry-run`.
 
+## Import a bank file
+
+Revolut (app → Accounts → Statement → **Excel/CSV**, personal account) and Wise (Statements →
+**CSV**) exports become pending rows for the review list. Uploading the same month again, or
+overlapping months, is safe: rows already staged are skipped by id. Staged rows are never
+deleted, so **always dry-run a new bank's export first** and compare the totals with the file:
+
+```
+cd backend
+python manage.py stage_bank_file --group 7 --member 21 --dry-run ~/Downloads/revolut.csv
+python manage.py stage_bank_file --group 7 --member 21 ~/Downloads/revolut.csv
+```
+
+The dry run prints rows seen / ignored / would create / would skip, a total per currency (Revolut:
+`Fee − Amount` over completed money-out rows; Wise: `−Amount` over negative rows) and the row
+types, and writes nothing. The API is `POST /api/groups/<id>/bank-imports/` (see `docs/api.md`).
+
+**Not yet checked against a real export.** The parsers are tested against hand-written fixtures
+only; the column names come from the banks' current exports and may differ. An unknown file is
+refused with `unknown_bank_format` and the list of missing columns.
+
 ## Run it for real on your laptop
 
 One origin, gunicorn, and the daily job on a clock; needs Docker (`compose.prod.yml`).

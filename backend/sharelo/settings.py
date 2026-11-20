@@ -96,6 +96,12 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "sharelo",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Without this, a second `status` enum renames the existing `StatusEnum` (member claim
+    # state) that the frontend already reads.
+    "ENUM_NAME_OVERRIDES": {
+        "StatusEnum": ["joined", "guest", "unclaimed"],
+        "BankRowStatusEnum": "importers.models.BankRowStatus",
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [

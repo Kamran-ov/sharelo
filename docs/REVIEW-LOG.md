@@ -351,3 +351,15 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
   - The balance check stayed exact, and both failing twins fire.
   - The fixture-only gaps are listed. Splitwise's real API has not been exercised yet.
 - Worth remembering: an importer tested only against hand-written fixtures has met the real source only once its first real dry run happens. The REPORT must list each assumed response shape, so a mismatch on that run points straight to a new ticket instead of a quiet fixture edit.
+
+- Ticket 020: plan review, head 7db9f8f
+- Verdict: REVISE. Two items. (1) Add a dry run that writes nothing and reports counts and per-currency sums; production checks start by dry-running each real file. (2) Hash normalised values for the Revolut id and freeze the recipe in docs. Q1–Q4 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: when the dedupe id leaves out the fields the parser is most likely to get wrong (fee, amount), a fix after the first real upload is skipped as a duplicate, and the wrong rows stay forever. A staging import with no delete needs a dry run before its first real file.
+
+- Ticket 020: plan review round 2, head 26dfc75
+- Verdict: ACCEPT PLAN. Both round-1 items are closed. The dry-run command reports per-currency totals and runs as production step 0 before any real stage. The Revolut id hashes canonical parsed values, and the recipe is frozen in ADR 002.
+- Worth remembering: a dry run counts as a guard only if its numbers equal the real run's on the same file, including edge cases like in-file duplicates. Otherwise the operator compares against a number the real stage won't produce.
+
+- Ticket 020: result review, head 200cac4
+- Verdict: ACCEPT — merge. Every planned test is listed and green. The KEY red is shown: with the constraint removed, the second batch doubled, (7,7,0) instead of (7,0,7). The restore and an empty `git status` are shown. The dry run and the real stage agree on an in-file duplicate (3/2/1). CI 44784961702 is green (test, e2e), and I checked it myself. The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: a parser that has only seen fixtures, writing to a table with no delete, is safe to merge only because its first real run is a dry run that writes nothing. The operator must not stage the first real file until the step-0 sums match the spreadsheet.

@@ -122,6 +122,27 @@ An expense keeps its `split_type` but not the preset params, so splits are never
 
 New codes: `not_a_sub_group`, `unknown_profile`, `invalid_params` (bad preset params).
 
+## Bank imports (ticket 020)
+
+`POST groups/{id}/bank-imports/` — multipart, field `file`: a Revolut personal-account CSV or a Wise
+statement CSV (the bank is recognised by its header; any column order). Only money-out rows are
+kept (Revolut: `State = COMPLETED`, `Amount ≤ 0`, amount = `Fee − Amount`; Wise: negative
+`Amount`). New rows are stored as pending for the review list (021); rows already staged in this
+group are skipped by id ([ADR 002](adr/002-bank-row-ids.md)). → 201
+`{batch: {id, source, label, rows_seen, rows_created, rows_skipped, started_at, finished_at},
+ignored, rows: [{id, date, amount_cents, currency, description, merchant, external_id, status}]}`.
+`rows_seen` counts money-out rows only; `ignored` counts the other data rows (top-ups, declined,
+reverted, money in). Foreign-currency rows keep their currency; conversion happens in 021.
+
+`GET groups/{id}/bank-imports/{batch}/` → the same without `ignored`. A statement is personal:
+a batch with rows is readable by its uploader only (404 for other members). A batch without rows
+(everything was a duplicate) shows its counts to any member. Splitwise batches are not bank
+imports (404).
+
+Codes: 400 `unknown_bank_format` (detail: `revolut missing: …; wise missing: …`), 400
+`bad_bank_row` (every unreadable line listed; nothing is staged), 400 `file_too_large` (> 2 MiB),
+400 `invalid_request` (no `file`), 415 for a non-multipart body.
+
 # Frontend
 
 `vite dev` (port 5173) and `vite preview` (port 4173) both proxy `/api` to Django with `changeOrigin: false`.
