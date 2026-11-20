@@ -1,7 +1,7 @@
 ---
 id: 018
 title: Share a group summary to WhatsApp (text and image)
-status: ready
+status: in-review
 risk: normal
 depends_on: [017]
 pr:
