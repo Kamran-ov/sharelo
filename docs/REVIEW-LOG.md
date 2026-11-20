@@ -363,3 +363,21 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 020: result review, head 200cac4
 - Verdict: ACCEPT — merge. Every planned test is listed and green. The KEY red is shown: with the constraint removed, the second batch doubled, (7,7,0) instead of (7,0,7). The restore and an empty `git status` are shown. The dry run and the real stage agree on an in-file duplicate (3/2/1). CI 44784961702 is green (test, e2e), and I checked it myself. The approval was posted as a comment because GitHub refuses self-approval.
 - Worth remembering: a parser that has only seen fixtures, writing to a table with no delete, is safe to merge only because its first real run is a dry run that writes nothing. The operator must not stage the first real file until the step-0 sums match the spreadsheet.
+
+- Ticket 021: plan review, head 35bae6b
+- Verdict: REVISE. Two items:
+  - The history suggestion takes the preset from the expense and the params from the row. They can disagree after an expense edit, so read both from one record.
+  - After a category change in the review list, the split label shown must be the split the tap creates. Today the server silently switches to the new category's default.
+  - Q1–Q6 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: on a one-tap screen, every input that can change server-side defaults (the category chip) must refresh what is displayed from the server. Otherwise the label and the money written diverge with no error. A suggestion's preset and params must come from one record, never stitched from two.
+
+- Ticket 021: plan review round 2, head e7483fe
+- Verdict: ACCEPT PLAN. Both round-1 items are closed:
+  - History reads preset and params from the row, with a validity guard.
+  - `category_splits` from one server rule makes the displayed split the sent split.
+  - Watch item: going back to the suggested category on the chip must restore the suggestion's own triple, the same in TS and in the service.
+- Worth remembering: once "what's shown = what's sent" rests on a server lookup table, every path through the chip, including changing back, needs one stated rule. Otherwise the label and the server's fill-in rule diverge on the round trip.
+
+- Ticket 021: result review, head 4c2003a
+- Verdict: ACCEPT — merge. Every planned test is listed and green, including both round-1 fixes and the change → change-back watch item. The KEY red (rule step removed → General) is shown with the restore and an empty `git status`. The preset tests went from 32 to 34 across the refactor. CI 44790461897 is green (test, e2e); the reviewer watched it. The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: when a REPORT says CI is "pending", the reviewer closes that gap by watching the run before accepting. A local-only e2e config override (here the Chromium path) counts as proven only by the CI run that doesn't use it.
