@@ -32,6 +32,7 @@ ROUTES = [
     ("groups/{g}/rate/", "GET", None, 400),
     ("groups/{g}/balances/", "GET", None, 200),
     ("groups/{g}/summary/", "GET", None, 200),
+    ("groups/{g}/analytics/", "GET", None, 200),
     ("groups/{g}/settlements/", "GET", None, 200),
     ("groups/{g}/settlements/", "POST", lambda w: {}, 400),
     ("groups/{g}/settlements/{s}/", "DELETE", None, 204),

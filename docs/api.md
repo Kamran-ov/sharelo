@@ -179,6 +179,40 @@ params, created_by, last_used_at}`; `POST` → 201; `PATCH groups/{id}/shop-rule
 `DELETE` → 204 (soft). 400 `duplicate_rule` (same text, case-insensitive), `invalid_category`
 (a main type), `invalid_params`/`empty_members` (a split the group cannot take).
 
+## Analytics (ticket 022)
+
+Data only, for the dashboard step; built in `ledger/services/analytics_report.py` from
+`services/analytics.py` and `services/home.py`, so every figure equals the service's to the cent.
+Spending is the owed share (FACTS), in cents.
+
+| Path | Params | Access |
+|---|---|---|
+| `groups/{id}/analytics/` | `from`, `to`, `by=member\|category\|month\|member_category`, `level=1\|2` | any member, guests included (the group's own spending, guests' shares counted); outsider 404 |
+| `home/analytics/` | `from`, `to`, `by=member\|category\|month`, `trips=lines\|spread`, `level=1\|2` | the caller's main group plus active linked sub-groups, profiles only: guest session or anonymous → 401 `not_authenticated`, a profile without a main group → 404 |
+| `home/analytics/trip/{group_id}/` | `from`, `to`, `level=1\|2` | same 401/404; a group not linked into the caller's Home (or missing) → 404 |
+
+Response: `{currency, from, to, rows: [{key, label, cents}]}`; `member_category` and the trip
+breakdown nest: `rows: [{key, label, cents, rows: [{key, label, cents}]}]`, the outer `cents`
+being the sum of its inner rows. Every key is a string:
+
+| Row | key | label | order |
+|---|---|---|---|
+| member | member id | display name | member id; `by=member` lists every member, 0 included |
+| category | category id | level 1 the name, level 2 `Parent › Child` | cents desc, then key |
+| trip line (Home `by=category&trips=lines`) | `trip:<group_id>` | trip name | with the categories |
+| month | `YYYY-MM` | same | ascending, months with spending only |
+
+Defaults: `from`/`to` are the current calendar month (server date), `by=category`, `level=1`,
+`trips=lines`. `trips` changes only `by=category` (member and month totals are the same in both
+modes; the totals are equal in both modes, the rows differ). Home trip guests and Home guests
+never appear in Home analytics. The trip breakdown is in Home's currency, keyed by the trip's own
+member ids. 400 codes: `invalid_date` (`from`/`to` not an ISO date), `invalid_range` (`from` after
+`to`), `range_too_long` (`to` on or after `from` + 5 years), `invalid_by`, `invalid_level`,
+`invalid_trips`, `no_rate` (a Home figure needs a missing rate).
+
+Home `by=member_category` is not offered yet (400 `invalid_by`): `home.py` has no such function.
+The dashboard ticket may need it; it would be added from the same converted cells.
+
 # Frontend
 
 `vite dev` (port 5173) and `vite preview` (port 4173) both proxy `/api` to Django with `changeOrigin: false`.

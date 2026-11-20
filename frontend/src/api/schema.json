@@ -308,6 +308,87 @@
                 }
             }
         },
+        "/api/groups/{group_id}/analytics/": {
+            "get": {
+                "operationId": "groups_analytics_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "by",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "category",
+                                "member",
+                                "member_category",
+                                "month"
+                            ]
+                        },
+                        "description": "default: category"
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/groups/{group_id}/balances/": {
             "get": {
                 "operationId": "groups_balances_retrieve",
@@ -1871,6 +1952,155 @@
                 }
             }
         },
+        "/api/home/analytics/": {
+            "get": {
+                "operationId": "home_analytics_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "by",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "category",
+                                "member",
+                                "month"
+                            ]
+                        },
+                        "description": "default: category"
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    },
+                    {
+                        "in": "query",
+                        "name": "trips",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "lines",
+                                "spread"
+                            ]
+                        },
+                        "description": "default: lines"
+                    }
+                ],
+                "tags": [
+                    "home"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/home/analytics/trip/{group_id}/": {
+            "get": {
+                "operationId": "home_analytics_trip_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    }
+                ],
+                "tags": [
+                    "home"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/join/{token}/": {
             "get": {
                 "operationId": "join_retrieve",
@@ -2046,6 +2276,78 @@
     },
     "components": {
         "schemas": {
+            "Analytics": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "from": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AnalyticsRow"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "from",
+                    "rows",
+                    "to"
+                ]
+            },
+            "AnalyticsLeafRow": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "cents",
+                    "key",
+                    "label"
+                ]
+            },
+            "AnalyticsRow": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "cents": {
+                        "type": "integer"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AnalyticsLeafRow"
+                        }
+                    }
+                },
+                "required": [
+                    "cents",
+                    "key",
+                    "label"
+                ]
+            },
             "Balances": {
                 "type": "object",
                 "properties": {
