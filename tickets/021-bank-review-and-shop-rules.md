@@ -1,7 +1,7 @@
 ---
 id: 021
 title: Bank import review list and shop rules
-status: ready
+status: in-review
 risk: normal
 depends_on: [020]
 pr:
