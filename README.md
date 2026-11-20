@@ -104,6 +104,11 @@ types, and writes nothing. The API is `POST /api/groups/<id>/bank-imports/` (see
 only; the column names come from the banks' current exports and may differ. An unknown file is
 refused with `unknown_bank_format` and the list of missing columns.
 
+In the app: Expenses → **Import bank file** → choose the CSV. Each new row then needs one tap:
+**Shared**, **Personal** or **Skip**, with the category (and its split) already guessed. Tick
+"Remember for this shop" to make a shop rule, so next month's rows come pre-filled; rules are
+listed, edited and deleted in Settings → Shop rules. Undo works per row while the page is open.
+
 ## Run it for real on your laptop
 
 One origin, gunicorn, and the daily job on a clock; needs Docker (`compose.prod.yml`).

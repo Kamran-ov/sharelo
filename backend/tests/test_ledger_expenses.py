@@ -284,3 +284,62 @@ def test_share_token_is_unique_and_url_safe():
     assert all(c.isalnum() or c in "-_" for c in a.share_token)
     assert len(a.share_token) >= 16
     assert isinstance(a.created_at, datetime.datetime)
+
+
+def test_revive_restores_soft_deleted_expense_with_new_split(group, members, category, day):
+    ann, ben, cy = members
+    expense = expenses.create_expense_from_preset(
+        group,
+        preset="equal",
+        payer_id=ann.id,
+        description="Esselunga",
+        currency="EUR",
+        date=day,
+        category=category,
+        amount_cents=1000,
+        source="revolut",
+        external_id="rv:abc",
+    )
+    delete_expense(expense)
+    expenses.revive_expense_from_preset(
+        expense,
+        preset="personal",
+        payer_id=ann.id,
+        description="Esselunga",
+        date=day,
+        category=category,
+        amount_cents=1000,
+    )
+    revived = Expense.objects.get(pk=expense.pk)
+    assert revived.deleted_at is None
+    assert revived.split_type == "personal"
+    assert revived.external_id == "rv:abc"
+    assert {s.member_id: s.owed_cents for s in revived.splits.all()} == {ann.id: 1000}
+    assert Expense.all_objects.filter(external_id="rv:abc").count() == 1
+
+
+def test_revive_refuses_live_expense(group, members, category, day):
+    ann = members[0]
+    expense = expenses.create_expense_from_preset(
+        group,
+        preset="equal",
+        payer_id=ann.id,
+        description="x",
+        currency="EUR",
+        date=day,
+        category=category,
+        amount_cents=1000,
+    )
+    with pytest.raises(LedgerError) as exc:
+        expenses.revive_expense_from_preset(
+            expense,
+            preset="personal",
+            payer_id=ann.id,
+            description="x",
+            date=day,
+            category=category,
+            amount_cents=1000,
+        )
+    assert exc.value.code == "expense_not_deleted"
+    expense.refresh_from_db()
+    assert expense.split_type == "equal"

@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router-dom";
 
 import { api, ApiError, type GroupDetail, type RecurringStatus } from "../api";
 import DefaultSplits from "./DefaultSplits";
+import ShopRules from "./ShopRules";
 import { groupKey } from "./GroupShell";
 
 const STATUS_LABEL: Record<GroupDetail["members"][number]["status"], string> = {
@@ -91,6 +92,7 @@ export default function Settings() {
         <AddPerson groupId={group.id} />
       </div>
       <DefaultSplits group={group} />
+      <ShopRules group={group} />
       <p className="text-sm text-slate-600" data-testid="recurring-status">
         Recurring expenses are created by the daily job; last run: {lastRun}
       </p>

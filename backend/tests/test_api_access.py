@@ -1,18 +1,24 @@
 import datetime
+from pathlib import Path
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import URLPattern, URLResolver, get_resolver
 from rest_framework.test import APIClient
 
+from importers.banks import shop_rules, staging
 from ledger.models import Expense, ImportBatch, RecurringRule
 from ledger.services import balances, expenses, recurring
 
 pytestmark = pytest.mark.django_db
 
+FIXTURES = Path(__file__).parent / "fixtures" / "banks"
+
 OK_STATUSES = {200, 201, 204}
 
 # (path template, method) -> body factory, and the status a guest of Rome gets by design.
-# Templates use {g} group, {e} expense, {r} rule, {s} settlement, {b} bank import batch.
+# Templates use {g} group, {e} expense, {r} rule, {s} settlement, {b} bank import batch,
+# {w} pending bank row, {h} shop rule.
 ROUTES = [
     ("groups/{g}/", "GET", None, 200),
     ("groups/{g}/link", "POST", lambda w: {"active": False}, 401),
@@ -42,6 +48,14 @@ ROUTES = [
     ("groups/{g}/bank-imports/", "POST", lambda w: {}, 415),
     # {b} is a batch without rows, which any member may read (one with rows is uploader-only).
     ("groups/{g}/bank-imports/{b}/", "GET", None, 200),
+    # {w} is a pending bank row the guest uploaded; {h} a shop rule of the group.
+    ("groups/{g}/bank-rows/", "GET", None, 200),
+    ("groups/{g}/bank-rows/{w}/resolve", "POST", lambda w: {"decision": "skip"}, 200),
+    ("groups/{g}/bank-rows/{w}/undo", "POST", None, 400),
+    ("groups/{g}/shop-rules/", "GET", None, 200),
+    ("groups/{g}/shop-rules/", "POST", lambda w: {}, 400),
+    ("groups/{g}/shop-rules/{h}/", "PATCH", lambda w: {"match_text": "Coop"}, 200),
+    ("groups/{g}/shop-rules/{h}/", "DELETE", None, 204),
 ]
 ROW_IDS = [f"{m} {t}" for t, m, _, _ in ROUTES]
 
@@ -75,7 +89,23 @@ def rome_ids(world):
     )
     settlement = balances.record_settlement(rome, b_rome, a_rome, 100, datetime.date(2026, 10, 2))
     batch = ImportBatch.objects.create(group=rome, source="wise")
-    return {"g": rome.id, "e": expense.id, "r": rule.id, "s": settlement.id, "b": batch.id}
+    staged = staging.stage_bank_file(
+        rome,
+        world.gus,
+        SimpleUploadedFile("r.csv", (FIXTURES / "revolut_review.csv").read_bytes()),
+    ).batch
+    shop_rule = shop_rules.save_rule(
+        rome, world.gus, match_text="Esselunga", category=world.groceries, preset="equal"
+    )
+    return {
+        "g": rome.id,
+        "e": expense.id,
+        "r": rule.id,
+        "s": settlement.id,
+        "b": batch.id,
+        "w": staged.bank_rows.order_by("id").first().id,
+        "h": shop_rule.id,
+    }
 
 
 def call(client, ids, template, method, body):
@@ -125,6 +155,8 @@ def test_route_table_covers_every_group_url():
             .replace("<int:rid>", "{r}")
             .replace("<int:sid>", "{s}")
             .replace("<int:batch_id>", "{b}")
+            .replace("<int:row_id>", "{w}")
+            .replace("<int:rule_id>", "{h}")
         )
         for method in ("get", "post", "put", "patch", "delete"):
             if hasattr(callback.cls, method):

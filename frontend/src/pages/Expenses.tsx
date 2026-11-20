@@ -2,7 +2,7 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-quer
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 
-import { api, ApiError, type CategoryDefaults, type CategoryNode, type ExpensePage, type ExpenseRow, type GroupDetail } from "../api";
+import { api, ApiError, type CategoryDefaults, type CategoryNode, type ExpensePage, type ExpenseRow, type GroupDetail, type ReviewList } from "../api";
 import Toast from "../components/Toast";
 import { monthKey, monthLabel } from "../lib/dates";
 import type { FormValues } from "../lib/expenseBody";
@@ -59,6 +59,8 @@ export default function Expenses() {
     getNextPageParam: (last, all) => (all.reduce((n, p) => n + p.results.length, 0) < last.count ? all.length + 1 : undefined),
   });
   const tree = useQuery({ queryKey: ["categories"], queryFn: () => api<CategoryNode[]>("GET", "/categories/") });
+  const bankRows = useQuery({ queryKey: ["bank-rows", group.id], queryFn: () => api<ReviewList>("GET", `${base}/bank-rows/`) });
+  const toReview = bankRows.data?.rows.length ?? 0;
   const defaults = useQuery({ queryKey: ["defaults", group.id], queryFn: () => api<CategoryDefaults>("GET", `${base}/category-defaults/`) });
 
   const categoryName = useMemo(() => {
@@ -145,6 +147,10 @@ export default function Expenses() {
 
   return (
     <section className="p-4">
+      <Link to={`/g/${group.id}/bank-import`} className="mb-3 flex min-h-11 items-center justify-between rounded-lg border border-slate-300 px-3 text-sm">
+        <span>Import bank file</span>
+        {toReview > 0 && <span data-testid="to-review" className="rounded-full bg-emerald-600 px-2 text-white">{toReview} to review</span>}
+      </Link>
       {list.isPending && <p className="text-slate-500">Loading…</p>}
       {list.isError && <p role="alert">Could not load expenses.</p>}
       {list.isSuccess && items.length === 0 && <p className="text-slate-600">No expenses yet.</p>}

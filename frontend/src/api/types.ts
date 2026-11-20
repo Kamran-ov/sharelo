@@ -144,6 +144,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/bank-imports/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        post: operations["groups_bank_imports_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{group_id}/bank-imports/{batch_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_bank_imports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{group_id}/bank-rows/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_bank_rows_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{group_id}/bank-rows/{row_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        post: operations["groups_bank_rows_resolve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{group_id}/bank-rows/{row_id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        post: operations["groups_bank_rows_undo_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{group_id}/category-defaults/": {
         parameters: {
             query?: never;
@@ -510,6 +620,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/shop-rules/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        get: operations["groups_shop_rules_list"];
+        put?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        post: operations["groups_shop_rules_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{group_id}/shop-rules/{rule_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        delete: operations["groups_shop_rules_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Every `groups/<group_id>/...` view derives from this; it is the only membership check.
+         *
+         *     CSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.
+         *     A missing group and a non-member get the same 404 so existence is not revealed.
+         */
+        patch: operations["groups_shop_rules_partial_update"];
+        trace?: never;
+    };
     "/api/groups/{group_id}/summary/": {
         parameters: {
             query?: never;
@@ -587,7 +753,60 @@ export interface components {
             transfers: components["schemas"]["Transfer"][];
             members: components["schemas"]["MemberBalance"][];
         };
+        BankBatch: {
+            readonly id: number;
+            source: string;
+            label?: string;
+            rows_seen?: number;
+            rows_created?: number;
+            rows_skipped?: number;
+            /** Format: date-time */
+            readonly started_at: string;
+            /** Format: date-time */
+            finished_at?: string | null;
+        };
+        BankImport: {
+            batch: components["schemas"]["BankBatch"];
+            rows: components["schemas"]["PendingBankRow"][];
+        };
+        /**
+         * @description * `pending` - Pending
+         *     * `shared` - Shared
+         *     * `personal` - Personal
+         *     * `skipped` - Skipped
+         * @enum {string}
+         */
+        BankRowStatusEnum: "pending" | "shared" | "personal" | "skipped";
+        /**
+         * @description * `revolut` - Revolut
+         *     * `wise` - Wise
+         * @enum {string}
+         */
+        BankSourceEnum: "revolut" | "wise";
+        BankUpload: {
+            /** Format: uri */
+            file: string;
+        };
+        BankUploadResult: {
+            batch: components["schemas"]["BankBatch"];
+            rows: components["schemas"]["PendingBankRow"][];
+            /** @description rows that are not money out (top-ups, declined) */
+            ignored: number;
+        };
+        /**
+         * @description * `rule` - rule
+         *     * `history` - history
+         *     * `default` - default
+         * @enum {string}
+         */
+        BasisEnum: "rule" | "history" | "default";
         CategoryDefaultOut: {
+            preset: string;
+            params: {
+                [key: string]: unknown;
+            };
+        };
+        CategorySplit: {
             preset: string;
             params: {
                 [key: string]: unknown;
@@ -786,9 +1005,28 @@ export interface components {
             /** Format: date */
             end_date?: string | null;
         };
+        PatchedShopRuleWrite: {
+            match_text?: string;
+            category?: number;
+            preset?: string;
+            params?: {
+                [key: string]: unknown;
+            };
+        };
         PayerOut: {
             member: number;
             paid_cents: number;
+        };
+        PendingBankRow: {
+            readonly id: number;
+            /** Format: date */
+            date: string;
+            amount_cents: number;
+            currency: string;
+            description: string;
+            merchant?: string;
+            external_id: string;
+            status?: components["schemas"]["BankRowStatusEnum"];
         };
         RateOut: {
             currency: string;
@@ -804,6 +1042,47 @@ export interface components {
             email: string;
             password: string;
             display_name: string;
+        };
+        Resolve: {
+            decision: components["schemas"]["ResolveDecisionEnum"];
+            category?: number;
+            preset?: string;
+            params?: {
+                [key: string]: unknown;
+            };
+            /** @default false */
+            remember: boolean;
+        };
+        /**
+         * @description * `shared` - shared
+         *     * `personal` - personal
+         *     * `skip` - skip
+         * @enum {string}
+         */
+        ResolveDecisionEnum: "shared" | "personal" | "skip";
+        Resolved: {
+            row: components["schemas"]["PendingBankRow"];
+            expense: number | null;
+            rule: number | null;
+        };
+        ReviewList: {
+            rows: components["schemas"]["ReviewRow"][];
+            /** @description the Shared split per leaf category id, used when a row's category changes */
+            category_splits: {
+                [key: string]: components["schemas"]["CategorySplit"];
+            };
+        };
+        ReviewRow: {
+            readonly id: number;
+            /** Format: date */
+            date: string;
+            amount_cents: number;
+            currency: string;
+            description: string;
+            merchant?: string;
+            source: components["schemas"]["BankSourceEnum"];
+            status?: components["schemas"]["BankRowStatusEnum"];
+            readonly suggestion: components["schemas"]["Suggestion"];
         };
         RuleOut: {
             readonly id: number;
@@ -872,6 +1151,25 @@ export interface components {
             transfers: components["schemas"]["SummaryTransfer"][];
             recent_expenses: components["schemas"]["SummaryExpense"][];
         };
+        ShopRule: {
+            readonly id: number;
+            match_text: string;
+            category: number;
+            readonly category_name: string;
+            preset: components["schemas"]["SplitTypeEnum"];
+            params?: unknown;
+            created_by: number;
+            /** Format: date-time */
+            last_used_at?: string | null;
+        };
+        ShopRuleWrite: {
+            match_text: string;
+            category: number;
+            preset: string;
+            params?: {
+                [key: string]: unknown;
+            };
+        };
         /**
          * @description * `manual` - Manual
          *     * `splitwise` - Splitwise
@@ -906,6 +1204,24 @@ export interface components {
             id: number;
             name: string;
         };
+        Suggestion: {
+            category: number;
+            category_name: string;
+            decision: components["schemas"]["SuggestionDecisionEnum"];
+            /** @description the split the Shared button uses; never personal */
+            preset: string;
+            params: {
+                [key: string]: unknown;
+            };
+            basis: components["schemas"]["BasisEnum"];
+            rule?: number | null;
+        };
+        /**
+         * @description * `shared` - shared
+         *     * `personal` - personal
+         * @enum {string}
+         */
+        SuggestionDecisionEnum: "shared" | "personal";
         SummaryExpense: {
             id: number;
             /** Format: date */
@@ -1145,6 +1461,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Balances"];
+                };
+            };
+        };
+    };
+    groups_bank_imports_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["BankUpload"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankUploadResult"];
+                };
+            };
+        };
+    };
+    groups_bank_imports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: number;
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankImport"];
+                };
+            };
+        };
+    };
+    groups_bank_rows_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewList"];
+                };
+            };
+        };
+    };
+    groups_bank_rows_resolve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+                row_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Resolve"];
+                "application/x-www-form-urlencoded": components["schemas"]["Resolve"];
+                "multipart/form-data": components["schemas"]["Resolve"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Resolved"];
+                };
+            };
+        };
+    };
+    groups_bank_rows_undo_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+                row_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingBankRow"];
                 };
             };
         };
@@ -1661,6 +2095,103 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    groups_shop_rules_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopRule"][];
+                };
+            };
+        };
+    };
+    groups_shop_rules_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShopRuleWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["ShopRuleWrite"];
+                "multipart/form-data": components["schemas"]["ShopRuleWrite"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopRule"];
+                };
+            };
+        };
+    };
+    groups_shop_rules_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+                rule_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    groups_shop_rules_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+                rule_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedShopRuleWrite"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedShopRuleWrite"];
+                "multipart/form-data": components["schemas"]["PatchedShopRuleWrite"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopRule"];
+                };
             };
         };
     };

@@ -16,6 +16,12 @@ export type SettlementRow = Schemas["SettlementOut"];
 export type ShareSummary = Schemas["ShareSummary"];
 export type RuleOut = Schemas["RuleOut"];
 export type RecurringStatus = Schemas["RecurringStatus"];
+export type ReviewList = Schemas["ReviewList"];
+export type ReviewRow = ReviewList["rows"][number];
+export type Suggestion = Schemas["Suggestion"];
+export type Resolved = Schemas["Resolved"];
+export type ShopRule = Schemas["ShopRule"];
+export type BankUploadResult = Schemas["BankUploadResult"];
 export type CategoryDefaults = Record<string, { preset: string; params: Record<string, unknown> }>;
 
 export class ApiError extends Error {
@@ -35,14 +41,16 @@ function csrfToken(): string | null {
 
 async function send(method: string, path: string, body: unknown, token: string | null) {
   const headers: Record<string, string> = {};
-  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const form = body instanceof FormData;
+  // A FormData body sets its own multipart Content-Type with the boundary.
+  if (body !== undefined && !form) headers["Content-Type"] = "application/json";
   if (method !== "GET" && token) headers["X-CSRFToken"] = token;
   try {
     return await fetch(`/api${path}`, {
       method,
       headers,
       credentials: "same-origin",
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : form ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, "network", "Cannot reach the server");

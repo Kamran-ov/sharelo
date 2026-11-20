@@ -1,5 +1,8 @@
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Lower
+
+from ledger.models import SplitType
 
 
 class BankSource(models.TextChoices):
@@ -38,6 +41,15 @@ class PendingBankRow(models.Model):
         max_length=10, choices=BankRowStatus.choices, default=BankRowStatus.PENDING
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    # The decision made on this row (021). Kept after an Undo so a re-decision revives the same
+    # expense: a soft-deleted expense still holds the row's (source, external_id).
+    expense = models.ForeignKey(
+        "ledger.Expense", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+    # Preset and params as decided, read together by the "last choice" suggestion: the expense
+    # keeps only cents and may be edited later, so its split_type cannot pair with these params.
+    split_preset = models.CharField(max_length=20, blank=True, default="")
+    split_params = models.JSONField(default=dict, blank=True)
 
     class Meta:
         constraints = [
@@ -52,4 +64,40 @@ class PendingBankRow(models.Model):
             models.CheckConstraint(
                 condition=Q(source__in=BankSource.values), name="bankrow_source_valid"
             ),
+        ]
+
+
+class LiveShopRuleManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class ShopRule(models.Model):
+    """Merchant text → category and split, so the review list can pre-fill a bank row (021)."""
+
+    group = models.ForeignKey("ledger.Group", on_delete=models.PROTECT, related_name="shop_rules")
+    match_text = models.CharField(max_length=200)
+    category = models.ForeignKey("ledger.Category", on_delete=models.PROTECT, related_name="+")
+    preset = models.CharField(max_length=20, choices=SplitType.choices)
+    params = models.JSONField(default=dict, blank=True)
+    created_by = models.ForeignKey("ledger.Member", on_delete=models.PROTECT, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = LiveShopRuleManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        base_manager_name = "all_objects"
+        constraints = [
+            # One live rule per text per group, so "remember" can create-or-update.
+            models.UniqueConstraint(
+                Lower("match_text"),
+                "group",
+                condition=Q(deleted_at__isnull=True),
+                name="uniq_shoprule_group_text",
+            ),
+            models.CheckConstraint(condition=~Q(match_text=""), name="shoprule_text_not_empty"),
         ]
