@@ -4,7 +4,7 @@ title: Placeholder members, claim by link, guest to account
 status: in-review
 risk: risky
 depends_on: [015]
-pr:
+pr: 25
 ---
 
 ## Goal
