@@ -8,6 +8,7 @@ import { moveBadge, topCardText } from "../lib/balances";
 import { formatCents } from "../lib/money";
 import MoveToHomeSheet from "./MoveToHomeSheet";
 import SettleSheet, { type SettleDefaults } from "./SettleSheet";
+import ShareSheet from "./ShareSheet";
 
 const TONE = { owed: "text-emerald-800", owe: "text-red-700", settled: "text-slate-700" } as const;
 
@@ -18,6 +19,7 @@ export default function Balances() {
   const [settle, setSettle] = useState<SettleDefaults | null>(null);
   const [move, setMove] = useState<Transfer | null>(null);
   const [toast, setToast] = useState<{ id: number } | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const bal = useQuery({ queryKey: ["balances", group.id], queryFn: () => api<BalancesData>("GET", `${base}/balances/`) });
   const hist = useQuery({ queryKey: ["settlements", group.id], queryFn: () => api<SettlementRow[]>("GET", `${base}/settlements/`) });
@@ -31,6 +33,7 @@ export default function Balances() {
     await Promise.all([qc.invalidateQueries({ queryKey: ["balances", group.id] }), qc.invalidateQueries({ queryKey: ["settlements", group.id] })]);
   };
   const closeToast = useCallback(() => setToast(null), []);
+  const closeShare = useCallback(() => setSharing(false), []);
 
   if (bal.isPending) return <p className="p-4 text-slate-500">Loading…</p>;
   if (bal.isError) return <p role="alert" className="p-4">Could not load balances.</p>;
@@ -39,8 +42,13 @@ export default function Balances() {
 
   return (
     <section className="space-y-5 p-4">
-      <div className="rounded-lg border border-slate-200 p-4" data-testid="top-card">
-        <p className={`break-words text-xl font-semibold ${TONE[card.tone]}`}>{card.text}</p>
+      <div className="flex items-start justify-between gap-2 rounded-lg border border-slate-200 p-4">
+        <p className={`min-w-0 break-words text-xl font-semibold ${TONE[card.tone]}`} data-testid="top-card">
+          {card.text}
+        </p>
+        <button type="button" className="min-h-11 shrink-0 rounded border border-slate-400 px-3" onClick={() => setSharing(true)}>
+          Share
+        </button>
       </div>
 
       <div>
@@ -127,6 +135,7 @@ export default function Balances() {
           onDone={() => setMove(null)}
         />
       )}
+      {sharing && <ShareSheet group={group} onClose={closeShare} />}
       {toast && <Toast message="Settled" onUndo={undo} onDone={closeToast} />}
     </section>
   );

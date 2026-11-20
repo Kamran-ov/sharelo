@@ -279,6 +279,38 @@ class BalancesSerializer(serializers.Serializer):
     members = MemberBalanceSerializer(many=True)
 
 
+class SummaryGroupSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class SummaryMemberSerializer(MemberBalanceSerializer):
+    display_name = serializers.CharField()
+
+
+class SummaryTransferSerializer(serializers.Serializer):
+    from_member = serializers.IntegerField()
+    to_member = serializers.IntegerField()
+    amount_cents = serializers.IntegerField()
+
+
+class SummaryExpenseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    date = serializers.DateField()
+    description = serializers.CharField()
+    amount_cents = serializers.IntegerField()
+    paid_by = serializers.ListField(child=serializers.IntegerField())
+
+
+class ShareSummarySerializer(serializers.Serializer):
+    group = SummaryGroupSerializer()
+    currency = serializers.CharField()
+    total_spent_cents = serializers.IntegerField()
+    per_member = SummaryMemberSerializer(many=True)
+    transfers = SummaryTransferSerializer(many=True)
+    recent_expenses = SummaryExpenseSerializer(many=True)
+
+
 class SettlementOutSerializer(serializers.ModelSerializer):
     twin_group_name = serializers.SerializerMethodField()
     is_home_side = serializers.SerializerMethodField()

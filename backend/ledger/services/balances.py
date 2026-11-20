@@ -118,6 +118,22 @@ def delete_settlement(group: Group, settlement_id: int) -> None:
     row.save(update_fields=["deleted_at"])
 
 
+def member_summaries(group: Group) -> dict[int, dict[str, int]]:
+    """`member_summary` for every member from one pass of the sums: O(1) queries."""
+    paid, owed = _paid_and_owed(group)
+    sent, received = _settlement_flows(group)
+    out = {
+        mid: {
+            "paid": paid.get(mid, 0),
+            "owed_share": owed.get(mid, 0),
+            "net": paid.get(mid, 0) - owed.get(mid, 0) + sent.get(mid, 0) - received.get(mid, 0),
+        }
+        for mid in group.members.values_list("id", flat=True)
+    }
+    _check_balanced({mid: row["net"] for mid, row in out.items()})
+    return out
+
+
 def member_summary(group: Group, member: Member) -> dict[str, int]:
     if member.group_id != group.pk:
         raise LedgerError("member_not_in_group", f"member {member.pk}")
