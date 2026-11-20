@@ -1,7 +1,7 @@
 ---
 id: 022
 title: Analytics API (data only, charts later)
-status: ready
+status: in-review
 risk: normal
 depends_on: [017]
 pr:
