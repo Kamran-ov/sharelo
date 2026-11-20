@@ -1,10 +1,10 @@
 ---
 id: 019
 title: Splitwise history import (API, command, re-runnable)
-status: ready
+status: done
 risk: risky
 depends_on: [017]
-pr:
+pr: 28
 ---
 
 ## Goal

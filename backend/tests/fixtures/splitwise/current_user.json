@@ -1,0 +1,8 @@
+{
+ "user": {
+  "id": 101,
+  "first_name": "Alice",
+  "last_name": "Rossi",
+  "email": "alice@example.com"
+ }
+}

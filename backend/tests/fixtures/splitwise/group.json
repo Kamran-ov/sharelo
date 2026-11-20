@@ -1,0 +1,53 @@
+{
+ "group": {
+  "id": 555,
+  "name": "Casa",
+  "members": [
+   {
+    "id": 101,
+    "first_name": "Alice",
+    "last_name": "Rossi",
+    "balance": [
+     {
+      "currency_code": "EUR",
+      "amount": "260.67"
+     },
+     {
+      "currency_code": "USD",
+      "amount": "-3.34"
+     }
+    ]
+   },
+   {
+    "id": 102,
+    "first_name": "Bea",
+    "last_name": "Bianchi",
+    "balance": [
+     {
+      "currency_code": "EUR",
+      "amount": "87.67"
+     },
+     {
+      "currency_code": "USD",
+      "amount": "6.67"
+     }
+    ]
+   },
+   {
+    "id": 103,
+    "first_name": "Carl",
+    "last_name": "Verdi",
+    "balance": [
+     {
+      "currency_code": "EUR",
+      "amount": "-348.33"
+     },
+     {
+      "currency_code": "USD",
+      "amount": "-3.33"
+     }
+    ]
+   }
+  ]
+ }
+}

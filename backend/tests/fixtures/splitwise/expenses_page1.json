@@ -1,0 +1,294 @@
+{
+ "expenses": [
+  {
+   "id": 8,
+   "group_id": 555,
+   "description": "Hotel NYC",
+   "details": null,
+   "payment": false,
+   "cost": "10.00",
+   "currency_code": "USD",
+   "date": "2021-08-10T12:00:00Z",
+   "created_at": "2021-08-10T12:00:00Z",
+   "deleted_at": null,
+   "category": {
+    "id": 32,
+    "name": "Hotel"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "0.00",
+     "owed_share": "3.34",
+     "net_balance": "-3.34"
+    },
+    {
+     "user": {
+      "id": 102,
+      "first_name": "Bea",
+      "last_name": "Bianchi"
+     },
+     "user_id": 102,
+     "paid_share": "10.00",
+     "owed_share": "3.33",
+     "net_balance": "6.67"
+    },
+    {
+     "user": {
+      "id": 103,
+      "first_name": "Carl",
+      "last_name": "Verdi"
+     },
+     "user_id": 103,
+     "paid_share": "0.00",
+     "owed_share": "3.33",
+     "net_balance": "-3.33"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "group_id": 555,
+   "description": "Light bulbs",
+   "details": null,
+   "payment": false,
+   "cost": "6.00",
+   "currency_code": "EUR",
+   "date": "2021-07-10T12:00:00Z",
+   "created_at": "2021-07-10T12:00:00Z",
+   "deleted_at": null,
+   "category": {
+    "id": 28,
+    "name": "Other"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "0.00",
+     "owed_share": "4.00",
+     "net_balance": "-4.00"
+    },
+    {
+     "user": {
+      "id": 102,
+      "first_name": "Bea",
+      "last_name": "Bianchi"
+     },
+     "user_id": 102,
+     "paid_share": "6.00",
+     "owed_share": "2.00",
+     "net_balance": "4.00"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "group_id": 555,
+   "description": "Bitcoin fees",
+   "details": null,
+   "payment": false,
+   "cost": "9.00",
+   "currency_code": "EUR",
+   "date": "2021-07-09T12:00:00Z",
+   "created_at": "2021-07-09T12:00:00Z",
+   "deleted_at": null,
+   "category": {
+    "id": 9999,
+    "name": "Crypto"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "9.00",
+     "owed_share": "3.00",
+     "net_balance": "6.00"
+    },
+    {
+     "user": {
+      "id": 102,
+      "first_name": "Bea",
+      "last_name": "Bianchi"
+     },
+     "user_id": 102,
+     "paid_share": "0.00",
+     "owed_share": "3.00",
+     "net_balance": "-3.00"
+    },
+    {
+     "user": {
+      "id": 103,
+      "first_name": "Carl",
+      "last_name": "Verdi"
+     },
+     "user_id": 103,
+     "paid_share": "0.00",
+     "owed_share": "3.00",
+     "net_balance": "-3.00"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "group_id": 555,
+   "description": "Deleted pizza",
+   "details": null,
+   "payment": false,
+   "cost": "40.00",
+   "currency_code": "EUR",
+   "date": "2021-07-07T12:00:00Z",
+   "created_at": "2021-07-07T12:00:00Z",
+   "deleted_at": "2021-07-08T09:00:00Z",
+   "category": {
+    "id": 13,
+    "name": "Dining out"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "40.00",
+     "owed_share": "13.34",
+     "net_balance": "26.66"
+    },
+    {
+     "user": {
+      "id": 102,
+      "first_name": "Bea",
+      "last_name": "Bianchi"
+     },
+     "user_id": 102,
+     "paid_share": "0.00",
+     "owed_share": "13.33",
+     "net_balance": "-13.33"
+    },
+    {
+     "user": {
+      "id": 103,
+      "first_name": "Carl",
+      "last_name": "Verdi"
+     },
+     "user_id": 103,
+     "paid_share": "0.00",
+     "owed_share": "13.33",
+     "net_balance": "-13.33"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "group_id": 555,
+   "description": "Payment",
+   "details": null,
+   "payment": true,
+   "cost": "20.00",
+   "currency_code": "EUR",
+   "date": "2021-07-06T12:00:00Z",
+   "created_at": "2021-07-06T12:00:00Z",
+   "deleted_at": null,
+   "category": {
+    "id": 18,
+    "name": "General"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 103,
+      "first_name": "Carl",
+      "last_name": "Verdi"
+     },
+     "user_id": 103,
+     "paid_share": "20.00",
+     "owed_share": "0.00",
+     "net_balance": "20.00"
+    },
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "0.00",
+     "owed_share": "20.00",
+     "net_balance": "-20.00"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "group_id": 555,
+   "description": "Rent July",
+   "details": "split three ways",
+   "payment": false,
+   "cost": "1000.00",
+   "currency_code": "EUR",
+   "date": "2021-07-05T12:00:00Z",
+   "created_at": "2021-07-05T12:00:00Z",
+   "deleted_at": null,
+   "category": {
+    "id": 29,
+    "name": "Rent"
+   },
+   "repayments": [],
+   "users": [
+    {
+     "user": {
+      "id": 101,
+      "first_name": "Alice",
+      "last_name": "Rossi"
+     },
+     "user_id": 101,
+     "paid_share": "600.00",
+     "owed_share": "333.33",
+     "net_balance": "266.67"
+    },
+    {
+     "user": {
+      "id": 102,
+      "first_name": "Bea",
+      "last_name": "Bianchi"
+     },
+     "user_id": 102,
+     "paid_share": "400.00",
+     "owed_share": "333.33",
+     "net_balance": "66.67"
+    },
+    {
+     "user": {
+      "id": 103,
+      "first_name": "Carl",
+      "last_name": "Verdi"
+     },
+     "user_id": 103,
+     "paid_share": "0.00",
+     "owed_share": "333.33",
+     "net_balance": "-333.33"
+    }
+   ]
+  }
+ ]
+}

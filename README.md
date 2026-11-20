@@ -42,6 +42,47 @@ rule failed. Example cron line (scheduling it on a server is the release step):
 15 6 * * * cd /srv/sharelo/backend && python manage.py run_daily >> /var/log/sharelo-daily.log 2>&1
 ```
 
+## Import from Splitwise
+
+A one-off import of a Splitwise group's history (`backend/importers/splitwise/`). Every expense
+comes in with its real paid and owed shares, payments become settlements, and categories map one
+to one. Re-running it creates nothing new.
+
+**The first real run fixes every choice for good.** Re-runs skip rows by Splitwise id, and
+nothing is ever hard-deleted, so the only undo is restoring a database dump. Take one first, and
+import into a **new, empty** group:
+
+```
+pg_dump "$DATABASE_URL" > before-splitwise.sql
+```
+
+1. API key: on splitwise.com go to *Your account → Your apps*, register an app, and copy its
+   **API key** (a personal key; no OAuth needed). Then `export SPLITWISE_API_KEY=...`. Only this
+   command reads it; the app does not need it to boot.
+2. Rates: if any expense is not in the group's currency, fetch the ECB history first:
+   `python manage.py fetch_rates --since <date of the oldest Splitwise expense>`. Currencies the
+   ECB never publishes (e.g. ARS) are listed as `no_rate`, and the import refuses to run.
+3. Find the ids: the Splitwise group id is in the group's URL (`/groups/<id>`). Run once
+   without `--map` and the command lists every Splitwise user to map, with our group's members.
+4. Dry run (writes nothing), then read the printout: counts, errors, unknown categories, cent
+   adjustments, and dates shifted by Europe/Rome:
+
+```
+cd backend
+python manage.py import_splitwise --group 555 --into 7 --map 101=21 --map 102=22 --dry-run
+python manage.py import_splitwise --group 555 --into 7 --map 101=21 --map 102=22
+```
+
+The real run prints a balance check. The group-currency line must have no ✗. Lines marked
+`= after cent adjustment` are Splitwise rounding gaps (e.g. 1000.00 / 3) that we closed with our
+one-cent rule. Foreign currencies are shown but not compared, because we convert at ECB rates.
+A refusal of any kind (unmapped users, rows that cannot be imported, rows already in another of
+our groups) writes nothing and exits non-zero.
+
+Tested against recorded, anonymised fixtures and stubs only. The real API shapes (`balance[]`,
+the `date` format, paging, users who left the group) and Bearer auth against the real host are
+first exercised by your first `--dry-run`.
+
 ## Run it for real on your laptop
 
 One origin, gunicorn, and the daily job on a clock; needs Docker (`compose.prod.yml`).

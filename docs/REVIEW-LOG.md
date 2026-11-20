@@ -325,3 +325,29 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
   - The freshness vitest seeds the cache, asserts the new response and was shown biting.
   - The approval was posted as a comment because GitHub refuses self-approval.
 - Worth remembering: the freshness guard for a share or export is only proven when its test seeds stale data itself and asserts that the *new* value is what gets shared. "Buttons disabled while fetching" alone passes even when the stale data would be sent.
+
+- Ticket 019: plan review, head 66c861f
+- Verdict: REVISE. Four items:
+  - The balance check must handle Splitwise's per-currency `balance[]`.
+  - Q2 is decided as Europe/Rome, and the dry run reports which dates change. Add a `pg_dump` step before the real run.
+  - Collect all mapping errors in one run, including currencies the ECB never publishes.
+  - Test the cross-group "existing" skip.
+  - Q1, Q3 and Q4 are accepted.
+- Worth remembering: for a re-runnable import that skips by `(source, external_id)` and never hard-deletes, every mapping choice is frozen at the first real run. "Reversible" assumptions about how rows are interpreted are not reversible, so decide them before the build and make the dry run show their impact.
+
+- Ticket 019: plan review round 2, head 716fda1
+- Verdict: REVISE (one item). All four round-1 items are closed. One defect remains: the exact EUR balance check ignores the mapper's own one-cent adjustments, so fixture id 5 (and any real adjustment) shows ✗. The check must add each member's adjustment to Splitwise's balance and print "= after cent adjustment", and it needs a failing twin that proves ✗ can fire.
+- Worth remembering: when an importer deliberately corrects source data (rounding fixes), any reconciliation against the source's own totals must apply the same corrections. Otherwise the check flags the importer's intended behaviour, and the operator learns to ignore ✗.
+
+- Ticket 019: plan review round 3, head d18050e
+- Verdict: ACCEPT PLAN. The balance check adds each member's cent-adjustment delta and has a failing twin (id 2 shifted by one cent → ✗ on B and C).
+- Worth remembering: a reconciliation check counts only once a test shows it can fire ✗. Ask for the failing twin alongside the "all ✓" case.
+
+- Ticket 019: result review, head 77394e9
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green; 58 are new, which matches 463 → 521.
+  - CI 44780304319 is green (test, e2e). I checked it myself.
+  - The KEY red is the honest one the plan predicted: `duplicate_external_id` from the DB constraint, not a second copy. The restore and an empty `git status` are shown.
+  - The balance check stayed exact, and both failing twins fire.
+  - The fixture-only gaps are listed. Splitwise's real API has not been exercised yet.
+- Worth remembering: an importer tested only against hand-written fixtures has met the real source only once its first real dry run happens. The REPORT must list each assumed response shape, so a mismatch on that run points straight to a new ticket instead of a quiet fixture edit.
