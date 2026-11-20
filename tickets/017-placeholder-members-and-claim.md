@@ -1,7 +1,7 @@
 ---
 id: 017
 title: Placeholder members, claim by link, guest to account
-status: in-review
+status: done
 risk: risky
 depends_on: [015]
 pr: 25
