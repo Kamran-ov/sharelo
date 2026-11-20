@@ -402,3 +402,31 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
   - The guest-exclusion test uses hand-computed sums, not the `profiles_only` path it guards.
   - Posted as a COMMENT because GitHub refuses self-approval.
 - Worth remembering: an "API equals service" test proves only the wiring. The guards that matter are the tests whose expected values come from outside the code under test: hand sums for guest exclusion, and the lines row for the dated trip drill-down.
+
+- Ticket 023: plan review, head c7c2f60
+- Verdict: REVISE. Four items:
+  - Prove that font and radius tokens flow, not only `--brand-primary`, and replace `document.fonts.check`, which is true even when no face is declared.
+  - Settle the Expenses hero and the `Amount` words against the "no copy change" rule.
+  - Guard the generated icons and `offline.css` against going stale.
+  - Make the literal guard catch named colours.
+  - Q1–Q4 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: a "one token file" ticket has a KEY test that overrides one token. That proves the mechanism only for that one name. Any theme key that refers to a token of the same name, and any asset generated from the tokens (icons, offline CSS), needs its own check, or it drifts silently.
+
+- Ticket 023: plan review round 2, head ead7a20
+- Verdict: ACCEPT PLAN. All round-1 items are closed:
+  - The KEY e2e overrides colour, font and radius.
+  - A real fonts-loaded check replaces `document.fonts.check`.
+  - The hero card is an explicit exception on the existing balances endpoint.
+  - The brand-asset stamp test is in place.
+  - Named colours are caught by the guard.
+  - Watch item: the REPORT must say whether `@theme inline reference` held or the renamed-key fallback was used, with `test_built_css_defines_no_token_twice` green on `dist`.
+- Worth remembering: when an asset is generated from a source file, guard it with a stamp: a hash of each input, written next to the outputs and recomputed by a test. Its red proof should edit the source in both copies, so that only the stamp test goes red, not the copy test.
+
+- Ticket 023: result review, head 3ce7659
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green.
+  - The KEY red is shown: a literal FAB class read `rgb(11, 111, 106)` instead of the override. The restore is shown.
+  - `inline reference` works, and the built CSS defines no token twice.
+  - CI 44800790627 is green (test, e2e). The reviewer checked it.
+  - Open question 4 (Space Grotesk 700) was left unanswered. It is not blocking.
+- Worth remembering: a "change one file, every page follows" claim is proven only by a runtime override that reaches every token kind, here colour, font and radius, plus a check that the build emits no second definition. A grep guard on source alone cannot see what Tailwind writes into `dist`.
