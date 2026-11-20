@@ -1,7 +1,7 @@
 ---
 id: 023
 title: Apply the Sharelo visual design from one token file
-status: ready
+status: in-review
 risk: normal
 depends_on: [017]
 pr:
