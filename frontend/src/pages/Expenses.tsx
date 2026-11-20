@@ -6,7 +6,7 @@ import { api, ApiError, type Balances, type CategoryDefaults, type CategoryNode,
 import Icon, { categoryIcon } from "../components/Icon";
 import Toast from "../components/Toast";
 import { Amount, Button, Card, Fab, List, ListRow, type Tone } from "../components/ui";
-import { topCardText } from "../lib/balances";
+import { topCardParts } from "../lib/balances";
 import { monthKey, monthLabel } from "../lib/dates";
 import type { FormValues } from "../lib/expenseBody";
 import { formatCents, parseAmount } from "../lib/money";
@@ -60,17 +60,20 @@ const HERO_LINES = 3;
 /** Overall balance (Balances' top-card words) and who owes whom, from GET balances/. */
 function Hero({ data, me, name }: { data: Balances; me: number; name: (id: number) => string }) {
   const mine = data.members.find((m) => m.member_id === me);
-  const card = topCardText(mine?.net ?? 0);
+  const card = topCardParts(mine?.net ?? 0);
   const lines = data.transfers
     .filter((t) => t.from_member === me || t.to_member === me)
     .map((t) => (t.to_member === me ? `${name(t.from_member)} owes you ${formatCents(t.amount_cents)}` : `you owe ${name(t.to_member)} ${formatCents(t.amount_cents)}`));
   return (
     <Card variant="hero" className="mt-1 flex flex-col gap-1 p-5" data-testid="hero">
-      <span className="text-sm">Overall,</span>
-      <span className="break-words font-heading text-2xl font-semibold tracking-[-0.5px]" data-testid="hero-total">
-        {card.text}
-        {card.tone !== "settled" && ` ${data.currency}`}
+      <span className="text-sm" data-testid="hero-label">
+        Overall, {card.label}
       </span>
+      {card.figure !== null && (
+        <span className="break-words font-heading text-2xl font-semibold tracking-[-0.5px]" data-testid="hero-total">
+          {card.figure} {data.currency}
+        </span>
+      )}
       {lines.slice(0, HERO_LINES).map((l) => (
         <span key={l} className="break-words text-sm" data-testid="hero-line">
           {l}

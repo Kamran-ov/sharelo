@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs";
 import http from "node:http";
 import type { Socket } from "node:net";
+import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { lightToken } from "../src/lib/designTokens";
 import { HOME, loginAsFixtureUser, resetFixture, shot } from "./helpers";
 
 // Runs in the `served` project: Django serves the built SPA itself on 8002, no vite preview.
@@ -36,6 +39,26 @@ test("test_manifest_served_with_name_and_icons", async ({ page, request }, testI
   }, manifest);
   await expect(page.locator("img")).toHaveCount(manifest.icons.length);
   await snap(page, testInfo);
+});
+
+test("test_manifest_theme_colour_comes_from_tokens", async ({ page, request }) => {
+  const tokens = readFileSync(path.resolve(process.cwd(), "src/styles/tokens.css"), "utf8");
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  expect(manifest.theme_color).toBe(lightToken(tokens, "--brand-primary"));
+  expect(manifest.background_color).toBe(lightToken(tokens, "--surface-ground"));
+  for (const icon of manifest.icons) expect((await request.get(icon.src)).status()).toBe(200);
+  await page.goto("/login");
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", lightToken(tokens, "--brand-primary"));
+});
+
+test("test_offline_page_is_styled_from_offline_css", async ({ page, request }) => {
+  const res = await request.get("/offline.css");
+  expect(res.status()).toBe(200);
+  const tokens = readFileSync(path.resolve(process.cwd(), "src/styles/tokens.css"), "utf8");
+  expect((await res.text()).startsWith(tokens)).toBe(true);
+  await page.goto("/offline.html");
+  await expect(page.locator('link[rel="stylesheet"][href="/offline.css"]')).toHaveCount(1);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(244, 249, 248)");
 });
 
 test("test_service_worker_registers", async ({ page }) => {

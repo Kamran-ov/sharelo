@@ -135,6 +135,8 @@ describe("contrast from tokens.css", () => {
     ["--danger", "--surface-card"],
     ["--danger", "--surface-ground"],
     ["--danger", "--danger-soft"],
+    ["--text-on-primary", "--danger"],
+    ["--text", "--danger-soft"],
     ["--surface-ground", "--text"],
   ];
   test.each(["light", "dark"] as const)("test_text_tokens_meet_4_5_contrast_on_their_surfaces (%s)", (mode) => {
