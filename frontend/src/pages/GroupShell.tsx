@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link, NavLink, Outlet, useParams } from "react-router-dom";
 
 import { api, ApiError, type GroupDetail } from "../api";
+import { useMe } from "../auth";
+import AccountSheet from "./AccountSheet";
+import GuestSignOutSheet from "./GuestSignOutSheet";
 
 export const groupKey = (id: string | undefined) => ["group", id] as const;
 
@@ -20,9 +24,29 @@ const TABS = [
   ["settings", "Settings"],
 ] as const;
 
+function GuestBanner({ googleEnabled }: { googleEnabled: boolean }) {
+  const [sheet, setSheet] = useState<"account" | "signout" | null>(null);
+  return (
+    <div className="space-y-2 border-b border-amber-200 bg-amber-50 p-4" role="region" aria-label="Guest">
+      <p className="break-words text-sm">You're a guest. Create an account to keep access on any device.</p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="min-h-11 rounded-lg bg-emerald-600 px-4 font-medium text-white" onClick={() => setSheet("account")}>
+          Create account
+        </button>
+        <button type="button" className="min-h-11 px-2 text-sm text-slate-600 underline" onClick={() => setSheet("signout")}>
+          Sign out
+        </button>
+      </div>
+      {sheet === "account" && <AccountSheet googleEnabled={googleEnabled} onClose={() => setSheet(null)} />}
+      {sheet === "signout" && <GuestSignOutSheet onClose={() => setSheet(null)} />}
+    </div>
+  );
+}
+
 export default function GroupShell() {
   const { id } = useParams();
   const group = useGroup(id);
+  const { data: me } = useMe();
   if (group.isPending) return <p className="p-4 text-slate-500">Loading…</p>;
   if (group.isError) {
     const missing = group.error instanceof ApiError && group.error.status === 404;
@@ -43,6 +67,7 @@ export default function GroupShell() {
         </Link>
         <h1 className="break-words text-xl font-semibold">{group.data.name}</h1>
       </header>
+      {me && !me.authenticated && <GuestBanner googleEnabled={me.google_enabled} />}
       <div className="flex-1">
         <Outlet context={group.data} />
       </div>

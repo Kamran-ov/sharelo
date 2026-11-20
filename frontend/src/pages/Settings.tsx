@@ -6,6 +6,47 @@ import { api, ApiError, type GroupDetail, type RecurringStatus } from "../api";
 import DefaultSplits from "./DefaultSplits";
 import { groupKey } from "./GroupShell";
 
+const STATUS_LABEL: Record<GroupDetail["members"][number]["status"], string> = {
+  joined: "joined",
+  guest: "guest",
+  unclaimed: "not joined yet",
+};
+
+function AddPerson({ groupId }: { groupId: number }) {
+  const qc = useQueryClient();
+  const [name, setName] = useState("");
+  const add = useMutation({
+    mutationFn: () => api("POST", `/groups/${groupId}/members/`, { display_name: name }),
+    onSuccess: async () => {
+      setName("");
+      await qc.invalidateQueries({ queryKey: groupKey(String(groupId)) });
+    },
+  });
+  const error = add.error instanceof ApiError ? add.error.detail || add.error.code : null;
+  return (
+    <form
+      className="space-y-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        add.mutate();
+      }}
+    >
+      <label className="block">
+        <span className="text-sm">Add person</span>
+        <input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={name} onChange={(e) => setName(e.target.value)} required />
+      </label>
+      {error && (
+        <p role="alert" className="break-words text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <button type="submit" className="min-h-11 w-full rounded-lg border border-slate-300" disabled={add.isPending}>
+        Add
+      </button>
+    </form>
+  );
+}
+
 export default function Settings() {
   const group = useOutletContext<GroupDetail>();
   const qc = useQueryClient();
@@ -40,13 +81,14 @@ export default function Settings() {
         <h2 className="text-lg font-semibold">Members</h2>
         <ul className="space-y-1">
           {group.members.map((m) => (
-            <li key={m.id} className="break-words">
+            <li key={m.id} className="break-words" data-testid={`member-${m.id}`}>
               {m.display_name}
               {m.id === group.my_member_id && <span className="text-slate-500"> (you)</span>}
-              {m.is_guest && <span className="text-slate-500"> · guest</span>}
+              <span className="text-slate-500"> · {STATUS_LABEL[m.status]}</span>
             </li>
           ))}
         </ul>
+        <AddPerson groupId={group.id} />
       </div>
       <DefaultSplits group={group} />
       <p className="text-sm text-slate-600" data-testid="recurring-status">
