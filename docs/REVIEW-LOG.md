@@ -381,3 +381,24 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 021: result review, head 4c2003a
 - Verdict: ACCEPT — merge. Every planned test is listed and green, including both round-1 fixes and the change → change-back watch item. The KEY red (rule step removed → General) is shown with the restore and an empty `git status`. The preset tests went from 32 to 34 across the refactor. CI 44790461897 is green (test, e2e); the reviewer watched it. The approval was posted as a comment because GitHub refuses self-approval.
 - Worth remembering: when a REPORT says CI is "pending", the reviewer closes that gap by watching the run before accepting. A local-only e2e config override (here the Chromium path) counts as proven only by the CI run that doesn't use it.
+
+- Ticket 022: plan review, head c6f71c1
+- Verdict: REVISE. Three items:
+  - The trip breakdown route accepts `from`/`to`, but the service it calls is listed without dates. Either thread the dates through to the service and test it, or drop them from the route.
+  - A date that does not parse needs a 400 code and a test.
+  - Guest exclusion from Home must be tested for both guests: the one in Home and the one in the trip.
+  - Q1–Q6 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: when an API echoes its input (`from`/`to`) next to computed numbers, check that every service it calls actually takes those inputs. Otherwise the response states a range its totals don't respect, and an equals-the-service test can't catch it.
+
+- Ticket 022: plan review round 2, head 032591d
+- Verdict: ACCEPT PLAN. All round-1 items are closed. The dated trip breakdown goes through the service and is tested against the lines row. `invalid_date` is a 400 on every route. Guest exclusion is tested for the Home guest and the trip guest on every Home view.
+- Worth remembering: a "guest shares absent" test proves nothing if its expected value comes from the same `profiles_only` filter under test. The expected totals must be built from the profiles' shares independently.
+
+- Ticket 022: result review, head 60291bb
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green.
+  - The KEY red is shown: with the view forced to `lines`, the `spread` assertion failed on the `trip:2 Rome` row. The restore is shown.
+  - CI 44793591746 is green (test, e2e). The reviewer checked it.
+  - The guest-exclusion test uses hand-computed sums, not the `profiles_only` path it guards.
+  - Posted as a COMMENT because GitHub refuses self-approval.
+- Worth remembering: an "API equals service" test proves only the wiring. The guards that matter are the tests whose expected values come from outside the code under test: hand sums for guest exclusion, and the lines row for the dated trip drill-down.
