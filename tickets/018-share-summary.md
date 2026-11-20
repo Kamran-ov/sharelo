@@ -1,10 +1,10 @@
 ---
 id: 018
 title: Share a group summary to WhatsApp (text and image)
-status: ready
+status: done
 risk: normal
 depends_on: [017]
-pr:
+pr: 27
 ---
 
 ## Goal

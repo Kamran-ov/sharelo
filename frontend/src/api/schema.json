@@ -1400,6 +1400,43 @@
                 }
             }
         },
+        "/api/groups/{group_id}/summary/": {
+            "get": {
+                "operationId": "groups_summary_retrieve",
+                "description": "The shareable summary: totals, who pays whom and the last 10 expenses.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShareSummary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/join/{token}/": {
             "get": {
                 "operationId": "join_retrieve",
@@ -2583,6 +2620,46 @@
                     "to_member"
                 ]
             },
+            "ShareSummary": {
+                "type": "object",
+                "properties": {
+                    "group": {
+                        "$ref": "#/components/schemas/SummaryGroup"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "total_spent_cents": {
+                        "type": "integer"
+                    },
+                    "per_member": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryMember"
+                        }
+                    },
+                    "transfers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryTransfer"
+                        }
+                    },
+                    "recent_expenses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryExpense"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "group",
+                    "per_member",
+                    "recent_expenses",
+                    "total_spent_cents",
+                    "transfers"
+                ]
+            },
             "SourceEnum": {
                 "enum": [
                     "manual",
@@ -2645,6 +2722,98 @@
                 "required": [
                     "id",
                     "name"
+                ]
+            },
+            "SummaryExpense": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "paid_by": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "date",
+                    "description",
+                    "id",
+                    "paid_by"
+                ]
+            },
+            "SummaryGroup": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "SummaryMember": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    },
+                    "paid": {
+                        "type": "integer"
+                    },
+                    "owed_share": {
+                        "type": "integer"
+                    },
+                    "net": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "member_id",
+                    "net",
+                    "owed_share",
+                    "paid"
+                ]
+            },
+            "SummaryTransfer": {
+                "type": "object",
+                "properties": {
+                    "from_member": {
+                        "type": "integer"
+                    },
+                    "to_member": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "from_member",
+                    "to_member"
                 ]
             },
             "Transfer": {

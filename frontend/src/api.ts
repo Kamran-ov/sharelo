@@ -13,6 +13,7 @@ export type RateOut = Schemas["RateOut"];
 export type Balances = Schemas["Balances"];
 export type Transfer = Balances["transfers"][number];
 export type SettlementRow = Schemas["SettlementOut"];
+export type ShareSummary = Schemas["ShareSummary"];
 export type RuleOut = Schemas["RuleOut"];
 export type RecurringStatus = Schemas["RecurringStatus"];
 export type CategoryDefaults = Record<string, { preset: string; params: Record<string, unknown> }>;

@@ -510,6 +510,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{group_id}/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The shareable summary: totals, who pays whom and the last 10 expenses. */
+        get: operations["groups_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/join/{token}/": {
         parameters: {
             query?: never;
@@ -847,6 +864,14 @@ export interface components {
             date: string;
             notes?: string;
         };
+        ShareSummary: {
+            group: components["schemas"]["SummaryGroup"];
+            currency: string;
+            total_spent_cents: number;
+            per_member: components["schemas"]["SummaryMember"][];
+            transfers: components["schemas"]["SummaryTransfer"][];
+            recent_expenses: components["schemas"]["SummaryExpense"][];
+        };
         /**
          * @description * `manual` - Manual
          *     * `splitwise` - Splitwise
@@ -880,6 +905,30 @@ export interface components {
         SubCategory: {
             id: number;
             name: string;
+        };
+        SummaryExpense: {
+            id: number;
+            /** Format: date */
+            date: string;
+            description: string;
+            amount_cents: number;
+            paid_by: number[];
+        };
+        SummaryGroup: {
+            id: number;
+            name: string;
+        };
+        SummaryMember: {
+            member_id: number;
+            paid: number;
+            owed_share: number;
+            net: number;
+            display_name: string;
+        };
+        SummaryTransfer: {
+            from_member: number;
+            to_member: number;
+            amount_cents: number;
         };
         Transfer: {
             from_member: number;
@@ -1612,6 +1661,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    groups_summary_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareSummary"];
+                };
             };
         };
     };

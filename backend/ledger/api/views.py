@@ -29,7 +29,7 @@ from ledger.models import (
     RecurringRule,
     Settlement,
 )
-from ledger.services import balances, expenses, groups, rates, recurring
+from ledger.services import balances, expenses, groups, rates, recurring, summary
 from ledger.services.rates import resolve_foreign_amount
 from ledger.services.splits import default_split_for, split_for_preset
 
@@ -542,6 +542,14 @@ class BalancesView(GroupScopedView):
                 ],
             }
         )
+
+
+class ShareSummaryView(GroupScopedView):
+    """The shareable summary: totals, who pays whom and the last 10 expenses."""
+
+    @extend_schema(responses=sz.ShareSummarySerializer)
+    def get(self, request, group_id):
+        return Response(sz.ShareSummarySerializer(summary.group_summary(self.group)).data)
 
 
 class SettlementListView(GroupScopedView):
