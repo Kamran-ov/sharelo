@@ -4,11 +4,11 @@ All routes are under `/api/`, session-cookie authenticated. Errors are always `{
 
 | Route | Body | Result |
 |---|---|---|
-| `GET /api/me` | — | `{authenticated, profile: {id, display_name, email, main_group_id} \| null, guest_memberships: [member_id], google_enabled}`; sets the `csrftoken` cookie |
-| `POST /api/auth/register` | `{email, password, display_name}` | logs in, returns the `/api/me` body |
+| `GET /api/me` | — | `{authenticated, profile: {id, display_name, email, main_group_id} \| null, guest_memberships: [member_id], guest_refused: [{member_id, group_id, code}], google_enabled}`; sets the `csrftoken` cookie; `guest_refused` is `[]` except on a sign-in response |
+| `POST /api/auth/register` | `{email, password, display_name}` | logs in, returns the `/api/me` body; the session's guest members are attached to the profile (same member id and history; see Guests) |
 | `POST /api/auth/login` | `{email, password}` | same |
 | `POST /api/auth/google` | `{id_token}` | same; 503 `google_disabled` when `GOOGLE_CLIENT_ID` is unset |
-| `POST /api/auth/logout` | — | clears the session (guest memberships too) |
+| `POST /api/auth/logout` | — | releases every guest member the session holds (their names become claimable from the link again), then clears the session |
 
 ## Error codes
 
@@ -47,6 +47,16 @@ the default does, and an env-driven value must keep `localhost`. With `changeOri
 `request.session["guest_member_ids"]` holds the member ids a guest holds. Use
 `accounts.services.access.member_for` / `require_member` (404 for non-members) in every group endpoint.
 
+Claim state of a member (017), derived from two columns: **joined** = has a profile; **guest** = no profile,
+`guest_claimed_at` set; **unclaimed** = neither (only "Add person" creates these). `guest_claimed_at` is set
+whenever anyone takes a member, profiles included, so a deleted profile (`SET_NULL`) leaves a guest, never a
+claimable name.
+
+On register / login / Google sign-in, `ledger.services.groups.adopt_guest_members` gives each guest member the
+session holds to the profile. Where the profile already has a member in that group the guest is kept as it is
+(still in the session) and reported in `guest_refused` with code `profile_already_in_group`; the sign-in itself
+succeeds. A profile without a main group gets no `GroupLink` (006 rule) and the group does not become main.
+
 # API (ledger)
 
 Interactive docs at `/api/docs/`; the OpenAPI schema is `GET /api/schema/` and is committed as
@@ -60,9 +70,11 @@ need the CSRF token (see above), guests included.
 | Path | Methods | Notes |
 |---|---|---|
 | `groups/` | GET, POST | GET rows: `id, name, currency, is_main, link_active` (`null` for the main group and guest sessions); POST `{name, currency, as_main?}`; first group is the main group; `as_main: true` when a main group exists → 400 `main_group_exists` |
-| `groups/{id}/` | GET | members (with `profile_id`, `is_guest`), `my_member_id`, `is_main`, `link_active`, `share_token` |
+| `groups/{id}/` | GET | members (with `profile_id`, `is_guest`, `status`: `joined` \| `guest` \| `unclaimed`), `my_member_id`, `is_main`, `link_active`, `share_token` |
+| `groups/{id}/members/` | POST | `{display_name}` → 201 member row (`status: unclaimed`); any member, guests included; `name_taken`, `invalid_display_name` |
 | `groups/{id}/link` | POST | `{active}`; profiles only (guest → 401) |
-| `join/{token}/` | GET, POST | GET is public and sets the CSRF cookie; POST `{display_name}`; a guest who joins again gets the same member |
+| `join/{token}/` | GET, POST | GET is public and sets the CSRF cookie, returns `group_name, currency, member_names, unclaimed_members: [{id, display_name}]`; POST `{display_name}` ("I'm new"); a guest who joins again gets the same member |
+| `join/{token}/claim` | POST | `{member_id}` → `{group_id, member_id}`; takes an unclaimed member: with a profile the member gets it (and the 006 link rule), otherwise the session holds it as a guest. 400 `member_already_claimed`, `profile_already_in_group`, `already_in_group` (the session already holds a member of this group); 404 unknown token or member of another group |
 | `categories/` | GET | two-level tree |
 | `groups/{id}/category-defaults/` | GET, PUT | PUT replaces the whole set: `{"<category id>": {preset, params}}`; `half` is stored and returned as `equal` |
 | `groups/{id}/expenses/` | GET, POST | list: `from`, `to`, `category` (id or parent id), `member`, `page`; 50 per page, newest first; a page past the end is 404; the page carries `month_totals` (`"YYYY-MM"` → cents, `amount_cents` summed over the whole filtered set for the months on the page, `personal` rows included, computed by `services.expenses.month_totals`); every expense row carries `recurring_rule` (the rule id for an expense a recurring rule created, else `null`) |
