@@ -32,7 +32,7 @@ jobs:
       - run: make lint
       - run: make test
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # pinned: Playwright cannot install chromium on ubuntu-latest (26.04)
     timeout-minutes: 20
     services:
       postgres:
