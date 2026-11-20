@@ -4,7 +4,7 @@ title: Bank CSV import — Revolut and Wise parsers, dedupe, import batches
 status: in-review
 risk: risky
 depends_on: [017]
-pr:
+pr: 29
 ---
 
 ## Goal
