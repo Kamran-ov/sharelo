@@ -3,11 +3,17 @@ import { formatCents } from "./money";
 
 export type Tone = "owed" | "owe" | "settled";
 
-/** The top card for "me": `net` is the server's number for my member, never recomputed here. */
+/** The top card for "me" in parts (words, then figure): `net` is the server's number for my
+ *  member, never recomputed here. */
+export function topCardParts(net: number): { tone: Tone; label: string; figure: string | null } {
+  if (net > 0) return { tone: "owed", label: "you are owed", figure: formatCents(net) };
+  if (net < 0) return { tone: "owe", label: "you owe", figure: formatCents(-net) };
+  return { tone: "settled", label: "all settled", figure: null };
+}
+
 export function topCardText(net: number): { tone: Tone; text: string } {
-  if (net > 0) return { tone: "owed", text: `you are owed ${formatCents(net)}` };
-  if (net < 0) return { tone: "owe", text: `you owe ${formatCents(-net)}` };
-  return { tone: "settled", text: "all settled" };
+  const { tone, label, figure } = topCardParts(net);
+  return { tone, text: figure === null ? label : `${label} ${figure}` };
 }
 
 /** Both lines name the transfer's debtor as the one who owes: the twin row runs the other way. */

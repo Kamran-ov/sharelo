@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, ApiError, type CategoryNode, type GroupDetail, type ShopRule } from "../api";
+import { INPUT } from "../components/ui";
 import { splitLabel, type Params } from "../lib/bankImport";
 import { storedPercent } from "../lib/presets";
 
@@ -44,7 +45,7 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
   };
   return (
     <form
-      className="space-y-2 rounded-lg bg-slate-50 p-3"
+      className="space-y-2 rounded-md bg-sunken p-3"
       aria-label={`Edit rule ${rule.match_text}`}
       onSubmit={(e) => {
         e.preventDefault();
@@ -52,10 +53,10 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
       }}
     >
       <label className="block">
-        <span className="text-sm">Shop text</span>
-        <input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" value={text} onChange={(e) => setText(e.target.value)} required />
+        <span className="text-sm text-muted">Shop text</span>
+        <input className={INPUT} value={text} onChange={(e) => setText(e.target.value)} required />
       </label>
-      <select aria-label="Rule category" className="min-h-11 w-full rounded-lg border border-slate-300 px-2" value={category} onChange={(e) => setCategory(Number(e.target.value))}>
+      <select aria-label="Rule category" className="min-h-11 w-full rounded-md border border-line px-2 bg-card" value={category} onChange={(e) => setCategory(Number(e.target.value))}>
         {tree.map((p) => (
           <optgroup key={p.id} label={p.name}>
             {p.children.map((k) => (
@@ -66,7 +67,7 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
           </optgroup>
         ))}
       </select>
-      <select aria-label="Rule split" className="min-h-11 w-full rounded-lg border border-slate-300 px-2" value={who} onChange={(e) => setWho(e.target.value as Who)}>
+      <select aria-label="Rule split" className="min-h-11 w-full rounded-md border border-line px-2 bg-card" value={who} onChange={(e) => setWho(e.target.value as Who)}>
         <option value="half">{two ? "50/50" : "Equal"}</option>
         <option value="personal">Only me</option>
         {two && <option value="all_other">All the other</option>}
@@ -80,21 +81,21 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
           max={100}
           step={5}
           aria-label="Payer's percent"
-          className="min-h-11 w-24 rounded-lg border border-slate-300 px-2"
+          className="min-h-11 w-24 rounded-md border border-line px-2 bg-card"
           value={percent}
           onChange={(e) => setPercent(Number(e.target.value))}
         />
       )}
       {error && (
-        <p role="alert" className="break-words text-sm text-red-700">
+        <p role="alert" className="break-words text-sm text-danger">
           {error}
         </p>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" className="min-h-11 rounded-lg border border-slate-300" onClick={onClose}>
+        <button type="button" className="min-h-11 rounded-md border border-line bg-card font-medium" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="min-h-11 rounded-lg bg-emerald-600 text-white">
+        <button type="submit" className="min-h-11 rounded-md bg-primary font-semibold text-on-primary">
           Save
         </button>
       </div>
@@ -117,31 +118,31 @@ export default function ShopRules({ group }: { group: GroupDetail }) {
   };
   return (
     <div className="space-y-2">
-      <h2 className="text-lg font-semibold">Shop rules</h2>
-      {rules.data.length === 0 && <p className="text-sm text-slate-600">None yet. Tick "Remember for this shop" when you review a bank file.</p>}
+      <h2 className="font-heading text-lg font-semibold">Shop rules</h2>
+      {rules.data.length === 0 && <p className="text-sm text-muted">None yet. Tick "Remember for this shop" when you review a bank file.</p>}
       <ul className="space-y-2">
         {rules.data.map((r) => (
           <li key={r.id} data-testid="shop-rule" className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="min-w-0 flex-1 break-words">
                 <span className="font-medium">{r.match_text}</span> → {r.category_name} · {splitLabel(r.preset, r.params as Params, group.my_member_id ?? 0, memberIds)}
-                {r.last_used_at && <span className="block text-xs text-slate-500">last used {r.last_used_at.slice(0, 10)}</span>}
+                {r.last_used_at && <span className="block text-xs text-muted">last used {r.last_used_at.slice(0, 10)}</span>}
               </span>
-              <button type="button" className="min-h-11 px-2 text-emerald-700" onClick={() => setEditing(r.id)}>
+              <button type="button" className="min-h-11 px-2 text-primary" onClick={() => setEditing(r.id)}>
                 Edit
               </button>
-              <button type="button" className="min-h-11 px-2 text-red-700" onClick={() => setConfirm(r.id)}>
+              <button type="button" className="min-h-11 px-2 text-danger" onClick={() => setConfirm(r.id)}>
                 Delete
               </button>
             </div>
             {confirm === r.id && (
-              <div role="alertdialog" aria-label="Confirm delete" className="flex items-center justify-between gap-2 rounded-lg bg-red-50 p-2 text-sm">
+              <div role="alertdialog" aria-label="Confirm delete" className="flex items-center justify-between gap-2 rounded-md bg-danger-soft p-2 text-sm">
                 <span>Delete the rule for {r.match_text}?</span>
                 <span className="flex gap-2">
                   <button type="button" className="min-h-11 px-2" onClick={() => setConfirm(null)}>
                     Keep
                   </button>
-                  <button type="button" className="min-h-11 px-2 font-semibold text-red-700" onClick={() => void remove(r.id)}>
+                  <button type="button" className="min-h-11 px-2 font-semibold text-danger" onClick={() => void remove(r.id)}>
                     Delete it
                   </button>
                 </span>

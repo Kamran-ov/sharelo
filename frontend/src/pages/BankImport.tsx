@@ -100,24 +100,24 @@ export default function BankImport() {
   };
 
   return (
-    <section className="space-y-4 p-4">
+    <section className="space-y-4 px-5 pb-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Import bank file</h2>
-        <Link to={`/g/${group.id}/expenses`} className="min-h-11 content-center text-sm text-emerald-700">
+        <h2 className="font-heading text-lg font-semibold">Import bank file</h2>
+        <Link to={`/g/${group.id}/expenses`} className="min-h-11 content-center text-sm text-primary">
           Back to expenses
         </Link>
       </div>
       <label className="block space-y-1">
-        <span className="text-sm">Revolut or Wise statement (CSV)</span>
+        <span className="text-sm text-muted">Revolut or Wise statement (CSV)</span>
         <input type="file" accept=".csv,text/csv" disabled={upload.busy} className="block w-full text-sm" onChange={(e) => onFile(e.target.files?.[0])} />
       </label>
-      {upload.line && <p data-testid="upload-result" className="text-sm text-slate-700">{upload.line}</p>}
+      {upload.line && <p data-testid="upload-result" className="text-sm text-muted">{upload.line}</p>}
       {upload.error && (
-        <p role="alert" className="break-words text-sm text-red-700">
+        <p role="alert" className="break-words text-sm text-danger">
           {upload.error}
         </p>
       )}
-      {list.isSuccess && rows.length === 0 && <p className="text-slate-600">Nothing to review.</p>}
+      {list.isSuccess && rows.length === 0 && <p className="text-muted">Nothing to review.</p>}
       <ul className="space-y-3">
         {rows.map((row) => {
           const finished = done[row.id];
@@ -126,20 +126,20 @@ export default function BankImport() {
           const label = triple ? splitLabel(triple.preset, triple.params as Params, me, memberIds) : "";
           const shop = row.merchant || row.description;
           return (
-            <li key={row.id} data-testid="bank-row" className="rounded-lg border border-slate-200 p-3">
+            <li key={row.id} data-testid="bank-row" className="rounded-card border border-line bg-card p-3">
               <div className="flex justify-between gap-2">
                 <span className="break-words font-medium">{shop}</span>
                 <span className="shrink-0">
                   {formatCents(row.amount_cents)} {row.currency}
                 </span>
               </div>
-              <div className="text-sm text-slate-600">{row.date}</div>
+              <div className="text-sm text-muted">{row.date}</div>
               {finished ? (
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <span data-testid="result-line" className="text-sm">
                     {finished.line}
                   </span>
-                  <button type="button" className="min-h-11 px-3 text-emerald-700" disabled={busy === row.id} onClick={() => undo(row)}>
+                  <button type="button" className="min-h-11 px-3 text-primary" disabled={busy === row.id} onClick={() => undo(row)}>
                     Undo
                   </button>
                 </div>
@@ -148,7 +148,7 @@ export default function BankImport() {
                   <div className="flex flex-wrap items-center gap-2">
                     <select
                       aria-label={`Category for ${shop}`}
-                      className="min-h-11 max-w-full rounded-full border border-slate-300 px-3 text-sm"
+                      className="min-h-11 max-w-full rounded-pill border border-line px-3 text-sm"
                       value={triple?.category ?? s.category}
                       onChange={(e) => setChosen((c) => ({ ...c, [row.id]: Number(e.target.value) }))}
                     >
@@ -162,7 +162,7 @@ export default function BankImport() {
                         </optgroup>
                       ))}
                     </select>
-                    <span data-testid="split-label" className="text-sm text-slate-600">
+                    <span data-testid="split-label" className="text-sm text-muted">
                       {label}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export default function BankImport() {
                         key={d}
                         type="button"
                         disabled={busy !== null || !triple}
-                        className={`min-h-12 rounded-lg border text-base capitalize ${d === s.decision ? "border-emerald-600 bg-emerald-50 font-semibold" : "border-slate-300"}`}
+                        className={`min-h-12 rounded-md border text-md capitalize ${d === s.decision ? "border-highlight bg-highlight-soft font-semibold" : "border-line bg-card"}`}
                         onClick={() => decide(row, d)}
                       >
                         {d === "skip" ? "Skip" : d === "shared" ? "Shared" : "Personal"}
@@ -189,7 +189,7 @@ export default function BankImport() {
                     <span>Remember for this shop</span>
                   </label>
                   {errors[row.id] && (
-                    <p role="alert" className="break-words text-sm text-red-700">
+                    <p role="alert" className="break-words text-sm text-danger">
                       {errors[row.id]}
                     </p>
                   )}

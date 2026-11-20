@@ -1,9 +1,9 @@
+import { tokenValue } from "./tokens";
+
 const WIDTH = 720;
 const PAD = 32;
 const LINE = 28;
 const SCALE = 2;
-const FONT = "16px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-const BOLD = `bold 20px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
 const INDENT = 16;
 
 /** Breaks one line at spaces to fit `max`; a word wider than `max` is cut. Nothing is ellipsised. */
@@ -33,8 +33,11 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[
   return out;
 }
 
-/** Draws the summary lines on a white card; the first line is the bold header. */
+/** Draws the summary lines on a card in the token colours of the viewer's current mode; the first
+ *  line is the heading. With no tokens loaded the canvas keeps its own defaults (no fallback literal). */
 export function renderSummaryPng(lines: string[]): Promise<Blob> {
+  const FONT = `16px ${tokenValue("--font-body")}`;
+  const BOLD = `600 20px ${tokenValue("--font-heading")}`;
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) return Promise.reject(new Error("no canvas"));
@@ -49,9 +52,9 @@ export function renderSummaryPng(lines: string[]): Promise<Blob> {
   canvas.width = WIDTH * SCALE;
   canvas.height = height * SCALE;
   ctx.scale(SCALE, SCALE);
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = tokenValue("--surface-card");
   ctx.fillRect(0, 0, WIDTH, height);
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = tokenValue("--text");
   ctx.textBaseline = "top";
   rows.forEach((row, i) => {
     ctx.font = row.font;

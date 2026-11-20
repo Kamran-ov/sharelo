@@ -21,7 +21,7 @@ export default function AccountSheet({ googleEnabled, onClose }: { googleEnabled
       {refused.length > 0 ? (
         <div className="space-y-3" role="status">
           <RefusedNotice refused={refused} />
-          <button type="button" className="min-h-11 w-full rounded-lg border border-slate-300" onClick={onClose}>
+          <button type="button" className="min-h-11 w-full rounded-md border border-line bg-card font-medium" onClick={onClose}>
             OK
           </button>
         </div>

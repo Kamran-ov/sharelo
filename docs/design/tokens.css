@@ -17,6 +17,10 @@
   --money-owe-soft: #F3DCCB;
   --money-neutral: #3F5B5F;        /* personal, settled */
 
+  /* Errors and destructive actions (added by ticket 023; not money) */
+  --danger: #B42318;
+  --danger-soft: #FDE7E5;
+
   /* Surfaces and text */
   --surface-ground: #F4F9F8;       /* page background (mist) */
   --surface-card: #FFFFFF;
@@ -68,6 +72,8 @@
     --money-owe: #F0A06A;
     --money-owe-soft: #4A2E1D;
     --money-neutral: #A9C2C4;
+    --danger: #FF8A80;
+    --danger-soft: #4A1F1C;
     --surface-ground: #0F2E33;
     --surface-card: #15393F;
     --surface-sunken: #0B2428;

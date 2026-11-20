@@ -1,0 +1,93 @@
+/*
+ * Sharelo brand tokens — the ONE place for colours, fonts, radii and spacing.
+ * The app imports this file once (via frontend/src/styles/theme.css).
+ * Change a value here and every page follows. Never hard-code these values elsewhere.
+ */
+
+:root {
+  /* Brand */
+  --brand-primary: #0B6F6A;        /* teal: buttons, active nav, "you're owed" */
+  --brand-primary-hover: #08514D;
+  --brand-highlight: #9FE3D6;      /* mint: logo half, selected chips border */
+  --brand-highlight-soft: #E3F5F1; /* mint wash: chip and icon backgrounds */
+
+  /* Money meaning (never use hue alone; these also differ in lightness) */
+  --money-owed: #0B6F6A;           /* you are owed / you lent */
+  --money-owe: #B4531A;            /* you owe */
+  --money-owe-soft: #F3DCCB;
+  --money-neutral: #3F5B5F;        /* personal, settled */
+
+  /* Errors and destructive actions (added by ticket 023; not money) */
+  --danger: #B42318;
+  --danger-soft: #FDE7E5;
+
+  /* Surfaces and text */
+  --surface-ground: #F4F9F8;       /* page background (mist) */
+  --surface-card: #FFFFFF;
+  --surface-sunken: #E6EFEE;       /* segmented control track */
+  --border: #DCEBE8;
+  --border-subtle: #EEF5F4;        /* row dividers */
+  --text: #0F2E33;                 /* deep ink */
+  --text-muted: #3F5B5F;
+  --text-on-primary: #FFFFFF;
+  --overlay: #0F2E33;              /* behind bottom sheets */
+
+  /* Type */
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 22px;
+  --text-2xl: 34px;
+  --text-amount: 56px;
+
+  /* Shape and spacing */
+  --radius-sm: 11px;   /* segmented buttons */
+  --radius-md: 14px;   /* inputs, icon tiles */
+  --radius-lg: 18px;   /* cards, lists */
+  --radius-xl: 20px;   /* hero card, FAB */
+  --radius-sheet: 28px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --tap-min: 44px;     /* minimum touch target */
+
+  --shadow-fab: 0 8px 20px rgba(11, 111, 106, 0.35);
+  --shadow-segment: 0 1px 3px rgba(15, 46, 51, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand-primary: #2BB3A6;
+    --brand-primary-hover: #4CC7BB;
+    --brand-highlight: #CFF3EC;
+    --brand-highlight-soft: #163F44;
+    --money-owed: #4CC7BB;
+    --money-owe: #F0A06A;
+    --money-owe-soft: #4A2E1D;
+    --money-neutral: #A9C2C4;
+    --danger: #FF8A80;
+    --danger-soft: #4A1F1C;
+    --surface-ground: #0F2E33;
+    --surface-card: #15393F;
+    --surface-sunken: #0B2428;
+    --border: #24505A;
+    --border-subtle: #1C454C;
+    --text: #F4F9F8;
+    --text-muted: #A9C2C4;
+    --text-on-primary: #0F2E33;
+    --overlay: #000000;
+  }
+}
+
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-weight: 600; font-display: swap; src: url("/fonts/space-grotesk-latin-600-normal.woff2") format("woff2"); }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: var(--space-4); text-align: center; background: var(--surface-ground); color: var(--text); font-family: var(--font-body); }
+h1 { font-family: var(--font-heading); font-size: var(--text-xl); }
+p { color: var(--text-muted); font-size: var(--text-md); }

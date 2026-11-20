@@ -35,5 +35,21 @@ markup for exact layout, sizes and values. They are not app code and are not ser
 
 ## How to change the look
 
-Edit `tokens.css` here and copy it to `frontend/src/styles/tokens.css` (ticket 023 sets up the
-link). One file, every page.
+After **every** edit of `tokens.css` or `logo-mark.svg` here, run both steps:
+
+```
+cp docs/design/tokens.css frontend/src/styles/tokens.css
+make icons
+```
+
+`make icons` (`frontend/scripts/brand-assets.mjs`) regenerates the PNG icons, `favicon.svg`,
+`offline.css`, the self-hosted fonts and `public/icons/brand-stamp.json`. Two vitests in
+`frontend/guard/design.test.tsx` stay red until both steps are done:
+`test_app_tokens_are_identical_to_design_tokens` (the copy) and
+`test_generated_brand_assets_are_current` (the stamp: logo sha256, `--brand-primary`, tokens sha256).
+
+The app reads these values through `frontend/src/styles/theme.css` (Tailwind names such as
+`bg-primary`, `text-owe`, `rounded-card`, `font-heading`); the manifest and `<meta theme-color>` read
+them from the same file at build time. No colour, font family or palette class may be written
+anywhere else in `frontend/src` (guard tests). `--danger` / `--danger-soft` were added by ticket 023
+for errors and destructive actions (not money).

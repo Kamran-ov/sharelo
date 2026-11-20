@@ -54,7 +54,7 @@ export default function InstallHint({
   };
 
   return (
-    <div role="region" aria-label="Install Sharelo" className="flex items-center justify-between gap-2 bg-emerald-50 px-4 py-2 text-sm text-emerald-900">
+    <div role="region" aria-label="Install Sharelo" className="flex items-center justify-between gap-2 bg-highlight-soft px-4 py-2 text-sm text-ink">
       {prompt ? (
         <button
           type="button"

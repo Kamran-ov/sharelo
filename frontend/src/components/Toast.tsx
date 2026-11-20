@@ -11,11 +11,11 @@ export default function Toast({ message, onUndo, onDone }: { message: string; on
   return (
     <div
       role="status"
-      className="fixed bottom-20 left-1/2 z-30 flex w-[calc(100%-2rem)] max-w-[448px] -translate-x-1/2 items-center justify-between rounded-lg bg-slate-900 px-4 text-white"
+      className="fixed bottom-20 left-1/2 z-30 flex w-[calc(100%-2rem)] max-w-[448px] -translate-x-1/2 items-center justify-between rounded-md bg-ink px-4 text-ground"
     >
       <span className="min-h-11 py-3">{message}</span>
       {onUndo && (
-        <button type="button" className="min-h-11 px-2 font-semibold text-emerald-300" onClick={onUndo}>
+        <button type="button" className="min-h-11 px-2 font-semibold text-ground underline" onClick={onUndo}>
           Undo
         </button>
       )}
