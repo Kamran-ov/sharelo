@@ -1,0 +1,6 @@
+TransferWise ID,Date,Amount,Currency,Description,Payment Reference,Running Balance,Merchant,Total fees
+CARD-1001,03-09-2026,-18.20,EUR,Card transaction of 18.20 EUR issued by Lidl,,481.80,Lidl,0.00
+TRANSFER-2001,05-09-2026,-200.00,EUR,Sent money to Landlord,rent,281.80,,0.00
+TRANSFER-2002,07-09-2026,300.00,EUR,Received money from Employer,,581.80,,0.00
+CARD-1002,10-09-2026,-9.99,USD,Card transaction of 9.99 USD issued by Steam,,40.01,Steam,0.00
+CONVERSION-3001,12-09-2026,-50.00,EUR,Converted 50.00 EUR to 54.10 USD,,531.80,,0.21

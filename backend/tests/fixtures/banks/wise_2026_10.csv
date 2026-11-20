@@ -1,0 +1,5 @@
+TransferWise ID,Date,Amount,Currency,Description,Payment Reference,Running Balance,Merchant,Total fees
+CARD-1002,10-09-2026,-9.99,USD,Card transaction of 9.99 USD issued by Steam,,40.01,Steam,0.00
+CONVERSION-3001,12-09-2026,-50.00,EUR,Converted 50.00 EUR to 54.10 USD,,531.80,,0.21
+CARD-1003,01-10-2026,-4.50,EUR,Card transaction of 4.50 EUR issued by Bar Sport,,527.30,Bar Sport,0.00
+CARD-1004,02-10-2026,-32.00,EUR,Card transaction of 32.00 EUR issued by Amazon,,495.30,Amazon,0.00
