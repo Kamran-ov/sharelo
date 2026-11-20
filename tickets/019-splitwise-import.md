@@ -1,7 +1,7 @@
 ---
 id: 019
 title: Splitwise history import (API, command, re-runnable)
-status: ready
+status: in-review
 risk: risky
 depends_on: [017]
 pr:
