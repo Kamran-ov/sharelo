@@ -37,7 +37,7 @@ export default function MoveToHomeSheet({ group, transfer, onClose, onDone }: { 
       <div className="space-y-4">
         <label className="block">
           <span className="text-sm text-muted">Amount ({group.currency})</span>
-          <input className="mt-1 block min-h-11 w-full rounded-sm border border-line px-2" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <input className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </label>
         <ul className="space-y-1 break-words">
           <li>{lines.trip}</li>
@@ -48,7 +48,7 @@ export default function MoveToHomeSheet({ group, transfer, onClose, onDone }: { 
             {error}
           </p>
         )}
-        <button type="button" disabled={cents === null || busy} onClick={confirm} className="min-h-12 w-full rounded-sm bg-primary-hover font-semibold text-on-primary disabled:opacity-50">
+        <button type="button" disabled={cents === null || busy} onClick={confirm} className="min-h-14 w-full rounded-md bg-primary font-semibold text-on-primary disabled:opacity-50">
           Move to Home
         </button>
       </div>

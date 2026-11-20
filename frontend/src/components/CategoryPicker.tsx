@@ -32,7 +32,7 @@ export default function CategoryPicker({
             role="tab"
             type="button"
             aria-selected={p.id === tab}
-            className={`min-h-11 rounded-full border px-3 text-sm ${p.id === tab ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`}
+            className={`min-h-11 rounded-pill border px-3 text-sm ${p.id === tab ? "border-highlight bg-highlight-soft font-semibold" : "border-line bg-card"}`}
             onClick={() => setTab(p.id)}
           >
             {p.name}
@@ -46,7 +46,7 @@ export default function CategoryPicker({
             type="button"
             role="option"
             aria-selected={k.id === current}
-            className={`min-h-11 break-words rounded-md border px-2 text-sm ${k.id === current ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`}
+            className={`min-h-11 break-words rounded-md border px-2 text-sm ${k.id === current ? "border-highlight bg-highlight-soft font-semibold" : "border-line bg-card"}`}
             onClick={() => onPick(k.id)}
           >
             {k.name}

@@ -39,7 +39,7 @@ export default function GuestSignOutSheet({ onClose }: { onClose: () => void }) 
             d.data ? (
               <li key={d.data.id} className="flex items-center justify-between gap-2">
                 <span className="min-w-0 break-words">{d.data.name}</span>
-                <button type="button" className="min-h-11 shrink-0 rounded-md border border-line px-3" onClick={() => copy(d.data)}>
+                <button type="button" className="min-h-11 shrink-0 rounded-md border border-line bg-card px-3 font-medium" onClick={() => copy(d.data)}>
                   {copied === d.data.id ? "Copied" : "Copy link"}
                 </button>
               </li>
@@ -49,7 +49,7 @@ export default function GuestSignOutSheet({ onClose }: { onClose: () => void }) 
         <button type="button" className="min-h-11 w-full rounded-md bg-danger font-medium text-on-primary" onClick={() => logout.mutate()} disabled={logout.isPending}>
           Sign out anyway
         </button>
-        <button type="button" className="min-h-11 w-full rounded-md border border-line" onClick={onClose}>
+        <button type="button" className="min-h-11 w-full rounded-md border border-line bg-card font-medium" onClick={onClose}>
           Cancel
         </button>
       </div>

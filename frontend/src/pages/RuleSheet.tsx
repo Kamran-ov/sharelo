@@ -3,15 +3,15 @@ import { useMemo, useState } from "react";
 import type { CategoryNode, GroupDetail } from "../api";
 import CategoryPicker from "../components/CategoryPicker";
 import Sheet from "../components/Sheet";
+import { Button, ErrorText, INPUT, SEG_TRACK, SEG_TRACK_WRAP, segItem } from "../components/ui";
 import { localToday } from "../lib/dates";
 import { formatCents, parseAmount } from "../lib/money";
 import { otherOf, type Who } from "../lib/presets";
 import { MONTH_NAMES, nextOccurrences } from "../lib/recurrence";
 import { ruleBody, rulePatchBody, scheduleOf, whoOfRule, type RuleLike, type RuleValues } from "../lib/ruleBody";
 
-const input = "min-h-11 w-full rounded-md border border-line px-3";
-const seg = (on: boolean) =>
-  `min-h-11 flex-1 rounded-md border px-2 text-sm ${on ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`;
+const input = INPUT;
+const seg = segItem;
 
 export function initialRuleValues(group: GroupDetail, tree: CategoryNode[], editing?: RuleLike): RuleValues {
   const ids = group.members.map((m) => m.id);
@@ -94,9 +94,9 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
     <Sheet title={editing ? "Edit recurring expense" : "New recurring expense"} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
         <label className="block">
-          <span className="text-sm">Amount ({group.currency})</span>
+          <span className="text-sm text-muted">Amount ({group.currency})</span>
           <input
-            className={`${input} text-xl`}
+            className={`${input} h-14 font-heading text-xl font-semibold`}
             inputMode="decimal"
             autoFocus
             value={v.amountText}
@@ -105,11 +105,11 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
           />
         </label>
         <label className="block">
-          <span className="text-sm">Description</span>
+          <span className="text-sm text-muted">Description</span>
           <input className={input} value={v.description} onChange={(e) => set({ description: e.target.value })} />
         </label>
         <div>
-          <span className="text-sm">Category</span>
+          <span className="text-sm text-muted">Category</span>
           <button type="button" className={`${input} text-left`} onClick={() => setPicking((p) => !p)} aria-expanded={picking}>
             {categoryName ? `${categoryName.parent} › ${categoryName.name}` : "Choose…"}
           </button>
@@ -127,9 +127,9 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
         </div>
 
         <div>
-          <span className="text-sm">Who paid</span>
+          <span className="text-sm text-muted">Who paid</span>
           {two ? (
-            <div className="flex gap-2" role="group" aria-label="Who paid">
+            <div className={SEG_TRACK} role="group" aria-label="Who paid">
               {ids.map((id) => (
                 <button key={id} type="button" aria-pressed={v.payerId === id} className={seg(v.payerId === id)} onClick={() => set({ payerId: id })}>
                   {nameOf(id)}
@@ -148,8 +148,8 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
         </div>
 
         <div>
-          <span className="text-sm">Who it&apos;s for</span>
-          <div className="flex gap-2" role="group" aria-label="Who it's for">
+          <span className="text-sm text-muted">Who it&apos;s for</span>
+          <div className={SEG_TRACK} role="group" aria-label="Who it's for">
             {(two
               ? ([["half", "50/50"], ["personal", "Only me"], ["all_other", `All ${nameOf(otherOf(v.payerId, ids))}`], ["custom", "Custom %"]] as [Who, string][])
               : ([["equal", "Equal among everyone"], ["personal", "Only me"]] as [Who, string][])
@@ -162,7 +162,7 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
           {v.who === null && <p className="mt-1 text-sm text-muted">Custom split — kept as it is</p>}
           {two && v.who === "custom" && (
             <label className="mt-2 block">
-              <span className="text-sm">
+              <span className="text-sm text-muted">
                 {nameOf(v.payerId)} {v.percent}% · {nameOf(otherOf(v.payerId, ids))} {100 - v.percent}%
               </span>
               <input type="range" className="w-full" min={5} max={95} step={5} value={v.percent} onChange={(e) => set({ percent: Number(e.target.value) })} aria-label="Payer's percent" />
@@ -171,8 +171,8 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
         </div>
 
         <div>
-          <span className="text-sm">Frequency</span>
-          <div className="flex gap-2" role="group" aria-label="Frequency">
+          <span className="text-sm text-muted">Frequency</span>
+          <div className={SEG_TRACK} role="group" aria-label="Frequency">
             {(["monthly", "yearly"] as const).map((f) => (
               <button key={f} type="button" aria-pressed={v.frequency === f} className={seg(v.frequency === f)} onClick={() => set({ frequency: f })}>
                 {f === "monthly" ? "Monthly" : "Yearly"}
@@ -183,7 +183,7 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
         <div className="flex gap-2">
           {v.frequency === "yearly" && (
             <label className="block flex-1">
-              <span className="text-sm">Month</span>
+              <span className="text-sm text-muted">Month</span>
               <select className={input} value={v.month} onChange={(e) => set({ month: Number(e.target.value) })}>
                 {MONTH_NAMES.map((name, i) => (
                   <option key={name} value={i + 1}>
@@ -194,7 +194,7 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
             </label>
           )}
           <label className="block flex-1">
-            <span className="text-sm">Day of month</span>
+            <span className="text-sm text-muted">Day of month</span>
             <input
               className={input}
               inputMode="numeric"
@@ -205,25 +205,25 @@ export default function RuleSheet({ group, tree, editing, error, busy, onSubmit,
           </label>
         </div>
         <label className="block">
-          <span className="text-sm">Start date</span>
+          <span className="text-sm text-muted">Start date</span>
           <input type="date" className={input} value={v.startDate} onChange={(e) => set({ startDate: e.target.value })} />
         </label>
         <label className="block">
-          <span className="text-sm">End date (optional)</span>
+          <span className="text-sm text-muted">End date (optional)</span>
           <input type="date" className={input} value={v.endDate} onChange={(e) => set({ endDate: e.target.value })} aria-invalid={!endOk} />
         </label>
         {preview.length > 0 && (
-          <p className="break-words rounded-md bg-sunken p-3 text-sm" data-testid="preview">
+          <p className="break-words rounded-card border border-line bg-card p-3 text-sm" data-testid="preview">
             Next: {preview.join(", ")}
           </p>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="break-words text-sm text-danger">
             {error}
           </p>
         )}
-        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-md bg-primary font-medium text-on-primary disabled:bg-line">
+        <button type="submit" disabled={!valid || busy} className="min-h-14 w-full rounded-md bg-primary px-5 font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-50">
           Save
         </button>
       </form>

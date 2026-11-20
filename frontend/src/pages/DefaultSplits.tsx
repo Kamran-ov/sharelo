@@ -51,8 +51,8 @@ export default function DefaultSplits({ group }: { group: GroupDetail }) {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Default split per category</h2>
-      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+      <h2 className="font-heading text-lg font-semibold">Default split per category</h2>
+      {error && <p role="alert" className="break-words text-sm text-danger">{error}</p>}
       {tree.data.map((parent) => (
         <div key={parent.id}>
           <h3 className="text-sm font-semibold text-muted">{parent.name}</h3>
@@ -68,7 +68,7 @@ export default function DefaultSplits({ group }: { group: GroupDetail }) {
                 <span className="min-w-0 flex-1 break-words">{k.name}</span>
                 <select
                   aria-label={`Default split for ${parent.name} › ${k.name}`}
-                  className="min-h-11 rounded-md border border-line px-2"
+                  className="min-h-11 rounded-md border border-line bg-card px-2"
                   value={choice}
                   onChange={(e) => save(k.id, e.target.value as Choice, percent)}
                 >
@@ -86,7 +86,7 @@ export default function DefaultSplits({ group }: { group: GroupDetail }) {
                     max={100}
                     step={5}
                     aria-label={`Payer's percent for ${k.name}`}
-                    className="min-h-11 w-20 rounded-md border border-line px-2"
+                    className="min-h-11 w-20 rounded-md border border-line px-2 bg-card"
                     defaultValue={percent}
                     onBlur={(e) => save(k.id, "custom", Number(e.target.value))}
                   />

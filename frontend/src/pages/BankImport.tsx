@@ -100,15 +100,15 @@ export default function BankImport() {
   };
 
   return (
-    <section className="space-y-4 p-4">
+    <section className="space-y-4 px-5 pb-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Import bank file</h2>
+        <h2 className="font-heading text-lg font-semibold">Import bank file</h2>
         <Link to={`/g/${group.id}/expenses`} className="min-h-11 content-center text-sm text-primary">
           Back to expenses
         </Link>
       </div>
       <label className="block space-y-1">
-        <span className="text-sm">Revolut or Wise statement (CSV)</span>
+        <span className="text-sm text-muted">Revolut or Wise statement (CSV)</span>
         <input type="file" accept=".csv,text/csv" disabled={upload.busy} className="block w-full text-sm" onChange={(e) => onFile(e.target.files?.[0])} />
       </label>
       {upload.line && <p data-testid="upload-result" className="text-sm text-muted">{upload.line}</p>}
@@ -126,7 +126,7 @@ export default function BankImport() {
           const label = triple ? splitLabel(triple.preset, triple.params as Params, me, memberIds) : "";
           const shop = row.merchant || row.description;
           return (
-            <li key={row.id} data-testid="bank-row" className="rounded-md border border-line p-3">
+            <li key={row.id} data-testid="bank-row" className="rounded-card border border-line bg-card p-3">
               <div className="flex justify-between gap-2">
                 <span className="break-words font-medium">{shop}</span>
                 <span className="shrink-0">
@@ -148,7 +148,7 @@ export default function BankImport() {
                   <div className="flex flex-wrap items-center gap-2">
                     <select
                       aria-label={`Category for ${shop}`}
-                      className="min-h-11 max-w-full rounded-full border border-line px-3 text-sm"
+                      className="min-h-11 max-w-full rounded-pill border border-line px-3 text-sm"
                       value={triple?.category ?? s.category}
                       onChange={(e) => setChosen((c) => ({ ...c, [row.id]: Number(e.target.value) }))}
                     >
@@ -172,7 +172,7 @@ export default function BankImport() {
                         key={d}
                         type="button"
                         disabled={busy !== null || !triple}
-                        className={`min-h-12 rounded-md border text-md capitalize ${d === s.decision ? "border-primary bg-highlight-soft font-semibold" : "border-line"}`}
+                        className={`min-h-12 rounded-md border text-md capitalize ${d === s.decision ? "border-highlight bg-highlight-soft font-semibold" : "border-line bg-card"}`}
                         onClick={() => decide(row, d)}
                       >
                         {d === "skip" ? "Skip" : d === "shared" ? "Shared" : "Personal"}

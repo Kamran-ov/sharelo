@@ -3,9 +3,10 @@ import { useState, type FormEvent } from "react";
 
 import { api, ApiError, type Me } from "../api";
 import GoogleButton from "./GoogleButton";
+import { INPUT } from "./ui";
 
-const input = "min-h-11 w-full rounded-md border border-line px-3 text-md";
-const primary = "min-h-11 w-full rounded-md bg-primary px-4 font-medium text-on-primary";
+const input = `${INPUT} mt-1.5 h-[50px]`;
+const primary = "min-h-14 w-full rounded-md bg-primary px-5 font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-50";
 
 /** Sign-in / create-account form shared by the login page and the guest account sheet. */
 export default function AuthForm({
@@ -39,20 +40,20 @@ export default function AuthForm({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{creating ? "Create account" : "Sign in"}</h1>
+      <h1 className="font-heading text-xl font-semibold">{creating ? "Create account" : "Sign in"}</h1>
       <form onSubmit={submit} className="space-y-3">
         {creating && (
           <label className="block">
-            <span className="text-sm">Your name</span>
+            <span className="text-sm text-muted">Your name</span>
             <input className={input} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
           </label>
         )}
         <label className="block">
-          <span className="text-sm">Email</span>
+          <span className="text-sm text-muted">Email</span>
           <input className={input} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label className="block">
-          <span className="text-sm">Password</span>
+          <span className="text-sm text-muted">Password</span>
           <input
             className={input}
             type="password"
@@ -74,7 +75,7 @@ export default function AuthForm({
       <GoogleButton enabled={googleEnabled} onCredential={(id_token) => signIn.mutate({ path: "/auth/google", body: { id_token } })} />
       <button
         type="button"
-        className="min-h-11 w-full text-primary underline"
+        className="min-h-11 w-full font-medium text-primary underline"
         onClick={() => {
           setCreating(!creating);
           signIn.reset();

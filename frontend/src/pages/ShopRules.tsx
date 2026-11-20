@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, ApiError, type CategoryNode, type GroupDetail, type ShopRule } from "../api";
+import { INPUT } from "../components/ui";
 import { splitLabel, type Params } from "../lib/bankImport";
 import { storedPercent } from "../lib/presets";
 
@@ -52,10 +53,10 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
       }}
     >
       <label className="block">
-        <span className="text-sm">Shop text</span>
-        <input className="min-h-11 w-full rounded-md border border-line px-3" value={text} onChange={(e) => setText(e.target.value)} required />
+        <span className="text-sm text-muted">Shop text</span>
+        <input className={INPUT} value={text} onChange={(e) => setText(e.target.value)} required />
       </label>
-      <select aria-label="Rule category" className="min-h-11 w-full rounded-md border border-line px-2" value={category} onChange={(e) => setCategory(Number(e.target.value))}>
+      <select aria-label="Rule category" className="min-h-11 w-full rounded-md border border-line px-2 bg-card" value={category} onChange={(e) => setCategory(Number(e.target.value))}>
         {tree.map((p) => (
           <optgroup key={p.id} label={p.name}>
             {p.children.map((k) => (
@@ -66,7 +67,7 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
           </optgroup>
         ))}
       </select>
-      <select aria-label="Rule split" className="min-h-11 w-full rounded-md border border-line px-2" value={who} onChange={(e) => setWho(e.target.value as Who)}>
+      <select aria-label="Rule split" className="min-h-11 w-full rounded-md border border-line px-2 bg-card" value={who} onChange={(e) => setWho(e.target.value as Who)}>
         <option value="half">{two ? "50/50" : "Equal"}</option>
         <option value="personal">Only me</option>
         {two && <option value="all_other">All the other</option>}
@@ -80,7 +81,7 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
           max={100}
           step={5}
           aria-label="Payer's percent"
-          className="min-h-11 w-24 rounded-md border border-line px-2"
+          className="min-h-11 w-24 rounded-md border border-line px-2 bg-card"
           value={percent}
           onChange={(e) => setPercent(Number(e.target.value))}
         />
@@ -91,10 +92,10 @@ function RuleEditor({ group, rule, tree, onClose }: { group: GroupDetail; rule: 
         </p>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" className="min-h-11 rounded-md border border-line" onClick={onClose}>
+        <button type="button" className="min-h-11 rounded-md border border-line bg-card font-medium" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="min-h-11 rounded-md bg-primary text-on-primary">
+        <button type="submit" className="min-h-11 rounded-md bg-primary font-semibold text-on-primary">
           Save
         </button>
       </div>
@@ -117,7 +118,7 @@ export default function ShopRules({ group }: { group: GroupDetail }) {
   };
   return (
     <div className="space-y-2">
-      <h2 className="text-lg font-semibold">Shop rules</h2>
+      <h2 className="font-heading text-lg font-semibold">Shop rules</h2>
       {rules.data.length === 0 && <p className="text-sm text-muted">None yet. Tick "Remember for this shop" when you review a bank file.</p>}
       <ul className="space-y-2">
         {rules.data.map((r) => (

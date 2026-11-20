@@ -3,6 +3,8 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, ApiError, type JoinPreview, type JoinResult } from "../api";
+import Logo from "../components/Logo";
+import { INPUT } from "../components/ui";
 import { meKey, useMe } from "../auth";
 
 export default function Join() {
@@ -37,11 +39,11 @@ export default function Join() {
     e.preventDefault();
     join.mutate();
   };
-  if (preview.isPending) return <p className="p-4 text-muted">Loading…</p>;
+  if (preview.isPending) return <p className="p-5 text-muted">Loading…</p>;
   if (preview.isError) {
     return (
-      <main className="space-y-3 p-4">
-        <h1 className="text-xl font-semibold">Link not found</h1>
+      <main className="space-y-3 px-5 py-5">
+        <h1 className="font-heading text-xl font-semibold">Link not found</h1>
         <p>This invitation link is not valid.</p>
         <Link to="/groups" className="inline-flex min-h-11 items-center text-primary underline">
           Go to your groups
@@ -54,22 +56,23 @@ export default function Join() {
   const claimError = claim.error instanceof ApiError ? claim.error.detail || claim.error.code : null;
   const unclaimed = preview.data.unclaimed_members;
   return (
-    <main className="space-y-4 p-4">
-      <h1 className="break-words text-xl font-semibold">Join {preview.data.group_name}</h1>
+    <main className="space-y-4 px-5 pb-8 pt-5">
+      <Logo size={32} wordmark />
+      <h1 className="font-heading break-words text-xl font-semibold">Join {preview.data.group_name}</h1>
       <p className="text-sm text-muted">
         {preview.data.currency} · {preview.data.member_names.join(", ")}
       </p>
       {unclaimed.length > 0 && (
         <section className="space-y-2" aria-labelledby="claim-heading">
-          <h2 id="claim-heading" className="text-lg font-semibold">
+          <h2 id="claim-heading" className="font-heading text-lg font-semibold">
             Are you one of these?
           </h2>
-          <ul className="space-y-2">
+          <ul className="overflow-hidden rounded-card border border-line bg-card [&>li+li]:border-t [&>li+li]:border-line-subtle">
             {unclaimed.map((m) => (
               <li key={m.id}>
                 <button
                   type="button"
-                  className="min-h-11 w-full break-words rounded-md border border-line px-3 text-left font-medium"
+                  className="min-h-14 w-full break-words px-4 text-left font-semibold"
                   disabled={claim.isPending}
                   onClick={() => claim.mutate(m.id)}
                 >
@@ -83,14 +86,14 @@ export default function Join() {
               {claimError}
             </p>
           )}
-          <h2 className="pt-2 text-lg font-semibold">I'm new</h2>
+          <h2 className="font-heading pt-2 text-lg font-semibold">I'm new</h2>
         </section>
       )}
       <form onSubmit={submit} className="space-y-3">
         {!signedIn && (
           <label className="block">
-            <span className="text-sm">Your name</span>
-            <input className="min-h-11 w-full rounded-md border border-line px-3" value={name} onChange={(e) => setName(e.target.value)} required />
+            <span className="text-sm text-muted">Your name</span>
+            <input className={INPUT} value={name} onChange={(e) => setName(e.target.value)} required />
           </label>
         )}
         {error && (
@@ -98,7 +101,7 @@ export default function Join() {
             {error}
           </p>
         )}
-        <button type="submit" className="min-h-11 w-full rounded-md bg-primary font-medium text-on-primary" disabled={join.isPending}>
+        <button type="submit" className="min-h-14 w-full rounded-md bg-primary px-5 font-semibold text-on-primary hover:bg-primary-hover disabled:opacity-50" disabled={join.isPending}>
           Join
         </button>
       </form>

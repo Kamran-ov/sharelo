@@ -39,6 +39,12 @@ export function Fab({ label, ...rest }: { label: string } & Omit<ButtonHTMLAttri
   );
 }
 
+/** Sunken track and its items, for groups of aria-pressed buttons that render their own items. */
+export const SEG_TRACK = "grid auto-cols-fr grid-flow-col gap-1 rounded-md bg-sunken p-1";
+export const SEG_TRACK_WRAP = "grid grid-cols-2 gap-1 rounded-md bg-sunken p-1";
+export const segItem = (on: boolean) =>
+  cx("min-h-11 min-w-0 break-words rounded-sm px-2 text-sm disabled:opacity-40", on ? "bg-card font-semibold text-ink shadow-segment" : "text-muted");
+
 /** "Who paid" / "Who it's for": a labelled group of aria-pressed buttons on a sunken track. */
 export function Segmented<T extends string | number>({
   label,
@@ -67,10 +73,7 @@ export function Segmented<T extends string | number>({
           aria-pressed={value === o.value}
           disabled={o.disabled}
           onClick={() => onChange(o.value)}
-          className={cx(
-            "min-h-11 min-w-0 break-words rounded-sm px-2 text-sm disabled:opacity-40",
-            value === o.value ? "bg-card font-semibold text-ink shadow-segment" : "text-muted",
-          )}
+          className={segItem(value === o.value)}
         >
           {o.label}
         </button>

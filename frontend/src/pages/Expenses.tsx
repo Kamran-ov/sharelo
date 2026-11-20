@@ -2,8 +2,11 @@ import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-quer
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 
-import { api, ApiError, type CategoryDefaults, type CategoryNode, type ExpensePage, type ExpenseRow, type GroupDetail, type ReviewList } from "../api";
+import { api, ApiError, type Balances, type CategoryDefaults, type CategoryNode, type ExpensePage, type ExpenseRow, type GroupDetail, type ReviewList } from "../api";
+import Icon, { categoryIcon } from "../components/Icon";
 import Toast from "../components/Toast";
+import { Amount, Button, Card, Fab, List, ListRow, type Tone } from "../components/ui";
+import { topCardText } from "../lib/balances";
 import { monthKey, monthLabel } from "../lib/dates";
 import type { FormValues } from "../lib/expenseBody";
 import { formatCents, parseAmount } from "../lib/money";
@@ -41,6 +44,43 @@ export function shareText(row: ExpenseRow, me: number | null): string {
   }
 }
 
+const SHARE_TONE: Record<string, Tone> = { owe: "owe", lent: "owed" };
+
+/** The row's share in words and money colour; the text is exactly shareText(). */
+function ShareAmount({ row, me }: { row: ExpenseRow; me: number | null }) {
+  if (me === null) return null;
+  const share = shareFor(me, row.payers, row.splits, row.split_type);
+  if (share.kind === "owe" || share.kind === "lent")
+    return <Amount tone={SHARE_TONE[share.kind]} label={share.kind === "owe" ? "you owe" : "you lent"} figure={formatCents(share.cents)} className="text-md" />;
+  return <Amount tone="neutral" label={shareText(row, me)} className="text-sm font-medium" />;
+}
+
+const HERO_LINES = 3;
+
+/** Overall balance (Balances' top-card words) and who owes whom, from GET balances/. */
+function Hero({ data, me, name }: { data: Balances; me: number; name: (id: number) => string }) {
+  const mine = data.members.find((m) => m.member_id === me);
+  const card = topCardText(mine?.net ?? 0);
+  const lines = data.transfers
+    .filter((t) => t.from_member === me || t.to_member === me)
+    .map((t) => (t.to_member === me ? `${name(t.from_member)} owes you ${formatCents(t.amount_cents)}` : `you owe ${name(t.to_member)} ${formatCents(t.amount_cents)}`));
+  return (
+    <Card variant="hero" className="mt-1 flex flex-col gap-1 p-5" data-testid="hero">
+      <span className="text-sm">Overall,</span>
+      <span className="break-words font-heading text-2xl font-semibold tracking-[-0.5px]" data-testid="hero-total">
+        {card.text}
+        {card.tone !== "settled" && ` ${data.currency}`}
+      </span>
+      {lines.slice(0, HERO_LINES).map((l) => (
+        <span key={l} className="break-words text-sm" data-testid="hero-line">
+          {l}
+        </span>
+      ))}
+      {lines.length > HERO_LINES && <span className="text-sm">+{lines.length - HERO_LINES} more</span>}
+    </Card>
+  );
+}
+
 export default function Expenses() {
   const group = useOutletContext<GroupDetail>();
   const qc = useQueryClient();
@@ -68,6 +108,12 @@ export default function Expenses() {
     for (const p of tree.data ?? []) for (const k of p.children) names.set(k.id, k.name);
     return names;
   }, [tree.data]);
+  const parentName = useMemo(() => {
+    const names = new Map<number, string>();
+    for (const p of tree.data ?? []) for (const k of p.children) names.set(k.id, p.name);
+    return names;
+  }, [tree.data]);
+  const balances = useQuery({ queryKey: ["balances", group.id], queryFn: () => api<Balances>("GET", `${base}/balances/`), retry: false });
   const memberName = (id: number) => group.members.find((m) => m.id === id)?.display_name ?? "?";
 
   const pages = list.data?.pages ?? [];
@@ -146,93 +192,104 @@ export default function Expenses() {
   };
 
   return (
-    <section className="p-4">
-      <Link to={`/g/${group.id}/bank-import`} className="mb-3 flex min-h-11 items-center justify-between rounded-md border border-line px-3 text-sm">
-        <span>Import bank file</span>
-        {toReview > 0 && <span data-testid="to-review" className="rounded-full bg-primary px-2 text-on-primary">{toReview} to review</span>}
+    <section className="px-5 pb-4">
+      {balances.data && group.my_member_id !== null && <Hero data={balances.data} me={group.my_member_id} name={memberName} />}
+      <Link to={`/g/${group.id}/bank-import`} className="mt-3 flex min-h-11 items-center justify-between gap-2 rounded-md border border-line bg-card px-4 text-sm font-medium">
+        <span className="flex items-center gap-2">
+          <Icon name="upload" size={18} />
+          Import bank file
+        </span>
+        {toReview > 0 && (
+          <span data-testid="to-review" className="rounded-pill bg-primary px-2.5 py-0.5 text-xs font-semibold text-on-primary">
+            {toReview} to review
+          </span>
+        )}
       </Link>
-      {list.isPending && <p className="text-muted">Loading…</p>}
-      {list.isError && <p role="alert">Could not load expenses.</p>}
-      {list.isSuccess && items.length === 0 && <p className="text-muted">No expenses yet.</p>}
+      {list.isPending && <p className="pt-4 text-muted">Loading…</p>}
+      {list.isError && <p role="alert" className="pt-4">Could not load expenses.</p>}
+      {list.isSuccess && items.length === 0 && <p className="pt-4 text-muted">No expenses yet.</p>}
       {months.map((m) => (
-        <div key={m} className="mb-4">
-          <h2 className="flex items-baseline justify-between border-b border-line pb-1 font-semibold" data-testid={`month-${m}`}>
-            <span>{monthLabel(m)}</span>
-            <span className="text-sm text-muted" data-testid={`month-total-${m}`}>
+        <div key={m}>
+          <h2 className="flex items-baseline justify-between gap-2 px-1 pb-2 pt-5" data-testid={`month-${m}`}>
+            <span className="font-heading text-md font-semibold">{monthLabel(m)}</span>
+            <span className="text-sm font-normal text-muted" data-testid={`month-total-${m}`}>
               {m in totals ? `${formatCents(totals[m])} ${group.currency}` : ""}
             </span>
           </h2>
-          <ul>
+          <List>
             {items
               .filter((i) => monthKey(i.date) === m)
               .map((item) =>
                 "pending" in item ? (
-                  <li key={item.pending.tempId} aria-busy="true" className="border-b border-line-subtle py-2 text-muted">
-                    <div className="flex justify-between gap-2">
-                      <span className="break-words">{item.pending.description}</span>
-                      <span>
-                        {item.pending.preview !== null
-                          ? `≈ ${formatCents(item.pending.preview)} ${group.currency}`
-                          : `${formatCents(item.pending.cents ?? 0)} ${item.pending.currency}`}
-                      </span>
-                    </div>
-                    <div className="text-sm">saving…</div>
+                  <li key={item.pending.tempId} aria-busy="true" className="text-muted">
+                    <ListRow
+                      icon={categoryIcon(parentName.get(item.pending.category))}
+                      title={item.pending.description}
+                      meta="saving…"
+                      right={
+                        <span className="text-sm">
+                          {item.pending.preview !== null
+                            ? `≈ ${formatCents(item.pending.preview)} ${group.currency}`
+                            : `${formatCents(item.pending.cents ?? 0)} ${item.pending.currency}`}
+                        </span>
+                      }
+                    />
                   </li>
                 ) : (
-                  <li key={item.row.id} data-testid="expense-row" className="relative border-b border-line-subtle">
+                  <li key={item.row.id} data-testid="expense-row" className="relative">
                     {item.row.recurring_rule != null && (
                       <Link
                         to={`/g/${group.id}/recurring#rule-${item.row.recurring_rule}`}
                         aria-label="Created by a recurring rule"
-                        className="absolute right-0 top-8 z-10 flex size-11 items-center justify-center text-muted"
+                        className="absolute bottom-1 left-1 z-10 flex size-11 items-end justify-start p-1 text-primary"
                       >
-                        ↻
+                        <Icon name="repeat" size={14} />
                       </Link>
                     )}
-                    <button type="button" className={`w-full min-h-14 py-2 text-left ${item.row.recurring_rule != null ? "pr-11" : ""}`} onClick={() => open(item.row)}>
-                      <div className="flex justify-between gap-2">
-                        <span className="break-words font-medium">{item.row.description}</span>
-                        <span className="shrink-0">{formatCents(item.row.amount_cents)}</span>
-                      </div>
-                      <div className="flex justify-between gap-2 text-sm text-muted">
-                        <span className="break-words">
-                          {categoryName.get(item.row.category) ?? ""} · {item.row.date}
-                        </span>
-                        {item.row.original_currency && item.row.original_currency !== group.currency && item.row.original_amount_cents != null && (
-                          <span className="shrink-0 text-xs">
-                            {formatCents(item.row.original_amount_cents)} {item.row.original_currency}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex justify-between gap-2 text-sm">
-                        <span>{item.row.payers.length > 1 ? "multiple payers" : item.row.payers[0]?.member === group.my_member_id ? "you paid" : `${memberName(item.row.payers[0]?.member)} paid`}</span>
-                        <span className="text-muted">{shareText(item.row, group.my_member_id)}</span>
-                      </div>
+                    <button type="button" className="w-full text-left" onClick={() => open(item.row)}>
+                      <ListRow
+                        icon={categoryIcon(parentName.get(item.row.category))}
+                        title={item.row.description}
+                        meta={
+                          <>
+                            {categoryName.get(item.row.category) ?? ""} · {item.row.date} ·{" "}
+                            {item.row.payers.length > 1 ? "multiple payers" : item.row.payers[0]?.member === group.my_member_id ? "you paid" : `${memberName(item.row.payers[0]?.member)} paid`}
+                            {item.row.original_currency && item.row.original_currency !== group.currency && item.row.original_amount_cents != null && (
+                              <>
+                                {" · "}
+                                {formatCents(item.row.original_amount_cents)} {item.row.original_currency}
+                              </>
+                            )}
+                          </>
+                        }
+                        right={
+                          <>
+                            <span className="text-xs text-muted">{formatCents(item.row.amount_cents)}</span>{" "}
+                            <ShareAmount row={item.row} me={group.my_member_id} />
+                          </>
+                        }
+                      />
                     </button>
                   </li>
                 ),
               )}
-          </ul>
+          </List>
         </div>
       ))}
       {list.hasNextPage && (
-        <button type="button" className="min-h-11 w-full rounded-md border border-line" disabled={list.isFetchingNextPage} onClick={() => list.fetchNextPage()}>
+        <Button className="mt-4 w-full" disabled={list.isFetchingNextPage} onClick={() => list.fetchNextPage()}>
           Load more
-        </button>
+        </Button>
       )}
-      <div className="pointer-events-none sticky bottom-20 flex justify-end pt-4">
-        <button
-          type="button"
-          aria-label="Add expense"
-          className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-primary text-xl text-on-primary shadow-fab"
+      <div className="pointer-events-none sticky bottom-24 flex justify-end pt-4">
+        <Fab
+          label="Add expense"
           disabled={!tree.data || !defaults.data}
           onClick={() => {
             setToast(null);
             setSheet({ kind: "add" });
           }}
-        >
-          +
-        </button>
+        />
       </div>
 
       {sheet && tree.data && defaults.data && (
