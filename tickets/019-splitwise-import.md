@@ -4,7 +4,7 @@ title: Splitwise history import (API, command, re-runnable)
 status: in-review
 risk: risky
 depends_on: [017]
-pr:
+pr: 28
 ---
 
 ## Goal
