@@ -4,7 +4,7 @@ title: Apply the Sharelo visual design from one token file
 status: in-review
 risk: normal
 depends_on: [017]
-pr:
+pr: 32
 ---
 
 ## Goal
