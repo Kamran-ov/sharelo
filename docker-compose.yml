@@ -17,8 +17,10 @@ services:
       DATABASE_URL: postgres://sharelo:sharelo@db:5432/sharelo
       SECRET_KEY: compose-dev-only-not-secret
       DEBUG: "1"
+    # Whole repo, not backend/ alone: tests read compose.prod.yml, deploy/, scripts/ and the schema.
     volumes:
-      - ./backend:/app
+      - .:/repo
+    working_dir: /repo/backend
     ports:
       - "8000:8000"
     depends_on:

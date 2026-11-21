@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import subprocess
@@ -88,3 +89,33 @@ def test_compose_prod_declares_expected_services():
 def test_cron_runs_only_in_compose():
     for path in [ROOT / "Makefile", *(ROOT / "scripts").iterdir()]:
         assert "supercronic" not in path.read_text(), path
+
+
+def test_prod_settings_do_not_use_md5_hasher():
+    # run_python pins DJANGO_SETTINGS_MODULE=sharelo.settings; pytest-django exports
+    # sharelo.settings_test into os.environ, so the module is asserted too.
+    result = run_python(
+        "from django.conf import settings;"
+        "print(settings.SETTINGS_MODULE);"
+        "print([h for h in settings.PASSWORD_HASHERS if 'MD5' in h])",
+        PROD_ENV,
+    )
+    assert result.stdout.split("\n")[:2] == ["sharelo.settings", "[]"], result.stderr
+
+
+def test_pytest_settings_use_md5_hasher(settings):
+    assert settings.SETTINGS_MODULE == "sharelo.settings_test"
+    assert settings.PASSWORD_HASHERS[0].endswith("MD5PasswordHasher")
+
+
+def test_compose_backend_mounts_repo_root_and_frontend_only_frontend():
+    services = yaml.safe_load((ROOT / "docker-compose.yml").read_text())["services"]
+    assert ".:/repo" in services["backend"]["volumes"]
+    assert services["backend"]["working_dir"] == "/repo/backend"
+    assert "./frontend:/app" in services["frontend"]["volumes"]
+    assert not any(v.startswith(".:") for v in services["frontend"]["volumes"])
+
+
+def test_frontend_test_script_never_watches():
+    scripts = json.loads((ROOT / "frontend" / "package.json").read_text())["scripts"]
+    assert scripts["test"] == "vitest run"

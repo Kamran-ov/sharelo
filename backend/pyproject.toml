@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "sharelo.settings"
+DJANGO_SETTINGS_MODULE = "sharelo.settings_test"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
 # whitenoise warns when STATIC_ROOT is not collected yet; only the container build collects it.
