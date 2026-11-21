@@ -4,15 +4,15 @@ import { useMemo, useState } from "react";
 import { api, ApiError, type CategoryDefaults, type CategoryNode, type ExpenseRow, type GroupDetail, type RateOut } from "../api";
 import CategoryPicker from "../components/CategoryPicker";
 import Sheet from "../components/Sheet";
+import { Button, Chip, ErrorText, INPUT, SEG_TRACK, SEG_TRACK_WRAP, segItem } from "../components/ui";
 import { buildCreateBody, buildPatchBody, exactSum, parseRate, type FormValues } from "../lib/expenseBody";
 import { localToday } from "../lib/dates";
 import { formatCents, parseAmount } from "../lib/money";
 import { descriptionSuggestions, detectPreset, otherOf, whoFromDefault, type Who } from "../lib/presets";
 import { CURRENCIES } from "./Groups";
 
-const input = "min-h-11 w-full rounded-lg border border-slate-300 px-3";
-const seg = (on: boolean) =>
-  `min-h-11 flex-1 rounded-lg border px-2 text-sm ${on ? "border-emerald-600 bg-emerald-50 font-semibold" : "border-slate-300"}`;
+const input = INPUT;
+const seg = segItem;
 
 export interface SheetSubmit {
   values: FormValues;
@@ -140,7 +140,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
     return (
       <Sheet title="Edit expense" onClose={onClose}>
         <p className="mb-4">{editing.description}</p>
-        <p role="note" className="mb-4 rounded-lg bg-slate-100 p-3 text-sm">
+        <p role="note" className="mb-4 rounded-md bg-sunken p-3 text-sm">
           multiple payers — edit not supported yet
         </p>
         <DeleteBlock confirm={confirmDelete} setConfirm={setConfirmDelete} onDelete={onDelete} />
@@ -151,10 +151,10 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
   return (
     <Sheet title={editing ? "Edit expense" : "New expense"} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
-        <label className="block">
-          <span className="text-sm">Amount ({v.currency})</span>
+        <label className="flex flex-col items-center gap-1 py-2">
+          <span className="text-sm text-muted">Amount ({v.currency})</span>
           <input
-            className={`${input} text-2xl`}
+            className="w-full min-w-0 border-none bg-transparent p-0 text-center font-heading text-amount font-semibold leading-none tracking-[-1.5px] text-ink"
             inputMode="decimal"
             autoFocus
             value={v.amountText}
@@ -163,13 +163,13 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
           />
         </label>
         {foreign && cents !== null && (
-          <p className="text-sm text-slate-600" data-testid="converted">
+          <p className="text-sm text-muted" data-testid="converted">
             {preview !== null ? `≈ ${formatCents(preview)} ${group.currency}` : rateQuery.isPending && !editing ? "Looking up the rate…" : ""}
           </p>
         )}
         {foreign && noRate && !editing && (
           <label className="block">
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className="break-words text-sm text-danger">
               No rate for {v.currency} on {v.date}. Enter one ({group.currency} per 1 {v.currency}).
             </p>
             <input className={input} inputMode="decimal" aria-label="Manual rate" value={v.manualRate} onChange={(e) => set({ manualRate: e.target.value })} />
@@ -177,44 +177,42 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
         )}
 
         <label className="block">
-          <span className="text-sm">Description</span>
+          <span className="text-sm text-muted">Description</span>
           <input className={input} value={v.description} onChange={(e) => set({ description: e.target.value })} />
         </label>
         {suggestions.length > 0 && !editing && v.description === "" && (
           <div className="flex flex-wrap gap-2" aria-label="Suggestions">
             {suggestions.slice(0, 6).map((s) => (
-              <button
+              <Chip
                 key={s.description}
-                type="button"
-                className="min-h-11 rounded-full border border-slate-300 px-3 text-sm"
                 onClick={() => {
                   const next = whoFromDefault(defaults[String(s.category)], ids.length, v.payerId);
                   set({ description: s.description, category: s.category, who: next.who, percent: next.percent, mode: "none" });
                 }}
               >
                 {s.description}
-              </button>
+              </Chip>
             ))}
           </div>
         )}
 
         <div>
-          <span className="text-sm">Category</span>
-          <button type="button" className={`${input} text-left`} onClick={() => setPicking((p) => !p)} aria-expanded={picking}>
+          <span className="text-sm text-muted">Category</span>
+          <button type="button" className={`${input} mt-1.5 flex items-center gap-2 text-left`} onClick={() => setPicking((p) => !p)} aria-expanded={picking}>
             {categoryName ? `${categoryName.parent} › ${categoryName.name}` : "Choose…"}
           </button>
           {picking && <CategoryPicker tree={tree} counts={counts} current={v.category} onPick={pickCategory} />}
         </div>
 
         <label className="block">
-          <span className="text-sm">Date</span>
+          <span className="text-sm text-muted">Date</span>
           <input type="date" className={input} value={v.date} onChange={(e) => set({ date: e.target.value })} />
         </label>
 
         <div>
-          <span className="text-sm">Who paid</span>
+          <span className="text-sm text-muted">Who paid</span>
           {two ? (
-            <div className="flex gap-2" role="group" aria-label="Who paid">
+            <div className={SEG_TRACK} role="group" aria-label="Who paid">
               {ids.map((id) => (
                 <button key={id} type="button" aria-pressed={v.payerId === id} className={seg(v.payerId === id)} onClick={() => set({ payerId: id })}>
                   {nameOf(id)}
@@ -233,8 +231,8 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
         </div>
 
         <div>
-          <span className="text-sm">Who it&apos;s for</span>
-          <div className="flex gap-2" role="group" aria-label="Who it's for">
+          <span className="text-sm text-muted">Who it&apos;s for</span>
+          <div className={SEG_TRACK} role="group" aria-label="Who it's for">
             {(two
               ? ([["half", "50/50"], ["personal", "Only me"], ["all_other", `All ${otherName}`], ["custom", "Custom %"]] as [Who, string][])
               : ([["equal", "Equal among everyone"], ["personal", "Only me"]] as [Who, string][])
@@ -244,10 +242,10 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
               </button>
             ))}
           </div>
-          {v.who === null && v.mode === "exact" && <p className="mt-1 text-sm text-slate-600">Custom split — edit in Advanced</p>}
+          {v.who === null && v.mode === "exact" && <p className="mt-1 text-sm text-muted">Custom split — edit in Advanced</p>}
           {two && v.who === "custom" && v.mode === "none" && (
             <label className="mt-2 block">
-              <span className="text-sm">
+              <span className="text-sm text-muted">
                 {nameOf(v.payerId)} {v.percent}% · {nameOf(otherOf(v.payerId, ids))} {100 - v.percent}%
               </span>
               <input type="range" className="w-full" min={0} max={100} step={5} value={v.percent} onChange={(e) => set({ percent: Number(e.target.value) })} aria-label="Payer's percent" />
@@ -255,18 +253,18 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
           )}
         </div>
 
-        <details open={v.mode !== "none"} className="rounded-lg border border-slate-200 p-3">
-          <summary className="min-h-11 cursor-pointer leading-[2.75rem]">Advanced</summary>
+        <details open={v.mode !== "none"} className="rounded-card border border-line bg-card px-4 py-1">
+          <summary className="min-h-11 cursor-pointer font-medium leading-[2.75rem]">Advanced</summary>
           <div className="space-y-3">
             <label className="block">
-              <span className="text-sm">Currency</span>
+              <span className="text-sm text-muted">Currency</span>
               <select className={input} value={v.currency} disabled={!!editing} onChange={(e) => set({ currency: e.target.value, mode: v.mode === "exact" ? "none" : v.mode })}>
                 {[group.currency, ...CURRENCIES.filter((c) => c !== group.currency)].map((c) => (
                   <option key={c}>{c}</option>
                 ))}
               </select>
             </label>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Split mode">
+            <div className={SEG_TRACK_WRAP} role="group" aria-label="Split mode">
               {([["none", "Preset"], ["exact", "Exact amounts"], ["shares", "Shares"], ["subset", "Equal among some"]] as const).map(([mode, label]) => (
                 <button key={mode} type="button" disabled={mode === "exact" && foreign} aria-pressed={v.mode === mode} className={seg(v.mode === mode)} onClick={() => set({ mode })}>
                   {label}
@@ -281,7 +279,7 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
                 </label>
               ))}
             {v.mode === "exact" && (
-              <p className="text-sm text-slate-600">{cents === null ? "" : `Remaining ${formatCents(cents - exactSum(v, group))}`}</p>
+              <p className="text-sm text-muted">{cents === null ? "" : `Remaining ${formatCents(cents - exactSum(v, group))}`}</p>
             )}
             {v.mode === "shares" &&
               group.members.map((m) => (
@@ -300,14 +298,10 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
           </div>
         </details>
 
-        {error && (
-          <p role="alert" className="text-sm text-red-700">
-            {error}
-          </p>
-        )}
-        <button type="submit" disabled={!valid || busy} className="min-h-12 w-full rounded-lg bg-emerald-600 font-medium text-white disabled:bg-slate-300">
+        {error && <ErrorText>{error}</ErrorText>}
+        <Button type="submit" variant="primary" disabled={!valid || busy} className="w-full">
           Save
-        </button>
+        </Button>
         {editing && <DeleteBlock confirm={confirmDelete} setConfirm={setConfirmDelete} onDelete={onDelete} />}
       </form>
     </Sheet>
@@ -317,19 +311,19 @@ export default function ExpenseSheet({ group, recent, tree, defaults, editing, d
 function DeleteBlock({ confirm, setConfirm, onDelete }: { confirm: boolean; setConfirm: (b: boolean) => void; onDelete?: () => void }) {
   if (!confirm) {
     return (
-      <button type="button" className="min-h-11 w-full rounded-lg border border-red-300 text-red-700" onClick={() => setConfirm(true)}>
+      <Button variant="danger" className="w-full" onClick={() => setConfirm(true)}>
         Delete
-      </button>
+      </Button>
     );
   }
   return (
-    <div role="alertdialog" aria-label="Confirm delete" className="space-y-2 rounded-lg border border-red-300 p-3">
+    <div role="alertdialog" aria-label="Confirm delete" className="space-y-2 rounded-card border border-danger bg-danger-soft p-3">
       <p>Delete this expense?</p>
       <div className="flex gap-2">
-        <button type="button" className="min-h-11 flex-1 rounded-lg border border-slate-300" onClick={() => setConfirm(false)}>
+        <Button className="flex-1" onClick={() => setConfirm(false)}>
           Keep
-        </button>
-        <button type="button" className="min-h-11 flex-1 rounded-lg bg-red-600 text-white" onClick={onDelete}>
+        </Button>
+        <button type="button" className="min-h-11 flex-1 rounded-md bg-danger font-medium text-on-primary" onClick={onDelete}>
           Delete for good
         </button>
       </div>

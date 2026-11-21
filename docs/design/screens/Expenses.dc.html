@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Expenses list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B6F6A}a:hover{color:#08514D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F9F8; font-family: Inter, system-ui, sans-serif; color: #0F2E33; display: flex; flex-direction: column; position: relative; overflow: hidden">
+
+<div style="padding: 20px 20px 12px; display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#0B6F6A"></rect><path d="M24 8 A9 9 0 0 0 24 26 Z" fill="#FFFFFF"></path><path d="M24 22 A9 9 0 0 1 24 40 Z" fill="#9FE3D6"></path></svg>
+<div style="display: flex; flex-direction: column">
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.1">Home</span>
+<span style="font-size: 12px; color: #3F5B5F">EUR · Kamran, Janet</span>
+</div>
+</div>
+<button aria-label="Switch group" style="width: 44px; height: 44px; border-radius: 12px; border: 1px solid #DCEBE8; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F2E33" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+</div>
+
+<div style="margin: 0 20px; padding: 20px; border-radius: 20px; background: #0B6F6A; color: #FFFFFF; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; opacity: 0.9">Overall, you are owed</span>
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 34px; letter-spacing: -0.5px">84.20 EUR</span>
+<span style="font-size: 13px; color: #CFF3EC">Janet owes you 84.20</span>
+</div>
+
+<div style="padding: 20px 20px 8px; display: flex; justify-content: space-between; align-items: baseline">
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px">November 2026</span>
+<span style="font-size: 13px; color: #3F5B5F">1,240.50 total</span>
+</div>
+
+<div style="margin: 0 20px; background: #FFFFFF; border: 1px solid #DCEBE8; border-radius: 18px; display: flex; flex-direction: column">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #EEF5F4">
+<div style="width: 40px; height: 40px; border-radius: 12px; background: #E3F5F1; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B6F6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg>
+</div>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 600; font-size: 15px">{{r.desc}}</span>
+<span style="font-size: 12px; color: #3F5B5F">{{r.meta}}</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px">
+<span style="font-size: 12px; color: #3F5B5F">{{r.label}}</span>
+<span style="font-weight: 600; font-size: 15px; color: {{r.color}}">{{r.share}}</span>
+</div>
+</div>
+</sc-for>
+</div>
+
+<a href="AddExpense.dc.html" aria-label="Add expense" style="position: absolute; right: 20px; bottom: 100px; width: 60px; height: 60px; border-radius: 20px; background: #0B6F6A; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(11,111,106,0.35)">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+</a>
+
+<nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #FFFFFF; border-top: 1px solid #DCEBE8; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 12px; box-sizing: border-box">
+<a href="Expenses.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #0B6F6A; font-size: 12px; font-weight: 600">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>Expenses</a>
+<a href="Balances.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M5 8l-3 6h6zM19 8l-3 6h6zM5 8h14"></path></svg>Balances</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"></path></svg>Recurring</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>Settings</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const teal = '#0B6F6A', amber = '#B4531A', grey = '#3F5B5F';
+const food = 'M4 3v8a3 3 0 006 0V3M7 3v18M17 3c-2 2-3 5-3 8h3v10';
+const cart = 'M3 4h3l2 11h11l2-8H7M9 20h.01M18 20h.01';
+const home = 'M3 11l9-7 9 7v9H3zM9 20v-6h6v6';
+const bolt = 'M13 2L4 14h7l-1 8 9-12h-7z';
+const bag = 'M5 8h14l-1 13H6zM9 8V6a3 3 0 016 0v2';
+return {
+rows: [
+{ desc: 'Pizza', meta: 'Dining out · 18 Nov', label: 'you lent', share: '21.05', color: teal, icon: food },
+{ desc: 'Esselunga', meta: 'Groceries · 17 Nov', label: 'you owe', share: '12.00', color: amber, icon: cart },
+{ desc: 'Rent', meta: 'Rent · 1 Nov · repeats', label: 'you lent', share: '475.00', color: teal, icon: home },
+{ desc: 'Electricity', meta: 'Electricity · 1 Nov', label: 'you owe', share: '31.40', color: amber, icon: bolt },
+{ desc: 'Running shoes', meta: 'Clothing · 30 Oct', label: 'personal', share: '89.90', color: grey, icon: bag }
+]
+};
+}
+}
+</script>
+</body>
+</html>

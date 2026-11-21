@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useOutletContext } from "react-router-dom";
 
 import { api, ApiError, type CategoryNode, type GroupDetail, type RuleOut } from "../api";
+import { Button, ErrorText, Fab, IconTile } from "../components/ui";
 import { formatCents } from "../lib/money";
 import { describeRule } from "../lib/recurrence";
 import { splitText, toRuleLike, type RuleLike } from "../lib/ruleBody";
@@ -12,7 +13,7 @@ type SheetState = { kind: "add" } | { kind: "edit"; rule: RuleLike } | null;
 type Confirm = { id: number; kind: "skip" | "delete" } | null;
 
 const errorText = (e: unknown) => (e instanceof ApiError ? e.detail || e.code : "Something went wrong");
-const small = "min-h-11 rounded-lg border border-slate-300 px-3 text-sm";
+const small = "min-h-11 rounded-md border border-line bg-card px-3 text-sm font-medium";
 
 export default function Recurring() {
   const group = useOutletContext<GroupDetail>();
@@ -66,32 +67,33 @@ export default function Recurring() {
   };
 
   return (
-    <section className="p-4">
-      {rulesQuery.isPending && <p className="text-slate-500">Loading…</p>}
-      {rulesQuery.isError && <p role="alert">Could not load recurring expenses.</p>}
-      {rulesQuery.isSuccess && rules.length === 0 && <p className="text-slate-600">No recurring expenses yet.</p>}
-      <ul>
+    <section className="px-5 pb-4">
+      {rulesQuery.isPending && <p className="pt-2 text-muted">Loading…</p>}
+      {rulesQuery.isError && <p role="alert" className="pt-2">Could not load recurring expenses.</p>}
+      {rulesQuery.isSuccess && rules.length === 0 && <p className="pt-2 text-muted">No recurring expenses yet.</p>}
+      <ul className="overflow-hidden rounded-card border border-line bg-card empty:hidden [&>li+li]:border-t [&>li+li]:border-line-subtle">
         {rules.map((rule) => (
           <li
             key={rule.id}
             id={`rule-${rule.id}`}
             data-testid="rule-row"
             data-highlight={hash === `#rule-${rule.id}` ? "true" : "false"}
-            className={`space-y-2 border-b border-slate-100 py-3 ${hash === `#rule-${rule.id}` ? "bg-amber-50" : ""}`}
+            className={`space-y-2 px-4 py-3.5 ${hash === `#rule-${rule.id}` ? "bg-highlight-soft" : ""}`}
           >
-            <div className="flex justify-between gap-2">
-              <span className="break-words font-medium">
+            <div className="flex items-center gap-3">
+              <IconTile name="repeat" />
+              <span className="min-w-0 flex-1 break-words font-semibold">
                 {rule.description}
-                {rule.paused && <span className="ml-2 rounded bg-slate-200 px-2 py-0.5 text-xs">Paused</span>}
+                {rule.paused && <span className="ml-2 rounded-pill bg-sunken px-2 py-0.5 text-xs font-medium text-muted">Paused</span>}
               </span>
-              <span className="shrink-0" data-testid="rule-amount">
+              <span className="shrink-0 font-heading font-semibold" data-testid="rule-amount">
                 {formatCents(rule.amount_cents)}
               </span>
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-muted">
               <span className="break-words">{describeRule(rule)}</span> · next <span data-testid="next-date">{rule.next_date}</span>
             </div>
-            <div className="break-words text-sm text-slate-600">
+            <div className="break-words text-sm text-muted">
               {memberName(rule.payer)} paid · {splitText(rule, group.members.length)}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -109,24 +111,24 @@ export default function Recurring() {
               <button type="button" className={small} onClick={() => { setRowError(null); setConfirm({ id: rule.id, kind: "skip" }); }}>
                 Skip next
               </button>
-              <button type="button" className={`${small} border-red-300 text-red-700`} onClick={() => { setRowError(null); setConfirm({ id: rule.id, kind: "delete" }); }}>
+              <button type="button" className={`${small} border-danger text-danger`} onClick={() => { setRowError(null); setConfirm({ id: rule.id, kind: "delete" }); }}>
                 Delete
               </button>
             </div>
             {confirm?.id === rule.id && (
-              <div role="alertdialog" aria-label={confirm.kind === "skip" ? "Confirm skip" : "Confirm delete"} className="space-y-2 rounded-lg border border-slate-300 p-3">
+              <div role="alertdialog" aria-label={confirm.kind === "skip" ? "Confirm skip" : "Confirm delete"} className="space-y-2 rounded-card border border-line bg-ground p-3">
                 <p className="break-words">
                   {confirm.kind === "skip"
                     ? `Skip ${rule.next_date}? No expense is created for that date.`
                     : "Delete this recurring expense? Expenses it already created stay."}
                 </p>
                 <div className="flex gap-2">
-                  <button type="button" className="min-h-11 flex-1 rounded-lg border border-slate-300" onClick={() => setConfirm(null)}>
+                  <Button className="flex-1" onClick={() => setConfirm(null)}>
                     Keep
-                  </button>
+                  </Button>
                   <button
                     type="button"
-                    className="min-h-11 flex-1 rounded-lg bg-slate-900 text-white"
+                    className="min-h-11 flex-1 rounded-md bg-primary font-medium text-on-primary"
                     disabled={busy}
                     onClick={() => act(rule, () => (confirm.kind === "skip" ? api("POST", `${base}/${rule.id}/skip`) : api("DELETE", `${base}/${rule.id}/`)))}
                   >
@@ -136,23 +138,13 @@ export default function Recurring() {
               </div>
             )}
             {rowError?.id === rule.id && (
-              <p role="alert" className="break-words text-sm text-red-700">
-                {rowError.text}
-              </p>
+              <ErrorText>{rowError.text}</ErrorText>
             )}
           </li>
         ))}
       </ul>
-      <div className="pointer-events-none sticky bottom-20 flex justify-end pt-4">
-        <button
-          type="button"
-          aria-label="Add recurring expense"
-          className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-emerald-600 text-3xl text-white shadow-lg"
-          disabled={!tree.data}
-          onClick={() => { setSheetError(null); setSheet({ kind: "add" }); }}
-        >
-          +
-        </button>
+      <div className="pointer-events-none sticky bottom-24 flex justify-end pt-4">
+        <Fab label="Add recurring expense" disabled={!tree.data} onClick={() => { setSheetError(null); setSheet({ kind: "add" }); }} />
       </div>
       {sheet && tree.data && (
         <RuleSheet

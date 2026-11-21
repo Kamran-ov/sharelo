@@ -5,13 +5,19 @@ A profile with a main group gets an active `GroupLink` to every other group it c
 group. `as_main` adopts a group as the profile's main group instead of linking it, which is how
 two partners end up sharing one Home.
 
+Claim state (017): a member with a profile is joined; without one it is a guest when
+`guest_claimed_at` is set and unclaimed otherwise. Only `add_placeholder_member` creates unclaimed
+members, and every claim is one guarded UPDATE so two people can never take the same name.
+
 `move_debt_to_home` writes the twin settlement pair in one transaction, with the trip group row
 locked so two concurrent calls cannot both spend the same debt.
 """
 
 import datetime
+from dataclasses import dataclass, field
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from accounts.models import Profile
 from ledger.errors import LedgerError
@@ -40,7 +46,12 @@ def create_group(profile: Profile, name: str, currency: str, as_main: bool = Fal
     if as_main and profile.main_group_id is not None:
         raise LedgerError("main_group_exists", f"profile {profile.pk} already has a main group")
     group = Group.objects.create(name=name, currency=currency)
-    Member.objects.create(group=group, display_name=profile.display_name, profile=profile)
+    Member.objects.create(
+        group=group,
+        display_name=profile.display_name,
+        profile=profile,
+        guest_claimed_at=timezone.now(),
+    )
     if as_main:
         _adopt_main(profile, group)
     else:
@@ -70,10 +81,127 @@ def join_group_by_token(
     return member
 
 
-def _new_member(group: Group, display_name: str, profile: Profile | None) -> Member:
+def _new_member(
+    group: Group, display_name: str, profile: Profile | None, claimed: bool = True
+) -> Member:
     if Member.objects.filter(group=group, display_name=display_name).exists():
         raise LedgerError("name_taken", f"{display_name!r} is already in group {group.pk}")
-    return Member.objects.create(group=group, display_name=display_name, profile=profile)
+    return Member.objects.create(
+        group=group,
+        display_name=display_name,
+        profile=profile,
+        guest_claimed_at=timezone.now() if claimed else None,
+    )
+
+
+def _clean_name(display_name: str) -> str:
+    name = (display_name or "").strip()
+    if not 1 <= len(name) <= 100:
+        raise LedgerError("invalid_display_name", "a name has 1 to 100 characters")
+    return name
+
+
+@transaction.atomic
+def add_placeholder_member(group: Group, display_name: str, by_member: Member) -> Member:
+    """A name only; anyone with the share link may later claim it."""
+    if by_member.group_id != group.pk:
+        raise LedgerError("not_a_member", f"member {by_member.pk} is not in group {group.pk}")
+    return _new_member(group, _clean_name(display_name), None, claimed=False)
+
+
+def _profile_in_group(profile: Profile, group: Group) -> bool:
+    return Member.objects.filter(group=group, profile=profile).exists()
+
+
+def _take(member_id: int, group: Group, profile: Profile | None) -> bool:
+    """The one guarded write; False when someone else holds the member.
+
+    The WHERE re-checks the claim under Postgres' row lock, so of two concurrent calls exactly one
+    updates a row. The savepoint keeps a unique-constraint race from poisoning the caller's
+    transaction; the caller decides what the IntegrityError means.
+    """
+    values: dict = {"guest_claimed_at": timezone.now()}
+    if profile is not None:
+        values["profile"] = profile
+    with transaction.atomic():
+        updated = Member.objects.filter(
+            pk=member_id, group=group, profile__isnull=True, guest_claimed_at__isnull=True
+        ).update(**values)
+    return updated == 1
+
+
+@transaction.atomic
+def claim_member(
+    token: str, member_id: int, guest_member_ids: list[int], profile: Profile | None = None
+) -> Member:
+    """Take an unclaimed member of the group behind `token`.
+
+    The view reads `guest_member_ids` from the session and writes the claimed id back for a
+    guest; the service never touches request objects.
+    """
+    group = Group.objects.filter(share_token=token).first()
+    if group is None:
+        raise LedgerError("not_found", "no group has this share token")
+    if not Member.objects.filter(pk=member_id, group=group).exists():
+        raise LedgerError("not_found", f"member {member_id} is not in group {group.pk}")
+    if profile is not None:
+        if _profile_in_group(profile, group):
+            raise LedgerError("profile_already_in_group", f"profile {profile.pk} is in it")
+    elif guest_member_ids and Member.objects.filter(group=group, id__in=guest_member_ids).exists():
+        raise LedgerError("already_in_group", "this session already holds a member here")
+    try:
+        taken = _take(member_id, group, profile)
+    except IntegrityError as exc:
+        # Only uniq_member_group_profile can fire: the profile joined between check and write.
+        raise LedgerError("profile_already_in_group", f"profile {profile.pk} is in it") from exc
+    if not taken:
+        raise LedgerError("member_already_claimed", f"member {member_id} is taken")
+    if profile is not None:
+        _auto_link(profile, group)
+    return Member.objects.get(pk=member_id)
+
+
+def release_guest(member: Member) -> None:
+    """Guest logout: the name becomes claimable again. A member with a profile is never freed."""
+    Member.objects.filter(pk=member.pk, profile__isnull=True).update(guest_claimed_at=None)
+
+
+@dataclass
+class AdoptResult:
+    attached: list[int] = field(default_factory=list)
+    kept: list[int] = field(default_factory=list)
+    refused: list[tuple[int, int, str]] = field(default_factory=list)  # (member, group, code)
+
+
+@transaction.atomic
+def adopt_guest_members(profile: Profile, member_ids: list[int]) -> AdoptResult:
+    """Sign-in: the session's guest members become the profile's, same id and history.
+
+    A group where the profile already has a member keeps the guest as it is (`kept`). Ids whose
+    member is gone or already has a profile are dropped. No main group → no link (006).
+    """
+    result = AdoptResult()
+    guests = Member.objects.filter(id__in=member_ids or [], profile__isnull=True).select_related(
+        "group"
+    )
+    for member in sorted(guests, key=lambda m: m.id):
+        if _profile_in_group(profile, member.group):
+            result.kept.append(member.id)
+            result.refused.append((member.id, member.group_id, "profile_already_in_group"))
+            continue
+        try:
+            with transaction.atomic():
+                updated = Member.objects.filter(pk=member.pk, profile__isnull=True).update(
+                    profile=profile
+                )
+        except IntegrityError:
+            result.kept.append(member.id)
+            result.refused.append((member.id, member.group_id, "profile_already_in_group"))
+            continue
+        if updated == 1:
+            result.attached.append(member.id)
+            _auto_link(profile, member.group)
+    return result
 
 
 def set_link_active(profile: Profile, group: Group, active: bool) -> GroupLink:

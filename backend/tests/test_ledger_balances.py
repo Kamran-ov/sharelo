@@ -229,3 +229,31 @@ def test_balances_module_has_no_float_or_decimal():
     source = inspect.getsource(balances)
     for banned in ("float(", "Decimal(", "round(", " / "):
         assert banned not in source, banned
+
+
+@pytest.mark.django_db
+def test_settlement_external_id_duplicate_is_refused(group, members, day):
+    ann, ben, _ = members
+    record_settlement(group, ben, ann, 500, day, source="splitwise", external_id="77")
+    with pytest.raises(LedgerError) as err:
+        record_settlement(group, ben, ann, 500, day, source="splitwise", external_id="77")
+    assert err.value.code == "duplicate_external_id"
+    assert group.settlements.count() == 1
+
+
+@pytest.mark.django_db
+def test_settlement_default_source_is_manual_and_repeatable(group, members, day):
+    ann, ben, _ = members
+    first = record_settlement(group, ben, ann, 500, day)
+    second = record_settlement(group, ben, ann, 500, day)
+    assert (first.source, first.external_id) == ("manual", None)
+    assert (second.source, second.external_id) == ("manual", None)
+    assert net_balances(group)[ben.id] == 1000
+
+
+@pytest.mark.django_db
+def test_settlement_with_unknown_source_is_refused(group, members, day):
+    ann, ben, _ = members
+    with pytest.raises(LedgerError) as err:
+        record_settlement(group, ben, ann, 500, day, source="paypal")
+    assert err.value.code == "invalid_source"

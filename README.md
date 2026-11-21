@@ -44,6 +44,73 @@ rule failed. Example cron line (scheduling it on a server is the release step):
 15 6 * * * cd /srv/sharelo/backend && python manage.py run_daily >> /var/log/sharelo-daily.log 2>&1
 ```
 
+## Import from Splitwise
+
+A one-off import of a Splitwise group's history (`backend/importers/splitwise/`). Every expense
+comes in with its real paid and owed shares, payments become settlements, and categories map one
+to one. Re-running it creates nothing new.
+
+**The first real run fixes every choice for good.** Re-runs skip rows by Splitwise id, and
+nothing is ever hard-deleted, so the only undo is restoring a database dump. Take one first, and
+import into a **new, empty** group:
+
+```
+pg_dump "$DATABASE_URL" > before-splitwise.sql
+```
+
+1. API key: on splitwise.com go to *Your account → Your apps*, register an app, and copy its
+   **API key** (a personal key; no OAuth needed). Then `export SPLITWISE_API_KEY=...`. Only this
+   command reads it; the app does not need it to boot.
+2. Rates: if any expense is not in the group's currency, fetch the ECB history first:
+   `python manage.py fetch_rates --since <date of the oldest Splitwise expense>`. Currencies the
+   ECB never publishes (e.g. ARS) are listed as `no_rate`, and the import refuses to run.
+3. Find the ids: the Splitwise group id is in the group's URL (`/groups/<id>`). Run once
+   without `--map` and the command lists every Splitwise user to map, with our group's members.
+4. Dry run (writes nothing), then read the printout: counts, errors, unknown categories, cent
+   adjustments, and dates shifted by Europe/Rome:
+
+```
+cd backend
+python manage.py import_splitwise --group 555 --into 7 --map 101=21 --map 102=22 --dry-run
+python manage.py import_splitwise --group 555 --into 7 --map 101=21 --map 102=22
+```
+
+The real run prints a balance check. The group-currency line must have no ✗. Lines marked
+`= after cent adjustment` are Splitwise rounding gaps (e.g. 1000.00 / 3) that we closed with our
+one-cent rule. Foreign currencies are shown but not compared, because we convert at ECB rates.
+A refusal of any kind (unmapped users, rows that cannot be imported, rows already in another of
+our groups) writes nothing and exits non-zero.
+
+Tested against recorded, anonymised fixtures and stubs only. The real API shapes (`balance[]`,
+the `date` format, paging, users who left the group) and Bearer auth against the real host are
+first exercised by your first `--dry-run`.
+
+## Import a bank file
+
+Revolut (app → Accounts → Statement → **Excel/CSV**, personal account) and Wise (Statements →
+**CSV**) exports become pending rows for the review list. Uploading the same month again, or
+overlapping months, is safe: rows already staged are skipped by id. Staged rows are never
+deleted, so **always dry-run a new bank's export first** and compare the totals with the file:
+
+```
+cd backend
+python manage.py stage_bank_file --group 7 --member 21 --dry-run ~/Downloads/revolut.csv
+python manage.py stage_bank_file --group 7 --member 21 ~/Downloads/revolut.csv
+```
+
+The dry run prints rows seen / ignored / would create / would skip, a total per currency (Revolut:
+`Fee − Amount` over completed money-out rows; Wise: `−Amount` over negative rows) and the row
+types, and writes nothing. The API is `POST /api/groups/<id>/bank-imports/` (see `docs/api.md`).
+
+**Not yet checked against a real export.** The parsers are tested against hand-written fixtures
+only; the column names come from the banks' current exports and may differ. An unknown file is
+refused with `unknown_bank_format` and the list of missing columns.
+
+In the app: Expenses → **Import bank file** → choose the CSV. Each new row then needs one tap:
+**Shared**, **Personal** or **Skip**, with the category (and its split) already guessed. Tick
+"Remember for this shop" to make a shop rule, so next month's rows come pre-filled; rules are
+listed, edited and deleted in Settings → Shop rules. Undo works per row while the page is open.
+
 ## Run it for real on your laptop
 
 One origin, gunicorn, and the daily job on a clock; needs Docker (`compose.prod.yml`).

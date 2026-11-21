@@ -51,6 +51,10 @@ class JoinSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length=100)
 
 
+class ClaimSerializer(serializers.Serializer):
+    member_id = serializers.IntegerField()
+
+
 class CategoryDefaultSerializer(serializers.Serializer):
     preset = serializers.CharField()
     params = serializers.DictField(required=False)
@@ -150,6 +154,7 @@ class MemberSerializer(serializers.Serializer):
     display_name = serializers.CharField()
     profile_id = serializers.IntegerField(allow_null=True)
     is_guest = serializers.BooleanField()
+    status = serializers.ChoiceField(choices=["joined", "guest", "unclaimed"])
 
 
 class GroupSummarySerializer(serializers.Serializer):
@@ -166,10 +171,16 @@ class GroupDetailSerializer(GroupSummarySerializer):
     my_member_id = serializers.IntegerField()
 
 
+class UnclaimedMemberSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    display_name = serializers.CharField()
+
+
 class JoinPreviewSerializer(serializers.Serializer):
     group_name = serializers.CharField()
     currency = serializers.CharField()
     member_names = serializers.ListField(child=serializers.CharField())
+    unclaimed_members = UnclaimedMemberSerializer(many=True)
 
 
 class JoinResultSerializer(serializers.Serializer):
@@ -268,6 +279,38 @@ class BalancesSerializer(serializers.Serializer):
     members = MemberBalanceSerializer(many=True)
 
 
+class SummaryGroupSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class SummaryMemberSerializer(MemberBalanceSerializer):
+    display_name = serializers.CharField()
+
+
+class SummaryTransferSerializer(serializers.Serializer):
+    from_member = serializers.IntegerField()
+    to_member = serializers.IntegerField()
+    amount_cents = serializers.IntegerField()
+
+
+class SummaryExpenseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    date = serializers.DateField()
+    description = serializers.CharField()
+    amount_cents = serializers.IntegerField()
+    paid_by = serializers.ListField(child=serializers.IntegerField())
+
+
+class ShareSummarySerializer(serializers.Serializer):
+    group = SummaryGroupSerializer()
+    currency = serializers.CharField()
+    total_spent_cents = serializers.IntegerField()
+    per_member = SummaryMemberSerializer(many=True)
+    transfers = SummaryTransferSerializer(many=True)
+    recent_expenses = SummaryExpenseSerializer(many=True)
+
+
 class SettlementOutSerializer(serializers.ModelSerializer):
     twin_group_name = serializers.SerializerMethodField()
     is_home_side = serializers.SerializerMethodField()
@@ -321,3 +364,26 @@ class RuleOutSerializer(serializers.ModelSerializer):
 
 class RecurringStatusSerializer(serializers.Serializer):
     last_run_at = serializers.DateTimeField(allow_null=True)
+
+
+class AnalyticsLeafRowSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()
+    cents = serializers.IntegerField()
+
+
+class AnalyticsRowSerializer(AnalyticsLeafRowSerializer):
+    rows = AnalyticsLeafRowSerializer(many=True, required=False)
+
+
+# `from` is a Python keyword, so the class is built with type() to keep the JSON name.
+AnalyticsSerializer = type(
+    "AnalyticsSerializer",
+    (serializers.Serializer,),
+    {
+        "currency": serializers.CharField(),
+        "from": serializers.DateField(),
+        "to": serializers.DateField(),
+        "rows": AnalyticsRowSerializer(many=True),
+    },
+)

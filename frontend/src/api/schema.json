@@ -308,6 +308,87 @@
                 }
             }
         },
+        "/api/groups/{group_id}/analytics/": {
+            "get": {
+                "operationId": "groups_analytics_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "by",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "category",
+                                "member",
+                                "member_category",
+                                "month"
+                            ]
+                        },
+                        "description": "default: category"
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/groups/{group_id}/balances/": {
             "get": {
                 "operationId": "groups_balances_retrieve",
@@ -337,6 +418,245 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Balances"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/bank-imports/": {
+            "post": {
+                "operationId": "groups_bank_imports_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BankUpload"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankUploadResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/bank-imports/{batch_id}/": {
+            "get": {
+                "operationId": "groups_bank_imports_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "batch_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BankImport"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/bank-rows/": {
+            "get": {
+                "operationId": "groups_bank_rows_retrieve",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReviewList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/bank-rows/{row_id}/resolve": {
+            "post": {
+                "operationId": "groups_bank_rows_resolve_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "row_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Resolve"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Resolve"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Resolve"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Resolved"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/bank-rows/{row_id}/undo": {
+            "post": {
+                "operationId": "groups_bank_rows_undo_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "row_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PendingBankRow"
                                 }
                             }
                         },
@@ -723,6 +1043,63 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/LinkResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/members/": {
+            "post": {
+                "operationId": "groups_members_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Join"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Member"
                                 }
                             }
                         },
@@ -1343,6 +1720,387 @@
                 }
             }
         },
+        "/api/groups/{group_id}/shop-rules/": {
+            "get": {
+                "operationId": "groups_shop_rules_list",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ShopRule"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "groups_shop_rules_create",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopRuleWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopRuleWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopRuleWrite"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopRule"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/shop-rules/{rule_id}/": {
+            "patch": {
+                "operationId": "groups_shop_rules_partial_update",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rule_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedShopRuleWrite"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedShopRuleWrite"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedShopRuleWrite"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopRule"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "groups_shop_rules_destroy",
+                "description": "Every `groups/<group_id>/...` view derives from this; it is the only membership check.\n\nCSRF protection comes from the base: DRF skips the token for anonymous (guest) sessions.\nA missing group and a non-member get the same 404 so existence is not revealed.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "rule_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/groups/{group_id}/summary/": {
+            "get": {
+                "operationId": "groups_summary_retrieve",
+                "description": "The shareable summary: totals, who pays whom and the last 10 expenses.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShareSummary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/home/analytics/": {
+            "get": {
+                "operationId": "home_analytics_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "by",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "category",
+                                "member",
+                                "month"
+                            ]
+                        },
+                        "description": "default: category"
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    },
+                    {
+                        "in": "query",
+                        "name": "trips",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "lines",
+                                "spread"
+                            ]
+                        },
+                        "description": "default: lines"
+                    }
+                ],
+                "tags": [
+                    "home"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/home/analytics/trip/{group_id}/": {
+            "get": {
+                "operationId": "home_analytics_trip_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: first day of this month"
+                    },
+                    {
+                        "in": "path",
+                        "name": "group_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "level",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                1,
+                                2
+                            ]
+                        },
+                        "description": "category level, default 1"
+                    },
+                    {
+                        "in": "query",
+                        "name": "to",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "default: last day of this month"
+                    }
+                ],
+                "tags": [
+                    "home"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Analytics"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/join/{token}/": {
             "get": {
                 "operationId": "join_retrieve",
@@ -1433,6 +2191,62 @@
                 }
             }
         },
+        "/api/join/{token}/claim": {
+            "post": {
+                "operationId": "join_claim_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "join"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Claim"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JoinResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/me": {
             "get": {
                 "operationId": "me_retrieve",
@@ -1462,6 +2276,78 @@
     },
     "components": {
         "schemas": {
+            "Analytics": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string"
+                    },
+                    "from": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AnalyticsRow"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "from",
+                    "rows",
+                    "to"
+                ]
+            },
+            "AnalyticsLeafRow": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "cents",
+                    "key",
+                    "label"
+                ]
+            },
+            "AnalyticsRow": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "cents": {
+                        "type": "integer"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AnalyticsLeafRow"
+                        }
+                    }
+                },
+                "required": [
+                    "cents",
+                    "key",
+                    "label"
+                ]
+            },
             "Balances": {
                 "type": "object",
                 "properties": {
@@ -1494,7 +2380,150 @@
                     "transfers"
                 ]
             },
+            "BankBatch": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "source": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "label": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "rows_seen": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "rows_created": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "rows_skipped": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "source",
+                    "started_at"
+                ]
+            },
+            "BankImport": {
+                "type": "object",
+                "properties": {
+                    "batch": {
+                        "$ref": "#/components/schemas/BankBatch"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PendingBankRow"
+                        }
+                    }
+                },
+                "required": [
+                    "batch",
+                    "rows"
+                ]
+            },
+            "BankRowStatusEnum": {
+                "enum": [
+                    "pending",
+                    "shared",
+                    "personal",
+                    "skipped"
+                ],
+                "type": "string",
+                "description": "* `pending` - Pending\n* `shared` - Shared\n* `personal` - Personal\n* `skipped` - Skipped"
+            },
+            "BankSourceEnum": {
+                "enum": [
+                    "revolut",
+                    "wise"
+                ],
+                "type": "string",
+                "description": "* `revolut` - Revolut\n* `wise` - Wise"
+            },
+            "BankUpload": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "file"
+                ]
+            },
+            "BankUploadResult": {
+                "type": "object",
+                "properties": {
+                    "batch": {
+                        "$ref": "#/components/schemas/BankBatch"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PendingBankRow"
+                        }
+                    },
+                    "ignored": {
+                        "type": "integer",
+                        "description": "rows that are not money out (top-ups, declined)"
+                    }
+                },
+                "required": [
+                    "batch",
+                    "ignored",
+                    "rows"
+                ]
+            },
+            "BasisEnum": {
+                "enum": [
+                    "rule",
+                    "history",
+                    "default"
+                ],
+                "type": "string",
+                "description": "* `rule` - rule\n* `history` - history\n* `default` - default"
+            },
             "CategoryDefaultOut": {
+                "type": "object",
+                "properties": {
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "params",
+                    "preset"
+                ]
+            },
+            "CategorySplit": {
                 "type": "object",
                 "properties": {
                     "preset": {
@@ -1530,6 +2559,17 @@
                     "children",
                     "id",
                     "name"
+                ]
+            },
+            "Claim": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "member_id"
                 ]
             },
             "ExpenseOut": {
@@ -1823,6 +2863,25 @@
                     "name"
                 ]
             },
+            "GuestRefused": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    },
+                    "group_id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "group_id",
+                    "member_id"
+                ]
+            },
             "Join": {
                 "type": "object",
                 "properties": {
@@ -1849,12 +2908,19 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "unclaimed_members": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UnclaimedMember"
+                        }
                     }
                 },
                 "required": [
                     "currency",
                     "group_name",
-                    "member_names"
+                    "member_names",
+                    "unclaimed_members"
                 ]
             },
             "JoinResult": {
@@ -1929,6 +2995,12 @@
                             "type": "integer"
                         }
                     },
+                    "guest_refused": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GuestRefused"
+                        }
+                    },
                     "google_enabled": {
                         "type": "boolean"
                     }
@@ -1937,6 +3009,7 @@
                     "authenticated",
                     "google_enabled",
                     "guest_memberships",
+                    "guest_refused",
                     "profile"
                 ]
             },
@@ -1979,13 +3052,17 @@
                     },
                     "is_guest": {
                         "type": "boolean"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/StatusEnum"
                     }
                 },
                 "required": [
                     "display_name",
                     "id",
                     "is_guest",
-                    "profile_id"
+                    "profile_id",
+                    "status"
                 ]
             },
             "MemberBalance": {
@@ -2138,6 +3215,25 @@
                     }
                 }
             },
+            "PatchedShopRuleWrite": {
+                "type": "object",
+                "properties": {
+                    "match_text": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                }
+            },
             "PayerOut": {
                 "type": "object",
                 "properties": {
@@ -2153,6 +3249,49 @@
                 "required": [
                     "member",
                     "paid_cents"
+                ]
+            },
+            "PendingBankRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "merchant": {
+                        "type": "string"
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/BankRowStatusEnum"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "currency",
+                    "date",
+                    "description",
+                    "external_id",
+                    "id"
                 ]
             },
             "RateOut": {
@@ -2205,6 +3344,134 @@
                     "display_name",
                     "email",
                     "password"
+                ]
+            },
+            "Resolve": {
+                "type": "object",
+                "properties": {
+                    "decision": {
+                        "$ref": "#/components/schemas/ResolveDecisionEnum"
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "remember": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "decision"
+                ]
+            },
+            "ResolveDecisionEnum": {
+                "enum": [
+                    "shared",
+                    "personal",
+                    "skip"
+                ],
+                "type": "string",
+                "description": "* `shared` - shared\n* `personal` - personal\n* `skip` - skip"
+            },
+            "Resolved": {
+                "type": "object",
+                "properties": {
+                    "row": {
+                        "$ref": "#/components/schemas/PendingBankRow"
+                    },
+                    "expense": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "rule": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "expense",
+                    "row",
+                    "rule"
+                ]
+            },
+            "ReviewList": {
+                "type": "object",
+                "properties": {
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReviewRow"
+                        }
+                    },
+                    "category_splits": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/CategorySplit"
+                        },
+                        "description": "the Shared split per leaf category id, used when a row's category changes"
+                    }
+                },
+                "required": [
+                    "category_splits",
+                    "rows"
+                ]
+            },
+            "ReviewRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "currency": {
+                        "type": "string",
+                        "maxLength": 3
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "merchant": {
+                        "type": "string"
+                    },
+                    "source": {
+                        "$ref": "#/components/schemas/BankSourceEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/BankRowStatusEnum"
+                    },
+                    "suggestion": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Suggestion"
+                            }
+                        ],
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "currency",
+                    "date",
+                    "description",
+                    "id",
+                    "source",
+                    "suggestion"
                 ]
             },
             "RuleOut": {
@@ -2422,6 +3689,110 @@
                     "to_member"
                 ]
             },
+            "ShareSummary": {
+                "type": "object",
+                "properties": {
+                    "group": {
+                        "$ref": "#/components/schemas/SummaryGroup"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "total_spent_cents": {
+                        "type": "integer"
+                    },
+                    "per_member": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryMember"
+                        }
+                    },
+                    "transfers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryTransfer"
+                        }
+                    },
+                    "recent_expenses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SummaryExpense"
+                        }
+                    }
+                },
+                "required": [
+                    "currency",
+                    "group",
+                    "per_member",
+                    "recent_expenses",
+                    "total_spent_cents",
+                    "transfers"
+                ]
+            },
+            "ShopRule": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "match_text": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "category_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "preset": {
+                        "$ref": "#/components/schemas/SplitTypeEnum"
+                    },
+                    "params": {},
+                    "created_by": {
+                        "type": "integer"
+                    },
+                    "last_used_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "category",
+                    "category_name",
+                    "created_by",
+                    "id",
+                    "match_text",
+                    "preset"
+                ]
+            },
+            "ShopRuleWrite": {
+                "type": "object",
+                "properties": {
+                    "match_text": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "type": "integer"
+                    },
+                    "preset": {
+                        "type": "string"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "category",
+                    "match_text",
+                    "preset"
+                ]
+            },
             "SourceEnum": {
                 "enum": [
                     "manual",
@@ -2462,6 +3833,15 @@
                 "type": "string",
                 "description": "* `equal` - Equal\n* `personal` - Personal\n* `full_for_other` - Full For Other\n* `percentage` - Percentage\n* `exact` - Exact\n* `shares` - Shares"
             },
+            "StatusEnum": {
+                "enum": [
+                    "joined",
+                    "guest",
+                    "unclaimed"
+                ],
+                "type": "string",
+                "description": "* `joined` - joined\n* `guest` - guest\n* `unclaimed` - unclaimed"
+            },
             "SubCategory": {
                 "type": "object",
                 "properties": {
@@ -2475,6 +3855,143 @@
                 "required": [
                     "id",
                     "name"
+                ]
+            },
+            "Suggestion": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "integer"
+                    },
+                    "category_name": {
+                        "type": "string"
+                    },
+                    "decision": {
+                        "$ref": "#/components/schemas/SuggestionDecisionEnum"
+                    },
+                    "preset": {
+                        "type": "string",
+                        "description": "the split the Shared button uses; never personal"
+                    },
+                    "params": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "basis": {
+                        "$ref": "#/components/schemas/BasisEnum"
+                    },
+                    "rule": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "basis",
+                    "category",
+                    "category_name",
+                    "decision",
+                    "params",
+                    "preset"
+                ]
+            },
+            "SuggestionDecisionEnum": {
+                "enum": [
+                    "shared",
+                    "personal"
+                ],
+                "type": "string",
+                "description": "* `shared` - shared\n* `personal` - personal"
+            },
+            "SummaryExpense": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    },
+                    "paid_by": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "date",
+                    "description",
+                    "id",
+                    "paid_by"
+                ]
+            },
+            "SummaryGroup": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "SummaryMember": {
+                "type": "object",
+                "properties": {
+                    "member_id": {
+                        "type": "integer"
+                    },
+                    "paid": {
+                        "type": "integer"
+                    },
+                    "owed_share": {
+                        "type": "integer"
+                    },
+                    "net": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "member_id",
+                    "net",
+                    "owed_share",
+                    "paid"
+                ]
+            },
+            "SummaryTransfer": {
+                "type": "object",
+                "properties": {
+                    "from_member": {
+                        "type": "integer"
+                    },
+                    "to_member": {
+                        "type": "integer"
+                    },
+                    "amount_cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "amount_cents",
+                    "from_member",
+                    "to_member"
                 ]
             },
             "Transfer": {
@@ -2503,6 +4020,21 @@
                     "from_member",
                     "to_member",
                     "to_profile"
+                ]
+            },
+            "UnclaimedMember": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "id"
                 ]
             }
         },

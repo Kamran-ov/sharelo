@@ -16,7 +16,7 @@ export function hasAccess(me: Me): boolean {
 export function RequireAccess() {
   const { data: me, isPending, isError } = useMe();
   const location = useLocation();
-  if (isPending) return <p className="p-4 text-slate-500">Loading…</p>;
+  if (isPending) return <p className="p-4 text-muted">Loading…</p>;
   if (isError || !hasAccess(me)) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }

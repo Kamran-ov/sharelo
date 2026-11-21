@@ -61,35 +61,35 @@ export default function SettleSheet({
     <Sheet title="Settle up" onClose={onClose}>
       <div className="space-y-4">
         <label className="block">
-          <span className="text-sm text-slate-600">From</span>
-          <select className="mt-1 block min-h-11 w-full rounded border border-slate-300 px-2" value={from} onChange={(e) => setFrom(Number(e.target.value))}>
+          <span className="text-sm text-muted">From</span>
+          <select className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" value={from} onChange={(e) => setFrom(Number(e.target.value))}>
             {members}
           </select>
         </label>
         <label className="block">
-          <span className="text-sm text-slate-600">To</span>
-          <select className="mt-1 block min-h-11 w-full rounded border border-slate-300 px-2" value={to} onChange={(e) => setTo(Number(e.target.value))}>
+          <span className="text-sm text-muted">To</span>
+          <select className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" value={to} onChange={(e) => setTo(Number(e.target.value))}>
             {members}
           </select>
         </label>
         <label className="block">
-          <span className="text-sm text-slate-600">Amount ({group.currency})</span>
-          <input className="mt-1 block min-h-11 w-full rounded border border-slate-300 px-2" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          <span className="text-sm text-muted">Amount ({group.currency})</span>
+          <input className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-600">Date</span>
-          <input type="date" className="mt-1 block min-h-11 w-full rounded border border-slate-300 px-2" value={date} onChange={(e) => setDate(e.target.value)} />
+          <span className="text-sm text-muted">Date</span>
+          <input type="date" className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <label className="block">
-          <span className="text-sm text-slate-600">Note</span>
-          <input className="mt-1 block min-h-11 w-full rounded border border-slate-300 px-2" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <span className="text-sm text-muted">Note</span>
+          <input className="mt-1 block min-h-11 w-full rounded-md border border-line bg-card px-3" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </label>
         {error && (
-          <p role="alert" className="break-words text-red-700">
+          <p role="alert" className="break-words text-danger">
             {error}
           </p>
         )}
-        <button type="button" disabled={cents === null || busy} onClick={save} className="min-h-12 w-full rounded bg-emerald-700 font-semibold text-white disabled:opacity-50">
+        <button type="button" disabled={cents === null || busy} onClick={save} className="min-h-14 w-full rounded-md bg-primary font-semibold text-on-primary disabled:opacity-50">
           Settle
         </button>
       </div>

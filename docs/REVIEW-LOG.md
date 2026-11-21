@@ -311,3 +311,141 @@ One entry per review verdict, newest last. The Reviewer reads this first on ever
 - Ticket 016: result review round 2, head b3f3021 (REPORT updated, sha unchanged)
 - Verdict: ACCEPT — merge. The laptop paste checks out: 409 passed in 20.25 s under `sharelo.settings_test` at `/repo/backend`, and vitest is 91/91. CI run 40121066931 is green. The KEY under Docker was waived by the operator. The missing Docker "before" timing is accepted because it measures speed, not correctness, and the cloud runs already show it (123.67 s → 22.40 s).
 - Worth remembering: when the only missing evidence is an operator paste, a re-applied label on an unchanged sha is still a real review event, because the REPORT changed. Use the sha rule to avoid re-reviewing an unchanged REPORT; it shouldn't block evidence from arriving. Side finding for a new ticket: `test_spa_serving` `/login` deep link likely lacks `django_db`.
+- Ticket 017: plan review, head f84911c
+- Verdict: REVISE. Four items: the IntegrityError catch needs its own savepoint in `claim_member`; the `/api/me` assertion plus `_auto_link` for a profile with no main group; every profile-less member creation site must state its claim state; a Home-analytics guard for placeholders. The KEY guarded-UPDATE pair is accepted, and so are all five assumptions.
+- Worth remembering: once a new nullable column changes what "profile-less member" means (guest vs unclaimed), every existing creator of such rows silently picks up the new meaning. A backfill fixes the old rows only. The plan must name each creation path and the state it should produce.
+
+- Ticket 017: plan review round 2, head 63ff27a
+- Verdict: ACCEPT PLAN. All four f84911c items are closed: an inner savepoint with the catch outside it, plus forced-race tests; the `/api/me` fields and the no-main-group, no-link outcome are asserted; a creation-site table; Home guard tests for the placeholder and the adopter. Watch: what profile deletion (`SET_NULL`) leaves behind (unclaimed or guest), the KEY red with restore, and the five 390 px PNGs.
+- Worth remembering: a table of creation sites built by grepping for `create(` misses rows that change state through an FK `on_delete`. `SET_NULL` on `Member.profile` is a creation path for "profile-less, unclaimed" members too.
+
+- Ticket 017: result review, head ee27e3d
+- Verdict: ACCEPT — merge. The backend KEY red is a guard-dropping `sed` with restore and an empty `git status`. The e2e KEY red mutates the join-preview filter, because the UI never offers a claimed name. CI 44769628378 is green (test, e2e on ubuntu-24.04), checked by the reviewer. The seven PNGs I opened match their Acceptance views, and the deleted-profile watch item has an outcome with a test. Plan change 2 lowers existing main-group Home totals that held guest shares; that is correct by FACTS and must be noted at merge.
+- Worth remembering: when the UI cannot reach a refused state, mutating the server guard leaves the e2e KEY green. The e2e needs its own mutation aimed at what the page shows (here, the preview filter), and the report should say so rather than claim a red it cannot produce.
+
+- Ticket 018: plan review, head fd0ddb3
+- Verdict: REVISE. Two items:
+  - The summary must be current when the user taps Share. Today only settle, undo and move-to-home invalidate it, while expense mutations leave a cached summary and its pre-rendered PNG. Add a re-share test.
+  - Name the behaviour when neither Web Share nor the clipboard is usable (plain http, `writeText` rejecting), with a vitest.
+  - All four assumptions are accepted.
+- Worth remembering: "fetch when the sheet opens" plus "enable once data is ready" shares cached data in TanStack Query. A share or export built from a pre-rendered snapshot needs a freshness rule tied to every mutation that changes its numbers, not only the ones on the same page.
+
+- Ticket 018: plan review round 2, head d5a72c4
+- Verdict: ACCEPT PLAN. Both items are closed:
+  - Freshness rests on one rule: the sheet is mounted only while open, with `staleTime`/`gcTime` 0 and `refetchOnMount: "always"`, and the buttons are disabled while `isFetching`. There is no list of invalidation sites to maintain.
+  - The share fallbacks end in named outcomes, including a "manual" path with a selectable textarea.
+- Worth remembering: a freshness rule that removes the cache entirely beats one that lists invalidation sites, which go stale the moment someone adds a mutation. The test that guards it must seed the cache itself, though, or it passes vacuously.
+
+- Ticket 018: result review, head 7834bb2
+- Verdict: ACCEPT — merge. Everything is in place:
+  - Every planned test is listed and green, and the KEY red (direction swap) is shown with the command, the restore and an empty `git status`.
+  - CI 44775024853 is green (test, e2e), checked by the reviewer.
+  - The card PNG wraps the long name and the long description.
+  - The freshness vitest seeds the cache, asserts the new response and was shown biting.
+  - The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: the freshness guard for a share or export is only proven when its test seeds stale data itself and asserts that the *new* value is what gets shared. "Buttons disabled while fetching" alone passes even when the stale data would be sent.
+
+- Ticket 019: plan review, head 66c861f
+- Verdict: REVISE. Four items:
+  - The balance check must handle Splitwise's per-currency `balance[]`.
+  - Q2 is decided as Europe/Rome, and the dry run reports which dates change. Add a `pg_dump` step before the real run.
+  - Collect all mapping errors in one run, including currencies the ECB never publishes.
+  - Test the cross-group "existing" skip.
+  - Q1, Q3 and Q4 are accepted.
+- Worth remembering: for a re-runnable import that skips by `(source, external_id)` and never hard-deletes, every mapping choice is frozen at the first real run. "Reversible" assumptions about how rows are interpreted are not reversible, so decide them before the build and make the dry run show their impact.
+
+- Ticket 019: plan review round 2, head 716fda1
+- Verdict: REVISE (one item). All four round-1 items are closed. One defect remains: the exact EUR balance check ignores the mapper's own one-cent adjustments, so fixture id 5 (and any real adjustment) shows ✗. The check must add each member's adjustment to Splitwise's balance and print "= after cent adjustment", and it needs a failing twin that proves ✗ can fire.
+- Worth remembering: when an importer deliberately corrects source data (rounding fixes), any reconciliation against the source's own totals must apply the same corrections. Otherwise the check flags the importer's intended behaviour, and the operator learns to ignore ✗.
+
+- Ticket 019: plan review round 3, head d18050e
+- Verdict: ACCEPT PLAN. The balance check adds each member's cent-adjustment delta and has a failing twin (id 2 shifted by one cent → ✗ on B and C).
+- Worth remembering: a reconciliation check counts only once a test shows it can fire ✗. Ask for the failing twin alongside the "all ✓" case.
+
+- Ticket 019: result review, head 77394e9
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green; 58 are new, which matches 463 → 521.
+  - CI 44780304319 is green (test, e2e). I checked it myself.
+  - The KEY red is the honest one the plan predicted: `duplicate_external_id` from the DB constraint, not a second copy. The restore and an empty `git status` are shown.
+  - The balance check stayed exact, and both failing twins fire.
+  - The fixture-only gaps are listed. Splitwise's real API has not been exercised yet.
+- Worth remembering: an importer tested only against hand-written fixtures has met the real source only once its first real dry run happens. The REPORT must list each assumed response shape, so a mismatch on that run points straight to a new ticket instead of a quiet fixture edit.
+
+- Ticket 020: plan review, head 7db9f8f
+- Verdict: REVISE. Two items. (1) Add a dry run that writes nothing and reports counts and per-currency sums; production checks start by dry-running each real file. (2) Hash normalised values for the Revolut id and freeze the recipe in docs. Q1–Q4 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: when the dedupe id leaves out the fields the parser is most likely to get wrong (fee, amount), a fix after the first real upload is skipped as a duplicate, and the wrong rows stay forever. A staging import with no delete needs a dry run before its first real file.
+
+- Ticket 020: plan review round 2, head 26dfc75
+- Verdict: ACCEPT PLAN. Both round-1 items are closed. The dry-run command reports per-currency totals and runs as production step 0 before any real stage. The Revolut id hashes canonical parsed values, and the recipe is frozen in ADR 002.
+- Worth remembering: a dry run counts as a guard only if its numbers equal the real run's on the same file, including edge cases like in-file duplicates. Otherwise the operator compares against a number the real stage won't produce.
+
+- Ticket 020: result review, head 200cac4
+- Verdict: ACCEPT — merge. Every planned test is listed and green. The KEY red is shown: with the constraint removed, the second batch doubled, (7,7,0) instead of (7,0,7). The restore and an empty `git status` are shown. The dry run and the real stage agree on an in-file duplicate (3/2/1). CI 44784961702 is green (test, e2e), and I checked it myself. The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: a parser that has only seen fixtures, writing to a table with no delete, is safe to merge only because its first real run is a dry run that writes nothing. The operator must not stage the first real file until the step-0 sums match the spreadsheet.
+
+- Ticket 021: plan review, head 35bae6b
+- Verdict: REVISE. Two items:
+  - The history suggestion takes the preset from the expense and the params from the row. They can disagree after an expense edit, so read both from one record.
+  - After a category change in the review list, the split label shown must be the split the tap creates. Today the server silently switches to the new category's default.
+  - Q1–Q6 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: on a one-tap screen, every input that can change server-side defaults (the category chip) must refresh what is displayed from the server. Otherwise the label and the money written diverge with no error. A suggestion's preset and params must come from one record, never stitched from two.
+
+- Ticket 021: plan review round 2, head e7483fe
+- Verdict: ACCEPT PLAN. Both round-1 items are closed:
+  - History reads preset and params from the row, with a validity guard.
+  - `category_splits` from one server rule makes the displayed split the sent split.
+  - Watch item: going back to the suggested category on the chip must restore the suggestion's own triple, the same in TS and in the service.
+- Worth remembering: once "what's shown = what's sent" rests on a server lookup table, every path through the chip, including changing back, needs one stated rule. Otherwise the label and the server's fill-in rule diverge on the round trip.
+
+- Ticket 021: result review, head 4c2003a
+- Verdict: ACCEPT — merge. Every planned test is listed and green, including both round-1 fixes and the change → change-back watch item. The KEY red (rule step removed → General) is shown with the restore and an empty `git status`. The preset tests went from 32 to 34 across the refactor. CI 44790461897 is green (test, e2e); the reviewer watched it. The approval was posted as a comment because GitHub refuses self-approval.
+- Worth remembering: when a REPORT says CI is "pending", the reviewer closes that gap by watching the run before accepting. A local-only e2e config override (here the Chromium path) counts as proven only by the CI run that doesn't use it.
+
+- Ticket 022: plan review, head c6f71c1
+- Verdict: REVISE. Three items:
+  - The trip breakdown route accepts `from`/`to`, but the service it calls is listed without dates. Either thread the dates through to the service and test it, or drop them from the route.
+  - A date that does not parse needs a 400 code and a test.
+  - Guest exclusion from Home must be tested for both guests: the one in Home and the one in the trip.
+  - Q1–Q6 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: when an API echoes its input (`from`/`to`) next to computed numbers, check that every service it calls actually takes those inputs. Otherwise the response states a range its totals don't respect, and an equals-the-service test can't catch it.
+
+- Ticket 022: plan review round 2, head 032591d
+- Verdict: ACCEPT PLAN. All round-1 items are closed. The dated trip breakdown goes through the service and is tested against the lines row. `invalid_date` is a 400 on every route. Guest exclusion is tested for the Home guest and the trip guest on every Home view.
+- Worth remembering: a "guest shares absent" test proves nothing if its expected value comes from the same `profiles_only` filter under test. The expected totals must be built from the profiles' shares independently.
+
+- Ticket 022: result review, head 60291bb
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green.
+  - The KEY red is shown: with the view forced to `lines`, the `spread` assertion failed on the `trip:2 Rome` row. The restore is shown.
+  - CI 44793591746 is green (test, e2e). The reviewer checked it.
+  - The guest-exclusion test uses hand-computed sums, not the `profiles_only` path it guards.
+  - Posted as a COMMENT because GitHub refuses self-approval.
+- Worth remembering: an "API equals service" test proves only the wiring. The guards that matter are the tests whose expected values come from outside the code under test: hand sums for guest exclusion, and the lines row for the dated trip drill-down.
+
+- Ticket 023: plan review, head c7c2f60
+- Verdict: REVISE. Four items:
+  - Prove that font and radius tokens flow, not only `--brand-primary`, and replace `document.fonts.check`, which is true even when no face is declared.
+  - Settle the Expenses hero and the `Amount` words against the "no copy change" rule.
+  - Guard the generated icons and `offline.css` against going stale.
+  - Make the literal guard catch named colours.
+  - Q1–Q4 are accepted. Posted as a COMMENT review because GitHub refuses request-changes on your own PR.
+- Worth remembering: a "one token file" ticket has a KEY test that overrides one token. That proves the mechanism only for that one name. Any theme key that refers to a token of the same name, and any asset generated from the tokens (icons, offline CSS), needs its own check, or it drifts silently.
+
+- Ticket 023: plan review round 2, head ead7a20
+- Verdict: ACCEPT PLAN. All round-1 items are closed:
+  - The KEY e2e overrides colour, font and radius.
+  - A real fonts-loaded check replaces `document.fonts.check`.
+  - The hero card is an explicit exception on the existing balances endpoint.
+  - The brand-asset stamp test is in place.
+  - Named colours are caught by the guard.
+  - Watch item: the REPORT must say whether `@theme inline reference` held or the renamed-key fallback was used, with `test_built_css_defines_no_token_twice` green on `dist`.
+- Worth remembering: when an asset is generated from a source file, guard it with a stamp: a hash of each input, written next to the outputs and recomputed by a test. Its red proof should edit the source in both copies, so that only the stamp test goes red, not the copy test.
+
+- Ticket 023: result review, head 3ce7659
+- Verdict: ACCEPT — merge.
+  - Every planned test is listed and green.
+  - The KEY red is shown: a literal FAB class read `rgb(11, 111, 106)` instead of the override. The restore is shown.
+  - `inline reference` works, and the built CSS defines no token twice.
+  - CI 44800790627 is green (test, e2e). The reviewer checked it.
+  - Open question 4 (Space Grotesk 700) was left unanswered. It is not blocking.
+- Worth remembering: a "change one file, every page follows" claim is proven only by a runtime override that reaches every token kind, here colour, font and radius, plus a check that the build emits no second definition. A grep guard on source alone cannot see what Tailwind writes into `dist`.

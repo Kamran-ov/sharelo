@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Balances</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0B6F6A}a:hover{color:#08514D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F9F8; font-family: Inter, system-ui, sans-serif; color: #0F2E33; display: flex; flex-direction: column; gap: 18px; position: relative; overflow: hidden">
+
+<div style="padding: 20px 20px 0; display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; flex-direction: column">
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 22px">Rome trip</span>
+<span style="font-size: 12px; color: #3F5B5F">EUR · 4 people · linked to Home</span>
+</div>
+<button style="height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid #DCEBE8; background: #FFFFFF; font-size: 14px; font-weight: 600; color: #0F2E33; display: flex; align-items: center; gap: 6px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12v8h16v-8M12 3v13M7 8l5-5 5 5"></path></svg>Share</button>
+</div>
+
+<div style="margin: 0 20px; padding: 20px; border-radius: 20px; background: #FFFFFF; border: 1px solid #DCEBE8; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; color: #3F5B5F">You are owed</span>
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 32px; color: #0B6F6A; letter-spacing: -0.5px">142.50 EUR</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{members}}" as="m" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="width: 32px; height: 32px; border-radius: 16px; background: {{m.bg}}; color: #0F2E33; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center">{{m.initial}}</div>
+<span style="flex: 1; font-size: 15px">{{m.name}}</span>
+<span style="font-size: 12px; color: #3F5B5F">{{m.tag}}</span>
+<span style="font-weight: 600; font-size: 15px; color: {{m.color}}; min-width: 72px; text-align: right">{{m.net}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding: 0 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px">Suggested payments</span>
+<sc-for list="{{transfers}}" as="t" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border: 1px solid #DCEBE8; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px"><b>{{t.from}}</b> pays <b>{{t.to}}</b></span>
+<span style="font-size: 12px; color: #3F5B5F">{{t.note}}</span>
+</div>
+<span style="font-weight: 600; font-size: 15px">{{t.amount}}</span>
+<button style="height: 40px; padding: 0 14px; border-radius: 12px; border: none; background: #0B6F6A; color: #FFFFFF; font-weight: 600; font-size: 14px">Settle</button>
+</div>
+</sc-for>
+<button style="height: 44px; border-radius: 12px; border: 1px dashed #9FE3D6; background: #E3F5F1; color: #0B6F6A; font-weight: 600; font-size: 14px">Move Janet's 60.00 to Home</button>
+</div>
+
+<nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #FFFFFF; border-top: 1px solid #DCEBE8; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding-bottom: 12px; box-sizing: border-box">
+<a href="Expenses.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>Expenses</a>
+<a href="Balances.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #0B6F6A; font-size: 12px; font-weight: 600">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M5 8l-3 6h6zM19 8l-3 6h6zM5 8h14"></path></svg>Balances</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"></path></svg>Recurring</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: #3F5B5F; font-size: 12px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>Settings</a>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const teal = '#0B6F6A', amber = '#B4531A';
+return {
+members: [
+{ initial: 'K', name: 'Kamran (you)', tag: '', net: '+142.50', color: teal, bg: '#9FE3D6' },
+{ initial: 'J', name: 'Janet', tag: 'joined', net: '−60.00', color: amber, bg: '#F3DCCB' },
+{ initial: 'C', name: 'Cami', tag: 'guest', net: '−45.00', color: amber, bg: '#F3DCCB' },
+{ initial: 'K', name: 'Kami', tag: 'not joined yet', net: '−37.50', color: amber, bg: '#E6EFEE' }
+],
+transfers: [
+{ from: 'Janet', to: 'you', amount: '60.00', note: 'or move it to Home' },
+{ from: 'Cami', to: 'you', amount: '45.00', note: 'guest' },
+{ from: 'Kami', to: 'you', amount: '37.50', note: 'not joined yet — share the summary' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

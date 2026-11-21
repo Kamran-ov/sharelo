@@ -99,6 +99,7 @@ def test_me_anonymous_shape():
         "authenticated": False,
         "profile": None,
         "guest_memberships": [],
+        "guest_refused": [],
         "google_enabled": False,
     }
 
@@ -107,7 +108,13 @@ def test_me_authenticated_shape():
     c = APIClient()
     register(c)
     me = c.get("/api/me").json()
-    assert set(me) == {"authenticated", "profile", "guest_memberships", "google_enabled"}
+    assert set(me) == {
+        "authenticated",
+        "profile",
+        "guest_memberships",
+        "guest_refused",
+        "google_enabled",
+    }
     assert set(me["profile"]) == {"id", "display_name", "email", "main_group_id"}
 
 

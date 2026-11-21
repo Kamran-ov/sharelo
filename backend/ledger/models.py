@@ -24,6 +24,16 @@ class Member(models.Model):
     profile = models.ForeignKey(
         "accounts.Profile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    # Set the moment anyone (guest session or profile) takes this member; cleared only by
+    # `release_guest`. Set for profile members too, so a deleted profile (SET_NULL above) leaves
+    # a "guest" nobody holds instead of a name anyone with the link could take over.
+    guest_claimed_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def claim_state(self) -> str:
+        if self.profile_id is not None:
+            return "joined"
+        return "guest" if self.guest_claimed_at is not None else "unclaimed"
 
     class Meta:
         constraints = [

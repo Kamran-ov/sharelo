@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "ledger",
+    "importers",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +96,18 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "sharelo",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Without this, a second `status` enum renames the existing `StatusEnum` (member claim
+    # state) that the frontend already reads.
+    "ENUM_NAME_OVERRIDES": {
+        "StatusEnum": ["joined", "guest", "unclaimed"],
+        "BankRowStatusEnum": "importers.models.BankRowStatus",
+        # ShopRule.preset shares the choice set with Expense.split_type: keep one name.
+        "SplitTypeEnum": "ledger.models.SplitType",
+        # Two `source` fields (expense, bank row) with different choices: name both, so the
+        # existing SourceEnum keeps its name.
+        "SourceEnum": "ledger.models.Source",
+        "BankSourceEnum": "importers.models.BankSource",
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
