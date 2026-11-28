@@ -4,7 +4,7 @@ title: Deploy pack — one Ubuntu server behind Cloudflare Tunnel, nightly backu
 status: in-review
 risk: risky
 depends_on: [016]
-pr:
+pr: 34
 ---
 
 ## Goal
