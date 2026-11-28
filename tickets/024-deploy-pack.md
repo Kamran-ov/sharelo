@@ -1,10 +1,10 @@
 ---
 id: 024
 title: Deploy pack — one Ubuntu server behind Cloudflare Tunnel, nightly backups, auto-deploy
-status: ready
+status: in-review
 risk: risky
 depends_on: [016]
-pr:
+pr: 34
 ---
 
 ## Goal
